@@ -12,7 +12,10 @@ import {
   Calendar, 
   Clock, 
   User, 
-  ChevronRight 
+  ChevronRight,
+  Pencil,
+  Headphones,
+  Mic
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
