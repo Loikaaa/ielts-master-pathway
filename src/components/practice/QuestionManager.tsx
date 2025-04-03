@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,9 +8,10 @@ import ReadingQuestionView from './ReadingQuestionView';
 import WritingQuestionView from './WritingQuestionView';
 import SpeakingQuestionView from './SpeakingQuestionView';
 import ListeningQuestionView from './ListeningQuestionView';
-import { ArrowLeft, Clock, Award } from 'lucide-react';
+import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 // This would normally come from an API or database
 import { mockQuestions } from '@/data/mockQuestions';
@@ -18,15 +19,18 @@ import { mockQuestions } from '@/data/mockQuestions';
 interface QuestionManagerProps {
   skillType?: 'reading' | 'writing' | 'speaking' | 'listening';
   practiceItemId?: string;
+  audioPermissionGranted?: boolean;
 }
 
 const QuestionManager: React.FC<QuestionManagerProps> = ({ 
   skillType: propSkillType,
-  practiceItemId: propPracticeItemId
+  practiceItemId: propPracticeItemId,
+  audioPermissionGranted
 }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { skillType: paramSkillType, practiceId: paramPracticeId } = useParams();
+  const timerRef = useRef<HTMLDivElement>(null);
   
   const skillType = propSkillType || paramSkillType;
   const practiceItemId = propPracticeItemId || paramPracticeId;
@@ -37,6 +41,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
+  const [stickyTimer, setStickyTimer] = useState(false);
   
   useEffect(() => {
     // In a real app, this would be an API call
@@ -77,6 +82,23 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     };
     
     loadQuestions();
+
+    // Listener for scroll to make timer sticky
+    const handleScroll = () => {
+      if (timerRef.current) {
+        const rect = timerRef.current.getBoundingClientRect();
+        if (rect.top <= 0) {
+          setStickyTimer(true);
+        } else {
+          setStickyTimer(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [skillType, practiceItemId, toast, navigate]);
   
   useEffect(() => {
@@ -91,7 +113,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         }
         
         // Show warning when 10% of time is left
-        if (prev === Math.floor(questions[currentQuestionIndex].timeLimit! * 0.1)) {
+        if (prev === Math.floor(questions[currentQuestionIndex]?.timeLimit! * 0.1)) {
           setShowTimeWarning(true);
           toast({
             title: "Time is running out!",
@@ -195,7 +217,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center mb-6">
+      <div className="flex items-center mb-6" ref={timerRef}>
         <Button 
           variant="ghost" 
           onClick={() => navigate('/practice')}
@@ -213,7 +235,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         </div>
         
         {timeRemaining !== null && (
-          <div className={`flex items-center sticky top-0 z-10 ${showTimeWarning ? 'animate-pulse text-red-500' : ''}`}>
+          <div className={`flex items-center ${showTimeWarning ? 'animate-pulse text-red-500' : ''}`}>
             <Clock className={`mr-2 h-5 w-5 ${showTimeWarning ? 'text-red-500' : 'text-orange-500'}`} />
             <span className="font-mono font-medium">
               {formatTime(timeRemaining)}
@@ -221,6 +243,15 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           </div>
         )}
       </div>
+      
+      {stickyTimer && timeRemaining !== null && (
+        <div className={`fixed top-0 right-0 z-50 bg-background/90 backdrop-blur-sm py-2 px-4 border-l border-b rounded-bl-lg shadow-md flex items-center ${showTimeWarning ? 'animate-pulse text-red-500 border-red-500' : ''}`}>
+          <Clock className={`mr-2 h-5 w-5 ${showTimeWarning ? 'text-red-500' : 'text-orange-500'}`} />
+          <span className="font-mono font-medium">
+            {formatTime(timeRemaining)}
+          </span>
+        </div>
+      )}
       
       <Progress value={progress} className="mb-6" />
       
@@ -259,6 +290,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
               question={currentQuestion} 
               onAnswer={handleAnswer} 
               answer={answers[currentQuestion.id]}
+              audioPermissionGranted={audioPermissionGranted}
             />
           )}
           

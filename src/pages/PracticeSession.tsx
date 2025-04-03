@@ -5,10 +5,12 @@ import Footer from '@/components/Footer';
 import QuestionManager from '@/components/practice/QuestionManager';
 import { useParams } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { Clock } from 'lucide-react';
 
 const PracticeSession = () => {
   const { skillType } = useParams();
   const { toast } = useToast();
+  const [audioPermissionGranted, setAudioPermissionGranted] = useState(false);
 
   useEffect(() => {
     // Request microphone permission for speaking section
@@ -22,7 +24,9 @@ const PracticeSession = () => {
         navigator.mediaDevices.getUserMedia({ audio: true })
           .then(stream => {
             console.log("Microphone permission granted");
-            // Stop all tracks to release the microphone
+            setAudioPermissionGranted(true);
+            // Stop all tracks to release the microphone for now
+            // It will be activated again during the actual recording
             stream.getTracks().forEach(track => track.stop());
           })
           .catch(err => {
@@ -41,7 +45,7 @@ const PracticeSession = () => {
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
-        <QuestionManager />
+        <QuestionManager audioPermissionGranted={skillType === 'speaking' ? audioPermissionGranted : undefined} />
       </main>
       <Footer />
     </div>

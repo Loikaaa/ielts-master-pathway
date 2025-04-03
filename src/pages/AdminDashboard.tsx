@@ -1,11 +1,25 @@
-
 import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { FileText, Users, Calendar, Settings, PenSquare, BookOpen, MessageSquare, BarChart, ChevronRight, ChevronLeft, Headphones, Mic } from 'lucide-react';
+import { 
+  FileText, 
+  Users, 
+  Calendar, 
+  Settings, 
+  PenSquare, 
+  BookOpen, 
+  MessageSquare, 
+  BarChart, 
+  ChevronRight, 
+  ChevronLeft, 
+  Headphones, 
+  Mic, 
+  LayoutDashboard, 
+  Shield, 
+  Database 
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import QuestionEditor from '@/components/admin/QuestionEditor';
@@ -40,7 +54,7 @@ const AdminDashboard = () => {
               className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
               onClick={() => handleSectionChange('overview')}
             >
-              <BarChart className="h-4 w-4 mr-2" />
+              <LayoutDashboard className="h-4 w-4 mr-2" />
               {isSidebarOpen && <span>Overview</span>}
             </Button>
             
@@ -96,6 +110,33 @@ const AdminDashboard = () => {
             >
               <Users className="h-4 w-4 mr-2" />
               {isSidebarOpen && <span>User Management</span>}
+            </Button>
+            
+            <Button 
+              variant={activeSection === 'reports' ? 'secondary' : 'ghost'} 
+              className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+              onClick={() => handleSectionChange('reports')}
+            >
+              <BarChart className="h-4 w-4 mr-2" />
+              {isSidebarOpen && <span>Reports & Analytics</span>}
+            </Button>
+            
+            <Button 
+              variant={activeSection === 'system' ? 'secondary' : 'ghost'} 
+              className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+              onClick={() => handleSectionChange('system')}
+            >
+              <Database className="h-4 w-4 mr-2" />
+              {isSidebarOpen && <span>System</span>}
+            </Button>
+            
+            <Button 
+              variant={activeSection === 'security' ? 'secondary' : 'ghost'} 
+              className={`w-full justify-start ${!isSidebarOpen && 'justify-center'}`}
+              onClick={() => handleSectionChange('security')}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              {isSidebarOpen && <span>Security</span>}
             </Button>
             
             <Button 
@@ -442,6 +483,224 @@ const AdminDashboard = () => {
                   
                   <div className="pt-4 flex justify-end">
                     <Button>Save Settings</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {activeSection === 'reports' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Reports & Analytics</CardTitle>
+                <CardDescription>Track student performance and system usage</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">Score Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64 flex items-center justify-center bg-accent/20 rounded-md">
+                        <p className="text-muted-foreground">Score Distribution Chart</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">User Activity</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-64 flex items-center justify-center bg-accent/20 rounded-md">
+                        <p className="text-muted-foreground">User Activity Chart</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+                
+                <Button>Generate Full Report</Button>
+              </CardContent>
+            </Card>
+          )}
+          
+          {activeSection === 'security' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Security Settings</CardTitle>
+                <CardDescription>Manage platform security and access controls</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Admin Access Controls</h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Permissions</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {[
+                          { 
+                            role: 'Super Admin', 
+                            description: 'Full system access', 
+                            permissions: 'All' 
+                          },
+                          { 
+                            role: 'Content Manager', 
+                            description: 'Can manage all content', 
+                            permissions: 'Create, Read, Update, Delete content' 
+                          },
+                          { 
+                            role: 'User Manager', 
+                            description: 'Can manage users and enrollments', 
+                            permissions: 'Create, Read, Update users' 
+                          },
+                        ].map((role, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="font-medium">{role.role}</TableCell>
+                            <TableCell>{role.description}</TableCell>
+                            <TableCell>{role.permissions}</TableCell>
+                            <TableCell>
+                              <Button variant="outline" size="sm">Edit</Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">Security Settings</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="two-factor" defaultChecked className="h-4 w-4" />
+                        <label htmlFor="two-factor">Require two-factor authentication for admins</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="session-timeout" defaultChecked className="h-4 w-4" />
+                        <label htmlFor="session-timeout">Automatic session timeout after 30 minutes of inactivity</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="login-attempts" defaultChecked className="h-4 w-4" />
+                        <label htmlFor="login-attempts">Lock account after 5 failed login attempts</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 flex justify-end">
+                    <Button>Save Security Settings</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          
+          {activeSection === 'system' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>System Management</CardTitle>
+                <CardDescription>Manage system resources and database operations</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Database</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex justify-between">
+                            <span>Status:</span>
+                            <span className="text-green-500 font-medium">Online</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Size:</span>
+                            <span>1.2 GB</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Last Backup:</span>
+                            <span>Today, 03:00 AM</span>
+                          </div>
+                          <Button variant="outline" className="w-full">Backup Now</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Storage</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex justify-between">
+                            <span>Used:</span>
+                            <span>45%</span>
+                          </div>
+                          <div className="h-2 bg-muted rounded-full">
+                            <div className="h-full bg-primary rounded-full w-[45%]"></div>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>4.5 GB used</span>
+                            <span>10 GB total</span>
+                          </div>
+                          <Button variant="outline" className="w-full">Manage Storage</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">System Logs</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex justify-between">
+                            <span>Error Logs:</span>
+                            <span className="font-medium">2</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Warning Logs:</span>
+                            <span className="font-medium">15</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Info Logs:</span>
+                            <span className="font-medium">253</span>
+                          </div>
+                          <Button variant="outline" className="w-full">View All Logs</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4">System Maintenance</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <Button variant="outline" className="h-auto py-4">
+                        <div className="flex flex-col items-center">
+                          <Database className="h-6 w-6 mb-2" />
+                          <span>Clean Database</span>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-auto py-4">
+                        <div className="flex flex-col items-center">
+                          <BarChart className="h-6 w-6 mb-2" />
+                          <span>Optimize Performance</span>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-auto py-4">
+                        <div className="flex flex-col items-center">
+                          <Shield className="h-6 w-6 mb-2" />
+                          <span>Security Scan</span>
+                        </div>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </CardContent>
