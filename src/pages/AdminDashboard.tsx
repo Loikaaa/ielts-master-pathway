@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import { Button } from "@/components/ui/button";
@@ -29,13 +28,15 @@ import {
   Save,
   RefreshCcw,
   Cog,
-  Shield
+  Shield,
+  ArrowLeft,
+  ArrowRight
 } from "lucide-react";
 import ReadingQuestionForm from '@/components/admin/ReadingQuestionForm';
 import WritingQuestionForm from '@/components/admin/WritingQuestionForm';
 import ListeningQuestionForm from '@/components/admin/ListeningQuestionForm';
 import SpeakingQuestionForm from '@/components/admin/SpeakingQuestionForm';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { toast } from 'sonner';
@@ -65,6 +66,11 @@ const AdminDashboard = () => {
   const [selectedFeature, setSelectedFeature] = useState("dashboard");
   const { addQuestion, questions } = useQuestions();
   const { toast: uiToast } = useToast();
+  const navigate = useNavigate();
+
+  // Navigation handlers
+  const handleBack = () => navigate(-1);
+  const handleForward = () => navigate(1);
 
   // Get question counts by type
   const readingCount = questions.filter(q => q.skillType === 'reading').length || 124;
@@ -696,7 +702,30 @@ const AdminDashboard = () => {
         <div className="flex-grow flex">
           <AdminSidebar />
           <SidebarInset className="px-6 py-6 mt-16">
-            <SidebarTrigger className="mb-4" />
+            <div className="flex justify-between items-center mb-6">
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleBack}
+                className="h-10 w-10 rounded-full bg-background shadow hover:bg-accent/50 transition-colors"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="sr-only">Go back</span>
+              </Button>
+              
+              <SidebarTrigger className="mb-4" />
+              
+              <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleForward}
+                className="h-10 w-10 rounded-full bg-background shadow hover:bg-accent/50 transition-colors"
+              >
+                <ArrowRight className="h-5 w-5" />
+                <span className="sr-only">Go forward</span>
+              </Button>
+            </div>
+            
             {renderFeatureContent()}
           </SidebarInset>
         </div>

@@ -23,17 +23,20 @@ import {
   Link as LinkIcon,
   CheckCircle,
   AlertCircle,
-  Plus
+  Plus,
+  ArrowLeft,
+  ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useQuestions } from '@/contexts/QuestionsContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 const BackendControl = () => {
   const { questions, loading } = useQuestions();
+  const navigate = useNavigate();
   
   // Get question counts by type
   const readingCount = questions.filter(q => q.skillType === 'reading').length;
@@ -41,6 +44,10 @@ const BackendControl = () => {
   const listeningCount = questions.filter(q => q.skillType === 'listening').length;
   const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
   const totalCount = questions.length;
+
+  // Navigation handlers
+  const handleBack = () => navigate(-1);
+  const handleForward = () => navigate(1);
 
   // Mock connected data sources
   const connectedSources = [
@@ -52,6 +59,31 @@ const BackendControl = () => {
 
   return (
     <div className="space-y-6">
+      {/* Navigation Controls */}
+      <div className="flex justify-between items-center mb-6">
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleBack}
+          className="h-10 w-10 rounded-full bg-background shadow hover:bg-accent/50 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          <span className="sr-only">Go back</span>
+        </Button>
+        
+        <h1 className="text-2xl font-bold">Backend Control Panel</h1>
+        
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleForward}
+          className="h-10 w-10 rounded-full bg-background shadow hover:bg-accent/50 transition-colors"
+        >
+          <ArrowRight className="h-5 w-5" />
+          <span className="sr-only">Go forward</span>
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
