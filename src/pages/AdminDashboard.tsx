@@ -25,7 +25,11 @@ import {
   TrendingUp,
   CircleUser,
   Bell,
-  FileQuestion
+  FileQuestion,
+  Save,
+  RefreshCcw,
+  Cog,
+  Shield
 } from "lucide-react";
 import ReadingQuestionForm from '@/components/admin/ReadingQuestionForm';
 import WritingQuestionForm from '@/components/admin/WritingQuestionForm';
@@ -114,6 +118,11 @@ const AdminDashboard = () => {
     }
   };
 
+  // Handle settings save
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully!');
+  };
+
   const AdminSidebar = () => (
     <Sidebar>
       <SidebarHeader>
@@ -142,18 +151,18 @@ const AdminDashboard = () => {
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "statistics"} onClick={() => setSelectedFeature("statistics")}>
-                <a href="#">
+                <button>
                   <LineChart className="h-4 w-4" />
                   <span>Statistics</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "users"} onClick={() => setSelectedFeature("users")}>
-                <a href="#">
+                <button>
                   <Users className="h-4 w-4" />
                   <span>User Management</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -164,34 +173,34 @@ const AdminDashboard = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "reading"} onClick={() => setSelectedFeature("reading")}>
-                <a href="#">
+                <button>
                   <FileText className="h-4 w-4" />
                   <span>Reading Questions</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "writing"} onClick={() => setSelectedFeature("writing")}>
-                <a href="#">
+                <button>
                   <PenSquare className="h-4 w-4" />
                   <span>Writing Questions</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "listening"} onClick={() => setSelectedFeature("listening")}>
-                <a href="#">
+                <button>
                   <Headphones className="h-4 w-4" />
                   <span>Listening Questions</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "speaking"} onClick={() => setSelectedFeature("speaking")}>
-                <a href="#">
+                <button>
                   <Mic className="h-4 w-4" />
                   <span>Speaking Questions</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
@@ -210,18 +219,26 @@ const AdminDashboard = () => {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={selectedFeature === "settings"} onClick={() => setSelectedFeature("settings")}>
-                <a href="#">
+                <button>
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
-                </a>
+                </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href="#">
+              <SidebarMenuButton asChild isActive={selectedFeature === "database"} onClick={() => setSelectedFeature("database")}>
+                <button>
                   <Database className="h-4 w-4" />
                   <span>Database</span>
-                </a>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={selectedFeature === "backend"} onClick={() => setSelectedFeature("backend")}>
+                <Link to="/admin-backend">
+                  <ServerCog className="h-4 w-4" />
+                  <span>Backend Control</span>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -235,15 +252,6 @@ const AdminDashboard = () => {
               <span className="font-medium">68%</span>
             </div>
             <Progress value={68} className="h-2" />
-          </div>
-          <div className="bg-accent/50 rounded-lg p-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium">Admin Plan</span>
-              <Badge variant="outline" className="text-xs bg-primary/10 text-primary">Pro</Badge>
-            </div>
-            <div className="text-xs text-muted-foreground">
-              Next billing date: June 15, 2025
-            </div>
           </div>
         </div>
       </SidebarFooter>
@@ -479,6 +487,125 @@ const AdminDashboard = () => {
     </>
   );
 
+  const SystemSettings = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-2xl font-bold">System Settings</h2>
+          <p className="text-muted-foreground">Configure system-wide settings and preferences</p>
+        </div>
+        <Button onClick={handleSaveSettings}>
+          <Save className="h-4 w-4 mr-2" />
+          Save Changes
+        </Button>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Shield className="h-5 w-5 mr-2 text-primary" />
+              Security Settings
+            </CardTitle>
+            <CardDescription>
+              Configure security and access controls
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Two-Factor Authentication</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Enable for all administrators</span>
+                <Badge>Enabled</Badge>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Session Timeout</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Automatic logout after inactivity</span>
+                <Badge variant="outline">30 minutes</Badge>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Login Attempts</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Max attempts before lockout</span>
+                <Badge variant="outline">5 attempts</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Cog className="h-5 w-5 mr-2 text-primary" />
+              General Settings
+            </CardTitle>
+            <CardDescription>
+              System-wide configuration options
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Maintenance Mode</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Site availability for users</span>
+                <Badge variant="secondary">Disabled</Badge>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Auto Backup</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Scheduled database backups</span>
+                <Badge>Enabled</Badge>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Error Logging</h3>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Detail level of error logs</span>
+                <Badge variant="outline">Detailed</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <RefreshCcw className="h-5 w-5 mr-2 text-primary" />
+              System Maintenance
+            </CardTitle>
+            <CardDescription>
+              Maintain system performance and data integrity
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Button variant="outline" className="w-full justify-start">
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Clear Cache
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <Database className="h-4 w-4 mr-2" />
+                Backup Database
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
+                <ServerCog className="h-4 w-4 mr-2" />
+                Test API Connections
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+
   const QuestionCreator = () => (
     <Card>
       <CardHeader>
@@ -549,6 +676,8 @@ const AdminDashboard = () => {
         return <QuestionEditor questionType={selectedFeature} />;
       case "database":
         return <DatabaseManager />;
+      case "settings":
+        return <SystemSettings />;
       default:
         return (
           <div className="space-y-8">
