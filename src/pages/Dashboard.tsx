@@ -6,7 +6,7 @@ import BackendControl from '@/components/BackendControl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, Clock, Database, FileText, BarChart, BookOpen, Brain, CheckCircle } from 'lucide-react';
+import { Calendar, Clock, Database, FileText, BarChart, BookOpen, Brain, CheckCircle, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
