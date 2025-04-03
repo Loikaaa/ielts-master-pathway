@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -26,6 +25,7 @@ import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
 import BackendControl from "./components/BackendControl";
 import MaintenancePage from "./pages/MaintenancePage";
+import { isMaintenanceMode } from "./utils/settingsStorage";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -35,24 +35,14 @@ const App = () => {
   const [isInMaintenanceMode, setIsInMaintenanceMode] = useState(false);
 
   useEffect(() => {
-    // Check for maintenance mode settings in localStorage
+    // Check for maintenance mode using our utility
     const checkMaintenanceMode = () => {
       try {
-        const settingsJson = localStorage.getItem('settings');
-        if (settingsJson) {
-          const settings = JSON.parse(settingsJson);
-          if (settings.maintenance && settings.maintenance.scheduledMaintenance) {
-            // Save the maintenance message for the maintenance page
-            if (settings.maintenance.maintenanceMessage) {
-              localStorage.setItem('maintenanceMessage', settings.maintenance.maintenanceMessage);
-            }
-            setIsInMaintenanceMode(true);
-          } else {
-            setIsInMaintenanceMode(false);
-          }
-        }
+        const maintenanceEnabled = isMaintenanceMode();
+        setIsInMaintenanceMode(maintenanceEnabled);
       } catch (error) {
         console.error('Error checking maintenance mode:', error);
+        setIsInMaintenanceMode(false);
       } finally {
         setIsLoading(false);
       }
@@ -110,7 +100,6 @@ const App = () => {
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
                   <Route path="/admin-backend" element={<BackendControl />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>

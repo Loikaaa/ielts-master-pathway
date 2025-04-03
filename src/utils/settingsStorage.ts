@@ -34,6 +34,22 @@ export const getSetting = (key: string) => {
 
 // Check if maintenance mode is enabled
 export const isMaintenanceMode = () => {
-  const maintenance = getSetting('maintenance');
-  return maintenance ? maintenance.scheduledMaintenance : false;
+  try {
+    const settings = getSettings();
+    return settings?.maintenance?.scheduledMaintenance === true;
+  } catch (error) {
+    console.error('Error checking maintenance mode:', error);
+    return false;
+  }
+};
+
+// Get maintenance message
+export const getMaintenanceMessage = () => {
+  try {
+    const settings = getSettings();
+    return settings?.maintenance?.maintenanceMessage || 'System maintenance in progress. Please try again later.';
+  } catch (error) {
+    console.error('Error getting maintenance message:', error);
+    return 'System maintenance in progress. Please try again later.';
+  }
 };

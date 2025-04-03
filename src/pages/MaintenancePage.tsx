@@ -2,11 +2,11 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, AlertTriangle } from 'lucide-react';
+import { getMaintenanceMessage } from '@/utils/settingsStorage';
 
 const MaintenancePage = () => {
-  // Get the maintenance message from localStorage or use default
-  const maintenanceMessage = localStorage.getItem('maintenanceMessage') || 
-    'System maintenance in progress. Please try again later.';
+  // Get the maintenance message from our utility function
+  const maintenanceMessage = getMaintenanceMessage();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
