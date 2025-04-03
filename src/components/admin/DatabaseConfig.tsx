@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -100,8 +101,17 @@ const DatabaseConfig = () => {
     
     setIsTesting(true);
     
+    // Simulate database connection test
     setTimeout(() => {
-      const success = config.host && config.database && config.user && (config.password || getDatabaseConfig().password);
+      // Simple validation - in a real app this would be an actual DB connection test
+      const isValidDomain = config.host === 'localhost' || 
+                          config.host.includes('.') || 
+                          config.host.includes('database.com');
+      
+      const success = config.database && 
+                    config.user && 
+                    (config.password || getDatabaseConfig().password) &&
+                    isValidDomain;
       
       if (success) {
         const now = new Date().toISOString();
@@ -118,10 +128,14 @@ const DatabaseConfig = () => {
           password: config.password === '••••••••' ? undefined : config.password
         });
         
-        toast.success(`Database connection successful! Connected to ${config.database}`);
+        toast.success(`Successfully connected to database "${config.database}" on ${config.host}`);
         console.log('Connected to database:', config.database, 'as user:', config.user);
       } else {
         toast.error('Database connection failed. Please check your credentials and try again.');
+        
+        if (!isValidDomain) {
+          toast.error('Invalid host/domain. Please enter a valid database host.');
+        }
       }
       
       setIsTesting(false);
@@ -145,7 +159,7 @@ const DatabaseConfig = () => {
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <AlertTitle>Connected</AlertTitle>
             <AlertDescription>
-              Database is currently connected to <strong>{config.database}</strong> as user <strong>{config.user}</strong>. 
+              Successfully connected to database <strong>{config.database}</strong> as user <strong>{config.user}</strong>. 
               Last connection: {config.lastConnected ? new Date(config.lastConnected).toLocaleString() : 'Unknown'}
             </AlertDescription>
           </Alert>
@@ -164,7 +178,7 @@ const DatabaseConfig = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="host" className="flex items-center gap-2">
-              <Server className="h-4 w-4" /> Host <span className="text-red-500">*</span>
+              <Server className="h-4 w-4" /> Host/Domain <span className="text-red-500">*</span>
             </Label>
             <Input
               id="host"
@@ -175,12 +189,12 @@ const DatabaseConfig = () => {
               className={formErrors.host ? "border-red-500" : ""}
             />
             {formErrors.host && (
-              <p className="text-red-500 text-xs mt-1">Host is required</p>
+              <p className="text-red-500 text-xs mt-1">Host/Domain is required</p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="port">Port</Label>
+            <Label htmlFor="port">Port (optional)</Label>
             <Input
               id="port"
               name="port"
@@ -248,8 +262,7 @@ const DatabaseConfig = () => {
         <div className="mt-2 text-sm text-muted-foreground">
           <p className="flex items-center gap-1">
             <Key className="h-3.5 w-3.5" />
-            Your database credentials are stored securely in local storage for demonstration purposes.
-            In a production environment, these should be stored server-side.
+            For demonstration purposes only. In a production environment, these would connect to an actual database.
           </p>
         </div>
       </CardContent>

@@ -119,6 +119,46 @@ export const saveDatabaseConfig = (config: any) => {
   return saveSettings(settings);
 };
 
+// Get email configuration
+export const getEmailConfig = () => {
+  try {
+    const settings = getSettings();
+    return settings?.email || {
+      smtpServer: '',
+      port: '',
+      username: '',
+      password: '',
+      fromEmail: '',
+      enableSSL: true,
+      connected: false
+    };
+  } catch (error) {
+    console.error('Error getting email config:', error);
+    return {
+      smtpServer: '',
+      port: '',
+      username: '',
+      password: '',
+      fromEmail: '',
+      enableSSL: true,
+      connected: false
+    };
+  }
+};
+
+// Save email configuration
+export const saveEmailConfig = (config: any) => {
+  // Validate required fields
+  if (!config.smtpServer || !config.username || !config.fromEmail) {
+    console.error('Cannot save email config: missing required fields');
+    return false;
+  }
+  
+  const settings = getSettings() || {};
+  settings.email = config;
+  return saveSettings(settings);
+};
+
 // Get analytics tracking IDs
 export const getAnalyticsConfig = () => {
   try {
@@ -190,6 +230,7 @@ export const getDataSourceConnections = () => {
     const settings = getSettings();
     return settings?.dataSources || [
       { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'Email Service', status: 'disconnected', type: 'email', lastSynced: 'Never' },
       { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
       { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
       { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
@@ -198,6 +239,7 @@ export const getDataSourceConnections = () => {
     console.error('Error getting data sources:', error);
     return [
       { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'Email Service', status: 'disconnected', type: 'email', lastSynced: 'Never' },
       { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
       { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
       { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
@@ -211,6 +253,7 @@ export const saveDataSourceConnection = (name: string, status: string, type: str
     const settings = getSettings() || {};
     const dataSources = settings.dataSources || [
       { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'Email Service', status: 'disconnected', type: 'email', lastSynced: 'Never' },
       { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
       { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
       { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }

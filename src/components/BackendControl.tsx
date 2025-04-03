@@ -27,7 +27,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Settings,
-  ExternalLink
+  ExternalLink,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -58,37 +59,31 @@ const BackendControl = () => {
   const [selectedSource, setSelectedSource] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
-  // Get question counts by type
   const readingCount = questions.filter(q => q.skillType === 'reading').length;
   const writingCount = questions.filter(q => q.skillType === 'writing').length;
   const listeningCount = questions.filter(q => q.skillType === 'listening').length;
   const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
   const totalCount = questions.length;
 
-  // Load data sources on component mount
   useEffect(() => {
     const sources = getDataSourceConnections();
     setConnectedSources(sources);
   }, []);
 
-  // Navigation handlers
   const handleBack = () => navigate(-1);
   const handleForward = () => navigate(1);
 
-  // Handle open connection dialog
   const handleOpenConnectionDialog = (source) => {
     setSelectedSource(source);
     setIsDialogOpen(true);
   };
 
-  // Handle adding new data source
   const handleAddNewSource = () => {
     toast.info("To add a new data source, you need to configure it manually in the database settings");
     navigate("/admin-backend?tab=settings");
     setActiveTab("settings");
   };
 
-  // Check database connection status
   const isDatabaseConnected = () => {
     const dbConfig = getDatabaseConfig();
     return dbConfig.connected === true;
@@ -96,7 +91,6 @@ const BackendControl = () => {
 
   return (
     <div className="space-y-6">
-      {/* Navigation Controls */}
       <div className="flex justify-between items-center mb-6">
         <Button 
           variant="outline" 
@@ -122,10 +116,14 @@ const BackendControl = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 w-full mb-6">
+        <TabsList className="grid grid-cols-3 w-full mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <ServerCog className="h-4 w-4" />
             <span>Dashboard</span>
+          </TabsTrigger>
+          <TabsTrigger value="database" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            <span>Database</span>
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -211,7 +209,7 @@ const BackendControl = () => {
             <CardHeader>
               <CardTitle>Connected Data Sources</CardTitle>
               <CardDescription>
-                Database and external API connections (manual configuration required)
+                Database and external API connections (requires manual configuration)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -229,6 +227,9 @@ const BackendControl = () => {
                           source.status === 'connected' ? 'text-green-600' : 'text-red-600'
                         }`} /> :
                         source.type === 'storage' ? <FileJson className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} /> :
+                        source.type === 'email' ? <Mail className={`h-5 w-5 ${
                           source.status === 'connected' ? 'text-green-600' : 'text-red-600'
                         }`} /> :
                         <BarChart4 className={`h-5 w-5 ${
@@ -349,6 +350,69 @@ const BackendControl = () => {
           </Card>
         </TabsContent>
 
+        <TabsContent value="database" className="space-y-6">
+          <DatabaseConfig />
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Connected Data Sources</CardTitle>
+              <CardDescription>
+                Database and external API connections (requires manual configuration)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {connectedSources.map((source, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-full ${
+                        source.status === 'connected' ? 'bg-green-100' : 'bg-red-100'
+                      }`}>
+                        {source.type === 'postgres' ? <Database className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} /> :
+                        source.type === 'auth' ? <Users className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} /> :
+                        source.type === 'storage' ? <FileJson className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} /> :
+                        source.type === 'email' ? <Mail className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} /> :
+                        <BarChart4 className={`h-5 w-5 ${
+                          source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                        }`} />}
+                      </div>
+                      <div>
+                        <div className="font-medium flex items-center">
+                          {source.name}
+                          {source.status === 'connected' ? 
+                            <CheckCircle className="ml-2 h-4 w-4 text-green-600" /> : 
+                            <AlertCircle className="ml-2 h-4 w-4 text-red-600" />}
+                        </div>
+                        <div className="text-xs text-muted-foreground">Last synced: {source.lastSynced}</div>
+                      </div>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      onClick={() => handleOpenConnectionDialog(source)}
+                    >
+                      <ExternalLink className="mr-1 h-4 w-4" />
+                      Configure
+                    </Button>
+                  </div>
+                ))}
+
+                <Button className="w-full mt-4" onClick={handleAddNewSource}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add New Data Source
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="settings">
           <SettingsComponent />
         </TabsContent>
@@ -359,7 +423,7 @@ const BackendControl = () => {
           <DialogHeader>
             <DialogTitle>Configure {selectedSource?.name}</DialogTitle>
             <DialogDescription>
-              Manual configuration required for database connections
+              Manual configuration required for data connections
             </DialogDescription>
           </DialogHeader>
           
@@ -368,16 +432,35 @@ const BackendControl = () => {
               <div className="text-center">
                 <Database className="h-12 w-12 mx-auto text-primary mb-4" />
                 <p className="mb-4">
-                  To configure your database connection, please use the dedicated Database Configuration interface.
+                  To configure your database connection, please use the dedicated Database tab.
                 </p>
                 <Button 
                   onClick={() => {
                     setIsDialogOpen(false);
-                    setActiveTab("settings");
+                    setActiveTab("database");
                   }}
                   className="w-full"
                 >
-                  Go to Database Settings
+                  Go to Database Configuration
+                </Button>
+              </div>
+            ) : selectedSource?.type === 'email' ? (
+              <div className="text-center">
+                <Mail className="h-12 w-12 mx-auto text-primary mb-4" />
+                <p className="mb-4">
+                  Email service requires a separate configuration with SMTP settings.
+                </p>
+                <p className="text-sm text-muted-foreground mb-6">
+                  In a production environment, you would configure SMTP server, port, credentials, and email templates.
+                </p>
+                <Button 
+                  onClick={() => {
+                    toast.info("Email configuration will be available in a separate component");
+                    setIsDialogOpen(false);
+                  }}
+                  className="w-full"
+                >
+                  Configure Email Settings
                 </Button>
               </div>
             ) : (
