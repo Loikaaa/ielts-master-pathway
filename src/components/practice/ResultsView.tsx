@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
+import { usePracticeResult } from '@/hooks/use-practice-result';
+import { toast } from '@/hooks/use-toast';
 
 interface ResultsViewProps {
   skillType: 'reading' | 'writing' | 'speaking' | 'listening';
@@ -10,6 +12,7 @@ interface ResultsViewProps {
   totalPossible: number;
   resultTime: string;
   onBackToPractice: () => void;
+  title?: string;
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({
@@ -17,31 +20,34 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   score,
   totalPossible,
   resultTime,
-  onBackToPractice
+  onBackToPractice,
+  title
 }) => {
-  const getBandScoreEstimate = (skillType: string, percentCorrect: number): number => {
-    // This is a simplified band score estimation based on IELTS scoring guidelines
-    // In a real IELTS test, band scores are determined by complex formulas per section
-    const percentage = (score / totalPossible) * 100;
-    
-    if (percentage >= 90) return 9.0;
-    if (percentage >= 85) return 8.5;
-    if (percentage >= 80) return 8.0;
-    if (percentage >= 75) return 7.5;
-    if (percentage >= 70) return 7.0;
-    if (percentage >= 65) return 6.5;
-    if (percentage >= 60) return 6.0;
-    if (percentage >= 55) return 5.5;
-    if (percentage >= 50) return 5.0;
-    if (percentage >= 45) return 4.5;
-    if (percentage >= 40) return 4.0;
-    if (percentage >= 35) return 3.5;
-    if (percentage >= 30) return 3.0;
-    return 2.5;
-  };
+  const { submitResult } = usePracticeResult();
+  const [bandScoreEstimate, setBandScoreEstimate] = useState<number>(0);
+  const [resultsSubmitted, setResultsSubmitted] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Submit results automatically when the component mounts
+    if (!resultsSubmitted && (skillType === 'reading' || skillType === 'listening')) {
+      const bandScore = submitResult({
+        skillType,
+        score,
+        totalPossible,
+        title: title || `${skillType.charAt(0).toUpperCase() + skillType.slice(1)} Test`
+      });
+      
+      setBandScoreEstimate(bandScore);
+      setResultsSubmitted(true);
+      
+      toast({
+        title: "Results saved",
+        description: "Your performance has been recorded in your progress tracking."
+      });
+    }
+  }, [submitResult, skillType, score, totalPossible, resultsSubmitted, title]);
   
   const percentage = totalPossible > 0 ? Math.round((score / totalPossible) * 100) : 0;
-  const bandScoreEstimate = getBandScoreEstimate(skillType, percentage);
   
   const getResultDescription = () => {
     if (skillType === 'reading' || skillType === 'listening') {
@@ -70,6 +76,26 @@ const ResultsView: React.FC<ResultsViewProps> = ({
       ];
     }
     return [];
+  };
+  
+  // Handler for writing and speaking tests that need manual evaluation
+  const handleSubmitForEvaluation = () => {
+    // For demonstration, we'll simulate submission
+    toast({
+      title: "Submitted for evaluation",
+      description: `Your ${skillType} test has been submitted and will be evaluated soon.`
+    });
+    
+    // In a real application, this would send the user's responses to a backend for evaluation
+    submitResult({
+      skillType,
+      score: Math.floor(totalPossible * 0.65), // Estimate a band 6.5 score for demonstration
+      totalPossible,
+      title: title || `${skillType.charAt(0).toUpperCase() + skillType.slice(1)} Test`,
+      details: "Pending expert evaluation"
+    });
+    
+    setResultsSubmitted(true);
   };
   
   return (
@@ -152,11 +178,21 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             )}
           </CardContent>
           
-          <CardFooter>
-            <Button onClick={onBackToPractice} className="w-full">
+          <CardFooter className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={onBackToPractice} className="w-full sm:w-auto">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Practice
             </Button>
+            
+            {(skillType === 'writing' || skillType === 'speaking') && !resultsSubmitted && (
+              <Button 
+                onClick={handleSubmitForEvaluation} 
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                Submit for Evaluation
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>

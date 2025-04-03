@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,63 +9,29 @@ import { Calendar, Clock, FileText, BarChart, BookOpen, Brain, CheckCircle, Mic,
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useQuestions } from '@/contexts/QuestionsContext';
+import { useUserProgress } from '@/contexts/UserProgressContext';
+import AddSessionDialog from '@/components/dashboard/AddSessionDialog';
+import EditScheduleDialog from '@/components/dashboard/EditScheduleDialog';
+import DetailedAnalysisDialog from '@/components/dashboard/DetailedAnalysisDialog';
+import RecommendedSteps from '@/components/dashboard/RecommendedSteps';
 
 const Dashboard = () => {
-  const { questions, loading } = useQuestions();
+  const { questions } = useQuestions();
+  const { userProgress, viewDetailedAnalysis } = useUserProgress();
   
+  // Dialog states
+  const [addSessionDialogOpen, setAddSessionDialogOpen] = useState(false);
+  const [editScheduleDialogOpen, setEditScheduleDialogOpen] = useState(false);
+  const [analysisDialogOpen, setAnalysisDialogOpen] = useState(false);
+  
+  // Count questions by skill type
   const readingCount = questions.filter(q => q.skillType === 'reading').length;
   const writingCount = questions.filter(q => q.skillType === 'writing').length;
   const listeningCount = questions.filter(q => q.skillType === 'listening').length;
   const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
 
-  // Activity data
-  const userActivities = [
-    {
-      activity: "Completed Reading Practice Test 3",
-      result: "32/40 questions (Band 7.5)",
-      time: "Yesterday, 7:30 PM",
-      icon: BookOpen,
-      color: "reading"
-    },
-    {
-      activity: "Submitted Writing Task 1",
-      result: "Band 6.0 - Need improvement in task achievement",
-      time: "Yesterday, 5:15 PM",
-      icon: FileText,
-      color: "writing"
-    },
-    {
-      activity: "Completed Vocabulary Quiz",
-      result: "85% Correct",
-      time: "2 days ago, 10:45 AM",
-      icon: Brain,
-      color: "primary"
-    },
-    {
-      activity: "Mock Test Completed",
-      result: "Overall Band 6.5",
-      time: "4 days ago, 2:00 PM",
-      icon: CheckCircle,
-      color: "green-500"
-    }
-  ];
-
-  // Progress data
-  const progressData = [
-    { month: 'Jan', reading: 5.5, writing: 5.0, listening: 6.0, speaking: 5.5 },
-    { month: 'Feb', reading: 6.0, writing: 5.5, listening: 6.0, speaking: 6.0 },
-    { month: 'Mar', reading: 6.5, writing: 5.5, listening: 6.5, speaking: 6.0 },
-    { month: 'Apr', reading: 7.0, writing: 6.0, listening: 7.0, speaking: 6.5 },
-  ];
-
-  // Study sessions data
-  const studySessions = [
-    { date: 'Monday', time: '2 hours', focus: 'Reading & Writing', complete: true },
-    { date: 'Tuesday', time: '1.5 hours', focus: 'Listening', complete: true },
-    { date: 'Wednesday', time: '2 hours', focus: 'Speaking Practice', complete: true },
-    { date: 'Thursday', time: '1 hour', focus: 'Vocabulary Building', complete: false },
-    { date: 'Friday', time: '2 hours', focus: 'Mock Test', complete: false },
-  ];
+  // Get 4 most recent activities
+  const recentActivities = [...userProgress.activities].slice(0, 4);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -78,9 +44,9 @@ const Dashboard = () => {
               <p className="text-muted-foreground">Track your progress and manage your IELTS preparation</p>
             </div>
             <div className="mt-4 md:mt-0 flex gap-2">
-              <Button>
+              <Button onClick={() => setAddSessionDialogOpen(true)}>
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule Mock Test
+                Schedule Study Session
               </Button>
             </div>
           </div>
@@ -102,18 +68,27 @@ const Dashboard = () => {
                   <CardContent>
                     <div className="flex items-end justify-between mb-4">
                       <div>
-                        <span className="text-3xl font-bold">6.5</span>
+                        <span className="text-3xl font-bold">{userProgress.currentBand.toFixed(1)}</span>
                         <span className="text-muted-foreground ml-2">/ 9.0</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm text-primary font-medium">+0.5</span>
-                        <span className="text-xs text-muted-foreground block">since last month</span>
+                        {userProgress.progressHistory.length > 1 && (
+                          <>
+                            <span className="text-sm text-primary font-medium">
+                              {(userProgress.currentBand - userProgress.progressHistory[0].scores.reading).toFixed(1)}
+                            </span>
+                            <span className="text-xs text-muted-foreground block">since start</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <Progress value={72} className="h-2 mb-2" />
+                    <Progress 
+                      value={userProgress.currentBand ? (userProgress.currentBand / 9) * 100 : 0} 
+                      className="h-2 mb-2" 
+                    />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Current: 6.5</span>
-                      <span>Target: 7.5</span>
+                      <span>Current: {userProgress.currentBand.toFixed(1)}</span>
+                      <span>Target: {userProgress.targetBand || 7.5}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -126,18 +101,31 @@ const Dashboard = () => {
                   <CardContent>
                     <div className="flex items-end justify-between mb-4">
                       <div>
-                        <span className="text-3xl font-bold">14.5</span>
+                        <span className="text-3xl font-bold">{userProgress.studyTime.current.toFixed(1)}</span>
                         <span className="text-muted-foreground ml-2">hours</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm text-green-500 font-medium">+2.3h</span>
-                        <span className="text-xs text-muted-foreground block">from last week</span>
+                        {userProgress.studyTime.lastWeek > 0 && (
+                          <>
+                            <span className="text-sm text-green-500 font-medium">
+                              +{(userProgress.studyTime.current - userProgress.studyTime.lastWeek).toFixed(1)}h
+                            </span>
+                            <span className="text-xs text-muted-foreground block">from last week</span>
+                          </>
+                        )}
                       </div>
                     </div>
-                    <Progress value={80} className="h-2 mb-2" />
+                    <Progress 
+                      value={userProgress.studyTime.target > 0 ? 
+                        Math.min(100, (userProgress.studyTime.current / userProgress.studyTime.target) * 100) : 0} 
+                      className="h-2 mb-2" 
+                    />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Target: 18 hours</span>
-                      <span>80% completed</span>
+                      <span>Target: {userProgress.studyTime.target} hours</span>
+                      <span>
+                        {userProgress.studyTime.target > 0 ? 
+                          Math.min(100, Math.round((userProgress.studyTime.current / userProgress.studyTime.target) * 100)) : 0}% completed
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -186,30 +174,30 @@ const Dashboard = () => {
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm font-medium">Reading</span>
-                          <span className="text-sm font-medium">7.0</span>
+                          <span className="text-sm font-medium">{userProgress.skillScores.reading.toFixed(1)}</span>
                         </div>
-                        <Progress value={78} className="h-2" />
+                        <Progress value={Math.round((userProgress.skillScores.reading / 9) * 100)} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm font-medium">Writing</span>
-                          <span className="text-sm font-medium">6.0</span>
+                          <span className="text-sm font-medium">{userProgress.skillScores.writing.toFixed(1)}</span>
                         </div>
-                        <Progress value={67} className="h-2" />
+                        <Progress value={Math.round((userProgress.skillScores.writing / 9) * 100)} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm font-medium">Listening</span>
-                          <span className="text-sm font-medium">7.0</span>
+                          <span className="text-sm font-medium">{userProgress.skillScores.listening.toFixed(1)}</span>
                         </div>
-                        <Progress value={78} className="h-2" />
+                        <Progress value={Math.round((userProgress.skillScores.listening / 9) * 100)} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-1">
                           <span className="text-sm font-medium">Speaking</span>
-                          <span className="text-sm font-medium">6.5</span>
+                          <span className="text-sm font-medium">{userProgress.skillScores.speaking.toFixed(1)}</span>
                         </div>
-                        <Progress value={72} className="h-2" />
+                        <Progress value={Math.round((userProgress.skillScores.speaking / 9) * 100)} className="h-2" />
                       </div>
                     </div>
                   </CardContent>
@@ -283,23 +271,52 @@ const Dashboard = () => {
               <div className="grid grid-cols-1 gap-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Recent Activity</CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg">Recent Activity</CardTitle>
+                      <Button variant="outline" size="sm" onClick={() => setAnalysisDialogOpen(true)}>
+                        View All
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {userActivities.map((item, index) => (
-                        <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0">
-                          <div className={`bg-${item.color}/10 p-2 rounded-full`}>
-                            <item.icon className={`h-5 w-5 text-${item.color}`} />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-medium">{item.activity}</h3>
-                            <p className="text-sm text-muted-foreground">{item.result}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    {recentActivities.length === 0 ? (
+                      <div className="text-center py-6">
+                        <p className="text-muted-foreground mb-4">No activities recorded yet. Complete practice tests to start tracking your progress.</p>
+                        <Button asChild>
+                          <Link to="/practice">Start Practicing</Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {recentActivities.map((item, index) => {
+                          // Handle dynamic component rendering based on icon name
+                          let IconComponent;
+                          switch (item.icon) {
+                            case 'BookOpen': IconComponent = BookOpen; break;
+                            case 'FileText': IconComponent = FileText; break;
+                            case 'Brain': IconComponent = Brain; break;
+                            case 'Mic': IconComponent = Mic; break;
+                            case 'Trophy': IconComponent = Trophy; break;
+                            case 'BookMarked': IconComponent = BookMarked; break;
+                            case 'TrendingUp': IconComponent = TrendingUp; break;
+                            default: IconComponent = CheckCircle;
+                          }
+                          
+                          return (
+                            <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0">
+                              <div className={`bg-${item.color}/10 p-2 rounded-full`}>
+                                <IconComponent className={`h-5 w-5 text-${item.color}`} />
+                              </div>
+                              <div className="flex-1">
+                                <h3 className="font-medium">{item.activity}</h3>
+                                <p className="text-sm text-muted-foreground">{item.result}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -315,33 +332,35 @@ const Dashboard = () => {
                   <CardContent>
                     <div className="h-80 bg-accent/5 p-4 rounded-lg">
                       <div className="grid grid-cols-4 gap-4 h-full">
-                        {progressData.map((month, index) => (
+                        {userProgress.progressHistory.slice(-4).map((month, index) => (
                           <div key={index} className="flex flex-col justify-end space-y-2">
                             {/* Reading bar */}
                             <div 
                               className="bg-reading w-full rounded-t-sm" 
-                              style={{ height: `${(month.reading/9)*100}%` }}
-                              title={`Reading: ${month.reading}`}
+                              style={{ height: `${(month.scores.reading/9)*100}%` }}
+                              title={`Reading: ${month.scores.reading}`}
                             />
                             {/* Writing bar */}
                             <div 
                               className="bg-writing w-full" 
-                              style={{ height: `${(month.writing/9)*100}%` }}
-                              title={`Writing: ${month.writing}`}
+                              style={{ height: `${(month.scores.writing/9)*100}%` }}
+                              title={`Writing: ${month.scores.writing}`}
                             />
                             {/* Listening bar */}
                             <div 
                               className="bg-listening w-full" 
-                              style={{ height: `${(month.listening/9)*100}%` }}
-                              title={`Listening: ${month.listening}`}
+                              style={{ height: `${(month.scores.listening/9)*100}%` }}
+                              title={`Listening: ${month.scores.listening}`}
                             />
                             {/* Speaking bar */}
                             <div 
                               className="bg-speaking w-full rounded-b-sm" 
-                              style={{ height: `${(month.speaking/9)*100}%` }}
-                              title={`Speaking: ${month.speaking}`}
+                              style={{ height: `${(month.scores.speaking/9)*100}%` }}
+                              title={`Speaking: ${month.scores.speaking}`}
                             />
-                            <span className="text-xs text-center mt-2">{month.month}</span>
+                            <span className="text-xs text-center mt-2">
+                              {new Date(month.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -374,49 +393,35 @@ const Dashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <div className="flex items-center">
-                            <FileText className="h-5 w-5 text-writing mr-2" />
-                            <span className="font-medium">Writing Task 2</span>
+                      {userProgress.improvementAreas.map((area, index) => {
+                        // Handle dynamic component rendering based on icon name
+                        let IconComponent;
+                        switch (area.icon) {
+                          case 'FileText': IconComponent = FileText; break;
+                          case 'Mic': IconComponent = Mic; break;
+                          case 'BookOpen': IconComponent = BookOpen; break;
+                          case 'Brain': IconComponent = Brain; break;
+                          default: IconComponent = ListChecks;
+                        }
+                        
+                        return (
+                          <div key={index} className="space-y-2">
+                            <div className="flex justify-between">
+                              <div className="flex items-center">
+                                <IconComponent className={`h-5 w-5 text-${area.skillType} mr-2`} />
+                                <span className="font-medium">{area.name}</span>
+                              </div>
+                              <span className="text-sm font-medium">{area.priority} Priority</span>
+                            </div>
+                            <Progress value={area.progress} className="h-2" />
+                            <p className="text-sm text-muted-foreground">
+                              {area.description}
+                            </p>
                           </div>
-                          <span className="text-sm font-medium">High Priority</span>
-                        </div>
-                        <Progress value={40} className="h-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Focus on essay structure and coherence
-                        </p>
-                      </div>
+                        );
+                      })}
                       
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <div className="flex items-center">
-                            <Mic className="h-5 w-5 text-speaking mr-2" />
-                            <span className="font-medium">Speaking Part 3</span>
-                          </div>
-                          <span className="text-sm font-medium">Medium Priority</span>
-                        </div>
-                        <Progress value={55} className="h-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Improve discussion on abstract topics
-                        </p>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex justify-between">
-                          <div className="flex items-center">
-                            <BookOpen className="h-5 w-5 text-reading mr-2" />
-                            <span className="font-medium">Reading Speed</span>
-                          </div>
-                          <span className="text-sm font-medium">Medium Priority</span>
-                        </div>
-                        <Progress value={65} className="h-2" />
-                        <p className="text-sm text-muted-foreground">
-                          Practice skimming and scanning techniques
-                        </p>
-                      </div>
-                      
-                      <Button className="w-full mt-4">
+                      <Button className="w-full mt-4" onClick={() => setAnalysisDialogOpen(true)}>
                         <TrendingUp className="h-4 w-4 mr-2" />
                         View Detailed Analysis
                       </Button>
@@ -432,35 +437,36 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-accent/30 p-4 rounded-lg flex items-center space-x-4">
-                      <div className="bg-primary/20 p-3 rounded-full">
-                        <Trophy className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Reading Master</h3>
-                        <p className="text-sm text-muted-foreground">Scored 7.0 in Reading</p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-accent/30 p-4 rounded-lg flex items-center space-x-4">
-                      <div className="bg-primary/20 p-3 rounded-full">
-                        <BookMarked className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Consistent Learner</h3>
-                        <p className="text-sm text-muted-foreground">14 days streak</p>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-accent/30 p-4 rounded-lg flex items-center space-x-4">
-                      <div className="bg-primary/20 p-3 rounded-full">
-                        <TrendingUp className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-medium">Quick Improver</h3>
-                        <p className="text-sm text-muted-foreground">+0.5 band in 1 month</p>
-                      </div>
-                    </div>
+                    {userProgress.achievements.map((achievement, index) => {
+                      // Handle dynamic component rendering based on icon name
+                      let IconComponent;
+                      switch (achievement.icon) {
+                        case 'Trophy': IconComponent = Trophy; break;
+                        case 'BookMarked': IconComponent = BookMarked; break;
+                        case 'TrendingUp': IconComponent = TrendingUp; break;
+                        default: IconComponent = CheckCircle;
+                      }
+                      
+                      return (
+                        <div 
+                          key={index} 
+                          className={`${achievement.achieved ? 'bg-primary/10' : 'bg-accent/30'} p-4 rounded-lg flex items-center space-x-4`}
+                        >
+                          <div className={`${achievement.achieved ? 'bg-primary/20' : 'bg-muted/50'} p-3 rounded-full`}>
+                            <IconComponent className={`h-6 w-6 ${achievement.achieved ? 'text-primary' : 'text-muted-foreground'}`} />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{achievement.title}</h3>
+                            <p className="text-sm text-muted-foreground">{achievement.description}</p>
+                            {achievement.achieved && achievement.date && (
+                              <p className="text-xs text-primary mt-1">
+                                Achieved on {new Date(achievement.date).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -474,24 +480,48 @@ const Dashboard = () => {
                     <CardDescription>Your learning history and achievements</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="relative pl-6 border-l">
-                      {userActivities.map((item, index) => (
-                        <div key={index} className="mb-6 relative last:mb-0">
-                          <div className="absolute w-3 h-3 bg-primary rounded-full -left-7 mt-1.5"></div>
-                          <div className="flex items-start">
-                            <div className={`bg-${item.color}/10 p-2 rounded-full mr-3`}>
-                              <item.icon className={`h-5 w-5 text-${item.color}`} />
+                    {userProgress.activities.length === 0 ? (
+                      <div className="text-center py-6">
+                        <p className="text-muted-foreground mb-4">No activities recorded yet. Complete practice tests to start tracking your progress.</p>
+                        <Button asChild>
+                          <Link to="/practice">Start Practicing</Link>
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="relative pl-6 border-l">
+                        {userProgress.activities.slice(0, 5).map((item, index) => {
+                          // Handle dynamic component rendering based on icon name
+                          let IconComponent;
+                          switch (item.icon) {
+                            case 'BookOpen': IconComponent = BookOpen; break;
+                            case 'FileText': IconComponent = FileText; break;
+                            case 'Brain': IconComponent = Brain; break;
+                            case 'Mic': IconComponent = Mic; break;
+                            case 'Trophy': IconComponent = Trophy; break;
+                            case 'BookMarked': IconComponent = BookMarked; break;
+                            case 'TrendingUp': IconComponent = TrendingUp; break;
+                            default: IconComponent = CheckCircle;
+                          }
+                          
+                          return (
+                            <div key={index} className="mb-6 relative last:mb-0">
+                              <div className="absolute w-3 h-3 bg-primary rounded-full -left-7 mt-1.5"></div>
+                              <div className="flex items-start">
+                                <div className={`bg-${item.color}/10 p-2 rounded-full mr-3`}>
+                                  <IconComponent className={`h-5 w-5 text-${item.color}`} />
+                                </div>
+                                <div>
+                                  <h3 className="font-medium">{item.activity}</h3>
+                                  <p className="text-sm text-muted-foreground">{item.result}</p>
+                                  <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-medium">{item.activity}</h3>
-                              <p className="text-sm text-muted-foreground">{item.result}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{item.time}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <Button variant="outline" className="w-full mt-4">
+                          );
+                        })}
+                      </div>
+                    )}
+                    <Button variant="outline" className="w-full mt-4" onClick={() => setAnalysisDialogOpen(true)}>
                       View All Activities
                     </Button>
                   </CardContent>
@@ -503,37 +533,47 @@ const Dashboard = () => {
                     <CardDescription>Your scheduled learning sessions</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      {studySessions.map((session, index) => (
-                        <div key={index} className="flex justify-between items-center p-3 bg-accent/20 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div className={`p-2 rounded-full ${session.complete ? 'bg-green-100' : 'bg-amber-100'}`}>
-                              {session.complete ? (
-                                <CheckCircle className="h-5 w-5 text-green-600" />
-                              ) : (
-                                <Clock className="h-5 w-5 text-amber-600" />
-                              )}
+                    {userProgress.studySessions.length === 0 ? (
+                      <div className="text-center py-6">
+                        <p className="text-muted-foreground mb-4">No study sessions scheduled yet. Add sessions to organize your study plan.</p>
+                        <Button onClick={() => setAddSessionDialogOpen(true)}>
+                          <Calendar className="h-4 w-4 mr-2" />
+                          Add Session
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {userProgress.studySessions.slice(0, 5).map((session, index) => (
+                          <div key={index} className="flex justify-between items-center p-3 bg-accent/20 rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <div className={`p-2 rounded-full ${session.complete ? 'bg-green-100' : 'bg-amber-100'}`}>
+                                {session.complete ? (
+                                  <CheckCircle className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <Clock className="h-5 w-5 text-amber-600" />
+                                )}
+                              </div>
+                              <div>
+                                <h3 className="font-medium">{session.date}</h3>
+                                <p className="text-sm text-muted-foreground">{session.focus}</p>
+                              </div>
                             </div>
-                            <div>
-                              <h3 className="font-medium">{session.date}</h3>
-                              <p className="text-sm text-muted-foreground">{session.focus}</p>
+                            <div className="text-right">
+                              <span className="text-sm font-medium">{session.time}</span>
+                              <span className="text-xs block text-muted-foreground">
+                                {session.complete ? 'Completed' : 'Upcoming'}
+                              </span>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <span className="text-sm font-medium">{session.time}</span>
-                            <span className="text-xs block text-muted-foreground">
-                              {session.complete ? 'Completed' : 'Upcoming'}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex justify-between mt-6">
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => setEditScheduleDialogOpen(true)}>
                         <ListChecks className="h-4 w-4 mr-2" />
                         Edit Schedule
                       </Button>
-                      <Button>
+                      <Button onClick={() => setAddSessionDialogOpen(true)}>
                         <Calendar className="h-4 w-4 mr-2" />
                         Add Session
                       </Button>
@@ -548,34 +588,7 @@ const Dashboard = () => {
                   <CardDescription>Based on your progress and schedule</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-writing/10 p-4 rounded-lg">
-                      <FileText className="h-6 w-6 text-writing mb-2" />
-                      <h3 className="font-medium mb-1">Complete Writing Task</h3>
-                      <p className="text-sm text-muted-foreground mb-3">Practice Task 1 - Chart Description</p>
-                      <Button size="sm" variant="outline" className="w-full">
-                        Start Now
-                      </Button>
-                    </div>
-                    
-                    <div className="bg-listening/10 p-4 rounded-lg">
-                      <Brain className="h-6 w-6 text-listening mb-2" />
-                      <h3 className="font-medium mb-1">Listening Practice</h3>
-                      <p className="text-sm text-muted-foreground mb-3">Section 3 - Academic Discussion</p>
-                      <Button size="sm" variant="outline" className="w-full">
-                        Start Now
-                      </Button>
-                    </div>
-                    
-                    <div className="bg-primary/10 p-4 rounded-lg">
-                      <BookOpen className="h-6 w-6 text-primary mb-2" />
-                      <h3 className="font-medium mb-1">Vocabulary Review</h3>
-                      <p className="text-sm text-muted-foreground mb-3">Academic Word List - Set 3</p>
-                      <Button size="sm" variant="outline" className="w-full">
-                        Start Now
-                      </Button>
-                    </div>
-                  </div>
+                  <RecommendedSteps />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -583,6 +596,22 @@ const Dashboard = () => {
         </div>
       </main>
       <Footer />
+      
+      {/* Dialogs */}
+      <AddSessionDialog 
+        open={addSessionDialogOpen} 
+        onOpenChange={setAddSessionDialogOpen} 
+      />
+      
+      <EditScheduleDialog 
+        open={editScheduleDialogOpen} 
+        onOpenChange={setEditScheduleDialogOpen} 
+      />
+      
+      <DetailedAnalysisDialog 
+        open={analysisDialogOpen} 
+        onOpenChange={setAnalysisDialogOpen} 
+      />
     </div>
   );
 };
