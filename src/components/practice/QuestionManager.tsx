@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import SpeakingQuestionView from './SpeakingQuestionView';
 import ListeningQuestionView from './ListeningQuestionView';
 import ResultsView from './ResultsView';
 import { useToast } from '@/components/ui/use-toast';
-import { Clock, AlertTriangle } from 'lucide-react';
+import { Clock, AlertTriangle, AlertCircle, Loader2 } from 'lucide-react';
 
 interface QuestionManagerProps {
   audioPermissionGranted?: boolean;
@@ -39,14 +38,27 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const [showResults, setShowResults] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [warningShown, setWarningShown] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Load questions on component mount
   useEffect(() => {
-    if (!skillType) return;
+    if (!skillType) {
+      setLoadError("No skill type specified");
+      setIsLoading(false);
+      return;
+    }
 
     console.log("QuestionManager: Loading questions for skillType:", skillType, "practiceId:", practiceId);
     console.log("Available mockQuestions:", mockQuestions);
+    
+    if (!mockQuestions || mockQuestions.length === 0) {
+      console.error("No mockQuestions available");
+      setLoadError("Failed to load questions data");
+      setIsLoading(false);
+      return;
+    }
     
     let filteredQuestions: Question[] = [];
     
@@ -69,6 +81,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     
     console.log(`Loading questions for ${skillType} practice with id ${practiceId}`, filteredQuestions);
     
+    if (filteredQuestions.length === 0) {
+      console.error(`No questions found for ${skillType} and id ${practiceId}`);
+      setLoadError(`No ${skillType} questions found`);
+      setIsLoading(false);
+      return;
+    }
+    
     setQuestions(filteredQuestions);
     
     // Reset state when questions change
@@ -89,6 +108,8 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
       setTimeRemaining(initialTime);
       console.log("Setting initial time remaining:", initialTime);
     }
+    
+    setIsLoading(false);
   }, [skillType, practiceId]);
 
   // Timer effect
@@ -221,16 +242,41 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
 
-  if (!skillType || questions.length === 0) {
+  if (isLoading) {
     return (
       <div className="container mx-auto p-4 mt-4">
         <Card>
           <CardContent className="p-6 text-center">
+            <div className="flex justify-center mb-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
             <h2 className="text-xl font-semibold mb-2">Loading...</h2>
             <p>Please wait while we prepare your practice session.</p>
-            <p className="text-sm text-muted-foreground mt-4">
-              {skillType ? `Looking for ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}` : 'No skill type specified'}
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loadError || !skillType || questions.length === 0) {
+    return (
+      <div className="container mx-auto p-4 mt-4">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="flex justify-center mb-4">
+              <AlertCircle className="h-8 w-8 text-destructive" />
+            </div>
+            <h2 className="text-xl font-semibold mb-2">
+              {loadError || `No ${skillType || 'practice'} questions found`}
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              {skillType 
+                ? `We couldn't find any ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}.`
+                : 'No skill type specified. Please select a practice type.'}
             </p>
+            <Button onClick={() => window.location.href = '/practice'}>
+              Back to Practice
+            </Button>
           </CardContent>
         </Card>
       </div>

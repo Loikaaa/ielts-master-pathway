@@ -20,7 +20,8 @@ import {
   Pencil, 
   Search, 
   Star, 
-  Timer 
+  Timer,
+  AlertCircle 
 } from 'lucide-react';
 import { mockQuestions } from '@/data/mockQuestions';
 import { toast } from '@/components/ui/use-toast';
@@ -36,58 +37,79 @@ const Practice = () => {
     speaking: [],
     listening: []
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Load practice items based on mockQuestions
   useEffect(() => {
     console.log("Loading practice items from mockQuestions:", mockQuestions);
+    setIsLoading(true);
+    setError(null);
     
-    // Map the mockQuestions to our practice item format
-    const items = {
-      reading: [],
-      writing: [],
-      speaking: [],
-      listening: []
-    };
-    
-    mockQuestions.forEach(question => {
-      if (!items[question.skillType]) return;
+    try {
+      // Map the mockQuestions to our practice item format
+      const items = {
+        reading: [],
+        writing: [],
+        speaking: [],
+        listening: []
+      };
       
-      let title = "";
-      let type = "";
-      let duration = "";
-      
-      if (question.skillType === 'reading') {
-        title = question.passageTitle || `Reading Practice ${question.id}`;
-        type = question.questions[0]?.questionType || 'Multiple Question Types';
-        duration = `${Math.floor(question.timeLimit / 60)} min`;
-      } else if (question.skillType === 'writing') {
-        title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
-        type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
-        duration = `${Math.floor(question.timeLimit / 60)} min`;
-      } else if (question.skillType === 'speaking') {
-        title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
-        type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
-        duration = `${Math.floor((question.preparationTime + question.responseTime) / 60)} min`;
-      } else if (question.skillType === 'listening') {
-        title = `Section ${question.sectionNumber}`;
-        type = question.questions[0]?.questionType || 'Multiple Question Types';
-        duration = `${Math.floor(question.timeLimit / 60)} min`;
+      if (!mockQuestions || mockQuestions.length === 0) {
+        console.error("No mockQuestions data available");
+        setError("Failed to load practice questions");
+        setIsLoading(false);
+        return;
       }
       
-      items[question.skillType].push({
-        id: question.id,
-        title: title,
-        type: type,
-        level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
-        duration: duration,
-        completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate
-        popular: Math.random() > 0.6 // Randomly mark some as popular
+      mockQuestions.forEach(question => {
+        if (!items[question.skillType]) {
+          console.warn(`Unknown skill type: ${question.skillType}`);
+          return;
+        }
+        
+        let title = "";
+        let type = "";
+        let duration = "";
+        
+        if (question.skillType === 'reading') {
+          title = question.passageTitle || `Reading Practice ${question.id}`;
+          type = question.questions[0]?.questionType || 'Multiple Question Types';
+          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+        } else if (question.skillType === 'writing') {
+          title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
+          type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
+          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+        } else if (question.skillType === 'speaking') {
+          title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
+          type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
+          duration = `${Math.floor(((question.preparationTime || 0) + (question.responseTime || 0)) / 60)} min`;
+        } else if (question.skillType === 'listening') {
+          title = `Section ${question.sectionNumber}`;
+          type = question.questions[0]?.questionType || 'Multiple Question Types';
+          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+        }
+        
+        items[question.skillType].push({
+          id: question.id,
+          title: title,
+          type: type,
+          level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
+          duration: duration,
+          completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate
+          popular: Math.random() > 0.6 // Randomly mark some as popular
+        });
       });
-    });
-    
-    // Set the practice items
-    setPracticeItems(items);
-    console.log("Processed practice items:", items);
+      
+      // Set the practice items
+      setPracticeItems(items);
+      console.log("Processed practice items:", items);
+    } catch (err) {
+      console.error("Error processing practice items:", err);
+      setError("Failed to load practice questions");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   // Handle tab change
@@ -121,6 +143,28 @@ const Practice = () => {
       })}>
         Request Materials
       </Button>
+    </div>
+  );
+
+  const renderError = () => (
+    <div className="text-center py-12">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mb-4">
+        <AlertCircle className="h-8 w-8 text-destructive" />
+      </div>
+      <h3 className="text-lg font-medium mb-2">Failed to load practice materials</h3>
+      <p className="text-muted-foreground mb-4">
+        There was an error loading the practice materials. Please try again later.
+      </p>
+      <Button variant="outline" onClick={() => window.location.reload()}>
+        Retry
+      </Button>
+    </div>
+  );
+
+  const renderLoading = () => (
+    <div className="text-center py-12">
+      <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label="loading"></div>
+      <h3 className="text-lg font-medium">Loading practice materials...</h3>
     </div>
   );
 
