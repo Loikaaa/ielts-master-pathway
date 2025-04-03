@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -23,226 +23,106 @@ import {
   Timer 
 } from 'lucide-react';
 import { mockQuestions } from '@/data/mockQuestions';
+import { toast } from '@/components/ui/use-toast';
 
-// Define practice items for each skill
-const getPracticeItems = () => {
-  const items = {
+const Practice = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const skillParam = searchParams.get('skill');
+  const [activeTab, setActiveTab] = useState(skillParam || 'reading');
+  const [practiceItems, setPracticeItems] = useState({
     reading: [],
     writing: [],
     speaking: [],
     listening: []
-  };
-  
-  // Use mockQuestions to populate the practice items
-  mockQuestions.forEach(question => {
-    if (!items[question.skillType]) return;
+  });
+
+  // Load practice items based on mockQuestions
+  useEffect(() => {
+    console.log("Loading practice items from mockQuestions:", mockQuestions);
     
-    let title = "";
-    let type = "";
-    let duration = "";
+    // Map the mockQuestions to our practice item format
+    const items = {
+      reading: [],
+      writing: [],
+      speaking: [],
+      listening: []
+    };
     
-    if (question.skillType === 'reading') {
-      title = question.passageTitle;
-      type = question.questions[0]?.questionType || 'Multiple Question Types';
-      duration = `${Math.floor(question.timeLimit / 60)} min`;
-    } else if (question.skillType === 'writing') {
-      title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
-      type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
-      duration = `${Math.floor(question.timeLimit / 60)} min`;
-    } else if (question.skillType === 'speaking') {
-      title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
-      type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
-      duration = `${Math.floor((question.preparationTime + question.responseTime) / 60)} min`;
-    } else if (question.skillType === 'listening') {
-      title = `Section ${question.sectionNumber}`;
-      type = question.questions[0]?.questionType || 'Multiple Question Types';
-      duration = `${Math.floor(question.timeLimit / 60)} min`;
-    }
-    
-    items[question.skillType].push({
-      id: question.id,
-      title: title,
-      type: type,
-      level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
-      duration: duration,
-      completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate between 40-80%
-      popular: Math.random() > 0.6 // Randomly mark some as popular
+    mockQuestions.forEach(question => {
+      if (!items[question.skillType]) return;
+      
+      let title = "";
+      let type = "";
+      let duration = "";
+      
+      if (question.skillType === 'reading') {
+        title = question.passageTitle || `Reading Practice ${question.id}`;
+        type = question.questions[0]?.questionType || 'Multiple Question Types';
+        duration = `${Math.floor(question.timeLimit / 60)} min`;
+      } else if (question.skillType === 'writing') {
+        title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
+        type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
+        duration = `${Math.floor(question.timeLimit / 60)} min`;
+      } else if (question.skillType === 'speaking') {
+        title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
+        type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
+        duration = `${Math.floor((question.preparationTime + question.responseTime) / 60)} min`;
+      } else if (question.skillType === 'listening') {
+        title = `Section ${question.sectionNumber}`;
+        type = question.questions[0]?.questionType || 'Multiple Question Types';
+        duration = `${Math.floor(question.timeLimit / 60)} min`;
+      }
+      
+      items[question.skillType].push({
+        id: question.id,
+        title: title,
+        type: type,
+        level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
+        duration: duration,
+        completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate
+        popular: Math.random() > 0.6 // Randomly mark some as popular
+      });
     });
-  });
-  
-  // Fallback to original practice items if no questions found for a skill
-  Object.keys(items).forEach(key => {
-    if (items[key].length === 0) {
-      items[key] = practiceItems[key];
+    
+    // Set the practice items
+    setPracticeItems(items);
+    console.log("Processed practice items:", items);
+  }, []);
+
+  // Handle tab change
+  useEffect(() => {
+    if (skillParam && skillParam !== activeTab) {
+      setActiveTab(skillParam);
     }
-  });
-  
-  return items;
-};
-
-// Original hardcoded practice items (kept as fallback)
-const practiceItems = {
-  reading: [
-    { 
-      id: 'r1',
-      title: 'Environmental Conservation',
-      type: 'Multiple Choice',
-      level: 'Medium',
-      duration: '20 min',
-      completionRate: 70,
-      popular: true
-    },
-    { 
-      id: 'r2',
-      title: 'Technological Innovations in Healthcare',
-      type: 'Matching Headings',
-      level: 'Hard',
-      duration: '25 min',
-      completionRate: 40,
-      popular: false
-    },
-    { 
-      id: 'r3',
-      title: 'History of Modern Architecture',
-      type: 'True/False/Not Given',
-      level: 'Medium',
-      duration: '18 min',
-      completionRate: 65,
-      popular: false
-    },
-    { 
-      id: 'r4',
-      title: 'The Psychology of Decision Making',
-      type: 'Summary Completion',
-      level: 'Hard',
-      duration: '22 min',
-      completionRate: 35,
-      popular: true
-    },
-  ],
-  writing: [
-    { 
-      id: 'w1',
-      title: 'Task 1: Bar Chart Analysis',
-      type: 'Data Analysis',
-      level: 'Medium',
-      duration: '20 min',
-      completionRate: 60,
-      popular: true
-    },
-    { 
-      id: 'w2',
-      title: 'Task 2: Technology in Education',
-      type: 'Argument Essay',
-      level: 'Hard',
-      duration: '40 min',
-      completionRate: 45,
-      popular: true
-    },
-    { 
-      id: 'w3',
-      title: 'Task 1: Process Diagram',
-      type: 'Process Description',
-      level: 'Medium',
-      duration: '20 min',
-      completionRate: 55,
-      popular: false
-    },
-    { 
-      id: 'w4',
-      title: 'Task 2: Environmental Challenges',
-      type: 'Problem/Solution Essay',
-      level: 'Hard',
-      duration: '40 min',
-      completionRate: 40,
-      popular: false
-    },
-  ],
-  speaking: [
-    { 
-      id: 's1',
-      title: 'Part 1: Personal Questions',
-      type: 'Interview',
-      level: 'Easy',
-      duration: '5 min',
-      completionRate: 80,
-      popular: true
-    },
-    { 
-      id: 's2',
-      title: 'Part 2: Topic Card - Describe a Person',
-      type: 'Monologue',
-      level: 'Medium',
-      duration: '4 min',
-      completionRate: 65,
-      popular: true
-    },
-    { 
-      id: 's3',
-      title: 'Part 3: Discussion on Technology',
-      type: 'Discussion',
-      level: 'Hard',
-      duration: '5 min',
-      completionRate: 50,
-      popular: false
-    },
-    { 
-      id: 's4',
-      title: 'Pronunciation Practice - Intonation',
-      type: 'Skill-building',
-      level: 'Medium',
-      duration: '10 min',
-      completionRate: 70,
-      popular: false
-    },
-  ],
-  listening: [
-    { 
-      id: 'l1',
-      title: 'Section 1: Accommodation Inquiry',
-      type: 'Form Completion',
-      level: 'Easy',
-      duration: '10 min',
-      completionRate: 75,
-      popular: true
-    },
-    { 
-      id: 'l2',
-      title: 'Section 2: Campus Tour',
-      type: 'Map Labeling',
-      level: 'Medium',
-      duration: '10 min',
-      completionRate: 60,
-      popular: false
-    },
-    { 
-      id: 'l3',
-      title: 'Section 3: Academic Discussion',
-      type: 'Multiple Choice',
-      level: 'Hard',
-      duration: '10 min',
-      completionRate: 45,
-      popular: true
-    },
-    { 
-      id: 'l4',
-      title: 'Section 4: Academic Lecture',
-      type: 'Sentence Completion',
-      level: 'Hard',
-      duration: '10 min',
-      completionRate: 40,
-      popular: false
-    },
-  ],
-};
-
-const Practice = () => {
-  const navigate = useNavigate();
-  const dynamicPracticeItems = getPracticeItems();
+  }, [skillParam]);
 
   const startPractice = (skillType: string, itemId: string) => {
+    console.log(`Starting practice for ${skillType}/${itemId}`);
     navigate(`/practice/session/${skillType}/${itemId}`);
   };
+
+  // Display a message if no practice items are found
+  const renderEmptyState = (skillType: string) => (
+    <div className="text-center py-12">
+      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+        {skillType === 'reading' && <Book className="h-8 w-8 text-muted-foreground" />}
+        {skillType === 'writing' && <Pencil className="h-8 w-8 text-muted-foreground" />}
+        {skillType === 'speaking' && <Mic className="h-8 w-8 text-muted-foreground" />}
+        {skillType === 'listening' && <Headphones className="h-8 w-8 text-muted-foreground" />}
+      </div>
+      <h3 className="text-lg font-medium mb-2">No {skillType} practices available</h3>
+      <p className="text-muted-foreground mb-4">
+        Check back later for new practice materials or contact support.
+      </p>
+      <Button variant="outline" onClick={() => toast({
+        title: "Coming Soon",
+        description: `New ${skillType} practice materials will be added soon.`
+      })}>
+        Request Materials
+      </Button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -289,7 +169,7 @@ const Practice = () => {
             </div>
           </div>
           
-          <Tabs defaultValue="reading">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-2 md:grid-cols-4 mb-8">
               <TabsTrigger value="reading" className="data-[state=active]:bg-reading/10 data-[state=active]:text-reading data-[state=active]:border-reading">
                 <Book className="h-4 w-4 mr-2" />
@@ -310,187 +190,195 @@ const Practice = () => {
             </TabsList>
             
             <TabsContent value="reading">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dynamicPracticeItems.reading.map((item) => (
-                  <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="bg-reading/5 p-4 border-b border-reading/10">
-                      <div className="flex justify-between items-start">
-                        <div className="w-10 h-10 rounded-full bg-reading/10 flex items-center justify-center text-reading">
-                          <Book className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center">
-                          {item.popular && (
-                            <div className="bg-reading/10 text-reading text-xs px-2 py-0.5 rounded-full font-medium mr-1">
-                              Popular
+              {practiceItems.reading.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {practiceItems.reading.map((item) => (
+                    <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="bg-reading/5 p-4 border-b border-reading/10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-10 h-10 rounded-full bg-reading/10 flex items-center justify-center text-reading">
+                            <Book className="h-5 w-5" />
+                          </div>
+                          <div className="flex items-center">
+                            {item.popular && (
+                              <div className="bg-reading/10 text-reading text-xs px-2 py-0.5 rounded-full font-medium mr-1">
+                                Popular
+                              </div>
+                            )}
+                            <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
+                              {item.level}
                             </div>
-                          )}
-                          <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
-                            {item.level}
                           </div>
                         </div>
+                        <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.type}</p>
                       </div>
-                      <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.type}</p>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {item.duration}
+                      <div className="p-4">
+                        <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {item.duration}
+                          </div>
+                          <div className="flex items-center">
+                            <LineChart className="h-4 w-4 mr-1" />
+                            <span>Completion rate: {item.completionRate}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <LineChart className="h-4 w-4 mr-1" />
-                          <span>Completion rate: {item.completionRate}%</span>
-                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => startPractice('reading', item.id)}
+                        >
+                          Start Practice
+                        </Button>
                       </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => startPractice('reading', item.id)}
-                      >
-                        Start Practice
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : renderEmptyState('reading')}
             </TabsContent>
             
             <TabsContent value="writing">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dynamicPracticeItems.writing.map((item) => (
-                  <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="bg-writing/5 p-4 border-b border-writing/10">
-                      <div className="flex justify-between items-start">
-                        <div className="w-10 h-10 rounded-full bg-writing/10 flex items-center justify-center text-writing">
-                          <Pencil className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center">
-                          {item.popular && (
-                            <div className="bg-writing/10 text-writing text-xs px-2 py-0.5 rounded-full font-medium mr-1">
-                              Popular
+              {practiceItems.writing.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {practiceItems.writing.map((item) => (
+                    <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="bg-writing/5 p-4 border-b border-writing/10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-10 h-10 rounded-full bg-writing/10 flex items-center justify-center text-writing">
+                            <Pencil className="h-5 w-5" />
+                          </div>
+                          <div className="flex items-center">
+                            {item.popular && (
+                              <div className="bg-writing/10 text-writing text-xs px-2 py-0.5 rounded-full font-medium mr-1">
+                                Popular
+                              </div>
+                            )}
+                            <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
+                              {item.level}
                             </div>
-                          )}
-                          <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
-                            {item.level}
                           </div>
                         </div>
+                        <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.type}</p>
                       </div>
-                      <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.type}</p>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {item.duration}
+                      <div className="p-4">
+                        <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {item.duration}
+                          </div>
+                          <div className="flex items-center">
+                            <LineChart className="h-4 w-4 mr-1" />
+                            <span>Completion rate: {item.completionRate}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <LineChart className="h-4 w-4 mr-1" />
-                          <span>Completion rate: {item.completionRate}%</span>
-                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => startPractice('writing', item.id)}
+                        >
+                          Start Practice
+                        </Button>
                       </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => startPractice('writing', item.id)}
-                      >
-                        Start Practice
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : renderEmptyState('writing')}
             </TabsContent>
             
             <TabsContent value="speaking">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dynamicPracticeItems.speaking.map((item) => (
-                  <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="bg-speaking/5 p-4 border-b border-speaking/10">
-                      <div className="flex justify-between items-start">
-                        <div className="w-10 h-10 rounded-full bg-speaking/10 flex items-center justify-center text-speaking">
-                          <Mic className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center">
-                          {item.popular && (
-                            <div className="bg-speaking/10 text-speaking text-xs px-2 py-0.5 rounded-full font-medium mr-1">
-                              Popular
+              {practiceItems.speaking.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {practiceItems.speaking.map((item) => (
+                    <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="bg-speaking/5 p-4 border-b border-speaking/10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-10 h-10 rounded-full bg-speaking/10 flex items-center justify-center text-speaking">
+                            <Mic className="h-5 w-5" />
+                          </div>
+                          <div className="flex items-center">
+                            {item.popular && (
+                              <div className="bg-speaking/10 text-speaking text-xs px-2 py-0.5 rounded-full font-medium mr-1">
+                                Popular
+                              </div>
+                            )}
+                            <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
+                              {item.level}
                             </div>
-                          )}
-                          <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
-                            {item.level}
                           </div>
                         </div>
+                        <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.type}</p>
                       </div>
-                      <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.type}</p>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {item.duration}
+                      <div className="p-4">
+                        <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {item.duration}
+                          </div>
+                          <div className="flex items-center">
+                            <LineChart className="h-4 w-4 mr-1" />
+                            <span>Completion rate: {item.completionRate}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <LineChart className="h-4 w-4 mr-1" />
-                          <span>Completion rate: {item.completionRate}%</span>
-                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => startPractice('speaking', item.id)}
+                        >
+                          Start Practice
+                        </Button>
                       </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => startPractice('speaking', item.id)}
-                      >
-                        Start Practice
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : renderEmptyState('speaking')}
             </TabsContent>
             
             <TabsContent value="listening">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {dynamicPracticeItems.listening.map((item) => (
-                  <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="bg-listening/5 p-4 border-b border-listening/10">
-                      <div className="flex justify-between items-start">
-                        <div className="w-10 h-10 rounded-full bg-listening/10 flex items-center justify-center text-listening">
-                          <Headphones className="h-5 w-5" />
-                        </div>
-                        <div className="flex items-center">
-                          {item.popular && (
-                            <div className="bg-listening/10 text-listening text-xs px-2 py-0.5 rounded-full font-medium mr-1">
-                              Popular
+              {practiceItems.listening.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {practiceItems.listening.map((item) => (
+                    <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                      <div className="bg-listening/5 p-4 border-b border-listening/10">
+                        <div className="flex justify-between items-start">
+                          <div className="w-10 h-10 rounded-full bg-listening/10 flex items-center justify-center text-listening">
+                            <Headphones className="h-5 w-5" />
+                          </div>
+                          <div className="flex items-center">
+                            {item.popular && (
+                              <div className="bg-listening/10 text-listening text-xs px-2 py-0.5 rounded-full font-medium mr-1">
+                                Popular
+                              </div>
+                            )}
+                            <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
+                              {item.level}
                             </div>
-                          )}
-                          <div className="bg-card text-xs px-2 py-0.5 rounded-full border">
-                            {item.level}
                           </div>
                         </div>
+                        <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground">{item.type}</p>
                       </div>
-                      <h3 className="font-semibold text-lg mt-4">{item.title}</h3>
-                      <p className="text-sm text-muted-foreground">{item.type}</p>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {item.duration}
+                      <div className="p-4">
+                        <div className="flex justify-between text-sm text-muted-foreground mb-4">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {item.duration}
+                          </div>
+                          <div className="flex items-center">
+                            <LineChart className="h-4 w-4 mr-1" />
+                            <span>Completion rate: {item.completionRate}%</span>
+                          </div>
                         </div>
-                        <div className="flex items-center">
-                          <LineChart className="h-4 w-4 mr-1" />
-                          <span>Completion rate: {item.completionRate}%</span>
-                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => startPractice('listening', item.id)}
+                        >
+                          Start Practice
+                        </Button>
                       </div>
-                      <Button 
-                        className="w-full"
-                        onClick={() => startPractice('listening', item.id)}
-                      >
-                        Start Practice
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : renderEmptyState('listening')}
             </TabsContent>
           </Tabs>
           

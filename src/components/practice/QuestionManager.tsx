@@ -45,19 +45,25 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   useEffect(() => {
     if (!skillType) return;
 
+    console.log("QuestionManager: Loading questions for skillType:", skillType, "practiceId:", practiceId);
+    console.log("Available mockQuestions:", mockQuestions);
+    
     let filteredQuestions: Question[] = [];
     
     if (practiceId) {
       // First try to find a specific question by ID
       const specificQuestion = mockQuestions.find(q => q.id === practiceId);
       if (specificQuestion) {
+        console.log("Found specific question:", specificQuestion);
         filteredQuestions = [specificQuestion];
       } else {
         // If no specific question found, filter by skill type
+        console.log("No specific question found, filtering by skill type");
         filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
       }
     } else {
       // Fallback to filter by skill type only
+      console.log("No practiceId provided, filtering by skill type only");
       filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
     }
     
@@ -69,7 +75,20 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     setCurrentQuestionIndex(0);
     setAnswers({});
     setShowResults(false);
-    setTimeRemaining(filteredQuestions[0]?.timeLimit || null);
+    
+    // Set initial time remaining
+    if (filteredQuestions.length > 0) {
+      const firstQuestion = filteredQuestions[0];
+      let initialTime = firstQuestion.timeLimit || null;
+      
+      // For speaking questions, add preparation time
+      if (isSpeakingQuestion(firstQuestion)) {
+        initialTime = (firstQuestion.preparationTime || 0) + (firstQuestion.responseTime || 0);
+      }
+      
+      setTimeRemaining(initialTime);
+      console.log("Setting initial time remaining:", initialTime);
+    }
   }, [skillType, practiceId]);
 
   // Timer effect
@@ -209,6 +228,9 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Loading...</h2>
             <p>Please wait while we prepare your practice session.</p>
+            <p className="text-sm text-muted-foreground mt-4">
+              {skillType ? `Looking for ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}` : 'No skill type specified'}
+            </p>
           </CardContent>
         </Card>
       </div>
