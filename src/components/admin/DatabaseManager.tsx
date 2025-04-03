@@ -43,6 +43,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 const DatabaseManager = () => {
   const [activeTab, setActiveTab] = useState('questions');
@@ -114,6 +115,75 @@ const DatabaseManager = () => {
         title: "Record Deleted",
         description: `Record ${id} has been successfully deleted.`,
       });
+    }
+  };
+
+  // Helper function to render badges with custom styling
+  const renderStatusBadge = (status: string) => {
+    if (status === 'active' || status === 'published') {
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
+          {status}
+        </Badge>
+      );
+    } else if (status === 'inactive') {
+      return (
+        <Badge variant="secondary">
+          {status}
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="outline">
+          {status}
+        </Badge>
+      );
+    }
+  };
+
+  // Helper function to render difficulty badges
+  const renderDifficultyBadge = (difficulty: string) => {
+    if (difficulty === 'easy') {
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
+          {difficulty}
+        </Badge>
+      );
+    } else if (difficulty === 'medium') {
+      return (
+        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200">
+          {difficulty}
+        </Badge>
+      );
+    } else if (difficulty === 'hard') {
+      return (
+        <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-200 border-red-200">
+          {difficulty}
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="outline">
+          {difficulty}
+        </Badge>
+      );
+    }
+  };
+
+  // Helper function to determine appropriate badge for operation result
+  const renderOperationBadge = (status: string) => {
+    if (status === 'success') {
+      return (
+        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
+          {status}
+        </Badge>
+      );
+    } else {
+      return (
+        <Badge variant="destructive">
+          {status}
+        </Badge>
+      );
     }
   };
 
@@ -260,22 +330,12 @@ const DatabaseManager = () => {
                           <TableRow key={index}>
                             {Object.entries(record).map(([key, value]) => (
                               <TableCell key={key}>
-                                {key === 'status' ? (
-                                  <Badge 
-                                    variant={value === 'active' || value === 'published' ? 'success' : 
-                                            value === 'inactive' ? 'secondary' : 'outline'}
-                                  >
-                                    {value}
-                                  </Badge>
-                                ) : key === 'difficulty' ? (
-                                  <Badge 
-                                    variant={value === 'easy' ? 'success' : 
-                                            value === 'medium' ? 'warning' : 'destructive'}
-                                  >
-                                    {value}
-                                  </Badge>
+                                {key === 'status' && typeof value === 'string' ? (
+                                  renderStatusBadge(value)
+                                ) : key === 'difficulty' && typeof value === 'string' ? (
+                                  renderDifficultyBadge(value)
                                 ) : (
-                                  value
+                                  value as React.ReactNode
                                 )}
                               </TableCell>
                             ))}
@@ -374,9 +434,7 @@ const DatabaseManager = () => {
                     <TableCell className="font-medium">{op.op}</TableCell>
                     <TableCell>{op.table}</TableCell>
                     <TableCell>
-                      <Badge variant={op.status === 'success' ? 'success' : 'destructive'}>
-                        {op.status}
-                      </Badge>
+                      {renderOperationBadge(op.status)}
                     </TableCell>
                     <TableCell>{op.time}</TableCell>
                   </TableRow>
