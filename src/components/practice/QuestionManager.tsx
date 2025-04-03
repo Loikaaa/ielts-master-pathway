@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Question } from '@/types/questions';
+import { Question, WritingQuestion } from '@/types/questions';
 import ReadingQuestionView from './ReadingQuestionView';
 import WritingQuestionView from './WritingQuestionView';
 import SpeakingQuestionView from './SpeakingQuestionView';
@@ -16,6 +15,11 @@ import ResultsView from './ResultsView';
 
 // This would normally come from an API or database
 import { mockQuestions } from '@/data/mockQuestions';
+
+// Type guard function to check if a question is a WritingQuestion
+const isWritingQuestion = (question: Question): question is WritingQuestion => {
+  return question.skillType === 'writing';
+};
 
 interface QuestionManagerProps {
   skillType?: 'reading' | 'writing' | 'speaking' | 'listening';
@@ -52,11 +56,9 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const [transferTime, setTransferTime] = useState(false);
   
   useEffect(() => {
-    // In a real app, this would be an API call
     const loadQuestions = async () => {
       setIsLoading(true);
       try {
-        // Filter questions by skill type and practice item id
         const filteredQuestions = mockQuestions.filter(
           q => q.skillType === skillType
         );
@@ -73,18 +75,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         
         setQuestions(filteredQuestions);
         
-        // Set initial timer based on the IELTS timing rules
         if (skillType === 'reading') {
-          // IELTS Reading: 60 minutes for 40 questions
-          setTimeRemaining(60 * 60); // 60 minutes in seconds
+          setTimeRemaining(60 * 60);
         } else if (skillType === 'listening') {
-          // IELTS Listening: 30 minutes + 10 minutes transfer time
-          setTimeRemaining(30 * 60); // 30 minutes in seconds
+          setTimeRemaining(30 * 60);
         } else if (skillType === 'writing') {
-          // IELTS Writing: 60 minutes total (20 mins Task 1, 40 mins Task 2)
-          setTimeRemaining(60 * 60); // 60 minutes in seconds
+          setTimeRemaining(60 * 60);
         } else if (skillType === 'speaking') {
-          // Individual questions will have their own timers
           if (filteredQuestions[0]?.timeLimit) {
             setTimeRemaining(filteredQuestions[0].timeLimit);
           }
@@ -103,7 +100,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     
     loadQuestions();
 
-    // Listener for scroll to make timer sticky
     const handleScroll = () => {
       if (timerRef.current) {
         const rect = timerRef.current.getBoundingClientRect();
@@ -122,19 +118,16 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   }, [skillType, practiceItemId, toast, navigate]);
   
   useEffect(() => {
-    // Timer effect
     if (timeRemaining === null) return;
     
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev === null || prev <= 0) {
           clearInterval(timer);
-          // Auto-submit when time is up or switch to transfer time for listening
           if (prev === 0) {
             if (skillType === 'listening' && !transferTime) {
-              // Switch to 10 minutes transfer time for listening
               setTransferTime(true);
-              return 10 * 60; // 10 minutes in seconds
+              return 10 * 60;
             } else if (!examCompleted) {
               handleSubmit();
             }
@@ -142,7 +135,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           return 0;
         }
         
-        // Show warning when 10% of time is left
         if (skillType === 'reading' && prev === Math.floor(60 * 60 * 0.1)) {
           setShowTimeWarning(true);
           toast({
@@ -165,7 +157,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
             variant: "destructive",
           });
         } else if (transferTime && prev === Math.floor(10 * 60 * 0.2)) {
-          // 20% warning for transfer time (2 minutes)
           setShowTimeWarning(true);
           toast({
             title: "Transfer time ending!",
@@ -200,21 +191,22 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev + 1);
       setShowTimeWarning(false);
       
-      // Only update timer for speaking questions or when moving from task 1 to task 2 in writing
       if (skillType === 'speaking') {
-        // Update timer for the next question
         const nextQuestion = questions[currentQuestionIndex + 1];
         if (nextQuestion?.timeLimit) {
           setTimeRemaining(nextQuestion.timeLimit);
         }
-      } else if (skillType === 'writing' && 
-                questions[currentQuestionIndex]?.taskType === 'task1' && 
-                questions[currentQuestionIndex + 1]?.taskType === 'task2') {
-        // When moving from Task 1 to Task 2 in writing, reset timer to 40 minutes
-        setTimeRemaining(40 * 60); // 40 minutes in seconds
+      } else if (skillType === 'writing') {
+        const currentQuestion = questions[currentQuestionIndex];
+        const nextQuestion = questions[currentQuestionIndex + 1];
+        
+        if (isWritingQuestion(currentQuestion) && isWritingQuestion(nextQuestion)) {
+          if (currentQuestion.taskType === 'task1' && nextQuestion.taskType === 'task2') {
+            setTimeRemaining(40 * 60);
+          }
+        }
       }
     } else {
-      // Submit answers
       handleSubmit();
     }
   };
@@ -224,27 +216,27 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev - 1);
       setShowTimeWarning(false);
       
-      // Only update timer for speaking questions or when moving from task 2 to task 1 in writing
       if (skillType === 'speaking') {
-        // Update timer for the previous question
         const prevQuestion = questions[currentQuestionIndex - 1];
         if (prevQuestion?.timeLimit) {
           setTimeRemaining(prevQuestion.timeLimit);
         }
-      } else if (skillType === 'writing' && 
-                questions[currentQuestionIndex]?.taskType === 'task2' && 
-                questions[currentQuestionIndex - 1]?.taskType === 'task1') {
-        // When moving from Task 2 to Task 1 in writing, reset timer to 20 minutes
-        setTimeRemaining(20 * 60); // 20 minutes in seconds
+      } else if (skillType === 'writing') {
+        const currentQuestion = questions[currentQuestionIndex];
+        const prevQuestion = questions[currentQuestionIndex - 1];
+        
+        if (isWritingQuestion(currentQuestion) && isWritingQuestion(prevQuestion)) {
+          if (currentQuestion.taskType === 'task2' && prevQuestion.taskType === 'task1') {
+            setTimeRemaining(20 * 60);
+          }
+        }
       }
     }
   };
   
   const handleSubmit = () => {
-    // In a real app, this would be an API call to submit answers
     console.log("Submitting answers:", answers);
     
-    // Calculate score (simplified for demo)
     let correctAnswers = 0;
     let totalQuestions = 0;
     
@@ -262,7 +254,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         });
       } else {
         totalQuestions++;
-        // For writing and speaking, we'd normally have a human evaluation
       }
     });
     
@@ -275,7 +266,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       resultTime = "Available in 4 hours";
     }
     
-    // Set results
     setExamResults({
       score: correctAnswers,
       totalPossible: totalQuestions,
@@ -436,7 +426,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         </CardFooter>
       </Card>
 
-      {/* IELTS Rules Info Card */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">IELTS {skillType?.charAt(0).toUpperCase() + skillType?.slice(1)} Rules</CardTitle>
