@@ -3,8 +3,11 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { 
   ArrowRight,
-  CheckCircle
+  CheckCircle,
+  LogIn,
+  UserPlus
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const CTASection = () => {
   return (
@@ -35,9 +38,20 @@ const CTASection = () => {
                 ))}
               </ul>
               
-              <Button size="lg" className="gap-2">
-                Get Started Now <ArrowRight className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-3">
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/signin">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button asChild size="lg">
+                  <Link to="/signup">
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
+                  </Link>
+                </Button>
+              </div>
             </div>
             
             <div className="bg-accent/50 rounded-xl p-6">
@@ -52,7 +66,9 @@ const CTASection = () => {
                     </div>
                     <span className="text-lg font-bold">$0</span>
                   </div>
-                  <Button variant="outline" className="w-full mt-2">Try Free</Button>
+                  <Button variant="outline" className="w-full mt-2" asChild>
+                    <Link to="/signup">Try Free</Link>
+                  </Button>
                 </div>
                 
                 <div className="bg-background rounded-lg p-4 border border-primary relative">
@@ -66,7 +82,9 @@ const CTASection = () => {
                     </div>
                     <span className="text-lg font-bold">$99</span>
                   </div>
-                  <Button className="w-full mt-2">Get Started</Button>
+                  <Button className="w-full mt-2" asChild>
+                    <Link to="/signup">Get Started</Link>
+                  </Button>
                 </div>
               </div>
             </div>

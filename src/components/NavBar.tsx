@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Book, Menu, X } from "lucide-react";
+import { Book, Menu, X, Database, LogIn, UserPlus } from "lucide-react";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -29,7 +29,23 @@ const NavBar = () => {
           <Link to="/community" className="text-foreground/80 hover:text-foreground transition-colors">
             Community
           </Link>
-          <Button>Get Started</Button>
+          <Link to="/resources" className="text-foreground/80 hover:text-foreground transition-colors">
+            Resources
+          </Link>
+          <div className="flex space-x-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/signin">
+                <LogIn className="h-4 w-4 mr-2" />
+                Sign In
+              </Link>
+            </Button>
+            <Button size="sm" asChild>
+              <Link to="/signup">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Sign Up
+              </Link>
+            </Button>
+          </div>
         </div>
         
         {/* Mobile Menu Button */}
@@ -73,7 +89,27 @@ const NavBar = () => {
             >
               Community
             </Link>
-            <Button className="w-full">Get Started</Button>
+            <Link 
+              to="/resources" 
+              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Resources
+            </Link>
+            <div className="flex flex-col space-y-2">
+              <Button variant="outline" className="w-full" asChild>
+                <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Link>
+              </Button>
+              <Button className="w-full" asChild>
+                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Sign Up
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       )}

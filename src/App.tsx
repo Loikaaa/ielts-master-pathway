@@ -11,6 +11,10 @@ import Dashboard from "./pages/Dashboard";
 import Practice from "./pages/Practice";
 import Community from "./pages/Community";
 import Onboarding from "./pages/Onboarding";
+import Resources from "./pages/Resources";
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+import ExamContent from "./pages/ExamContent";
 
 // Create a new QueryClient instance outside of the component
 const queryClient = new QueryClient();
@@ -28,6 +32,10 @@ const App = () => (
             <Route path="/practice" element={<Practice />} />
             <Route path="/community" element={<Community />} />
             <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/exam-content" element={<ExamContent />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
