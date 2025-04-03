@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { WritingQuestion } from '@/types/questions';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Clock, HelpCircle } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 interface WritingQuestionViewProps {
   question: WritingQuestion;
@@ -16,8 +17,24 @@ const WritingQuestionView: React.FC<WritingQuestionViewProps> = ({
   onAnswer,
   answer = '',
 }) => {
-  const wordCount = answer.trim() ? answer.trim().split(/\s+/).length : 0;
+  const [wordCount, setWordCount] = useState(0);
   const isWordLimitExceeded = wordCount > question.wordLimit;
+  const isWordLimitMet = wordCount >= question.wordLimit;
+  
+  // Calculate word count using a more accurate method
+  useEffect(() => {
+    if (!answer || answer.trim() === '') {
+      setWordCount(0);
+      return;
+    }
+    
+    // Remove extra whitespace and count words
+    const words = answer.trim().replace(/\s+/g, ' ').split(' ');
+    setWordCount(words.length);
+  }, [answer]);
+  
+  // Calculate progress towards word limit
+  const wordProgress = Math.min(100, (wordCount / question.wordLimit) * 100);
 
   return (
     <div>
@@ -59,14 +76,27 @@ const WritingQuestionView: React.FC<WritingQuestionViewProps> = ({
           onChange={(e) => onAnswer(question.id, e.target.value)}
         />
 
-        <div className="flex justify-between items-center">
-          <div className={`text-sm ${isWordLimitExceeded ? 'text-destructive' : 'text-muted-foreground'}`}>
-            Word count: {wordCount} / {question.wordLimit}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className={`text-sm ${isWordLimitExceeded ? 'text-amber-500' : isWordLimitMet ? 'text-green-500' : 'text-muted-foreground'}`}>
+              Word count: {wordCount} / {question.wordLimit} minimum
+            </div>
+            <Button variant="outline" size="sm" className="flex items-center">
+              <HelpCircle className="h-4 w-4 mr-1" />
+              Writing tips
+            </Button>
           </div>
-          <Button variant="outline" size="sm" className="flex items-center">
-            <HelpCircle className="h-4 w-4 mr-1" />
-            Writing tips
-          </Button>
+          
+          <Progress 
+            value={wordProgress} 
+            className={`h-2 ${isWordLimitMet ? 'bg-green-200' : 'bg-muted'}`}
+          />
+          
+          {isWordLimitMet && (
+            <p className="text-xs text-green-500">
+              You've reached the minimum word count! You can continue writing to further develop your response.
+            </p>
+          )}
         </div>
       </div>
     </div>

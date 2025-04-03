@@ -36,6 +36,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showTimeWarning, setShowTimeWarning] = useState(false);
   
   useEffect(() => {
     // In a real app, this would be an API call
@@ -88,12 +89,23 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           clearInterval(timer);
           return 0;
         }
+        
+        // Show warning when 10% of time is left
+        if (prev === Math.floor(questions[currentQuestionIndex].timeLimit! * 0.1)) {
+          setShowTimeWarning(true);
+          toast({
+            title: "Time is running out!",
+            description: "You have less than 10% of your time remaining.",
+            variant: "destructive",
+          });
+        }
+        
         return prev - 1;
       });
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [timeRemaining]);
+  }, [timeRemaining, currentQuestionIndex, questions, toast]);
   
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({
@@ -105,6 +117,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+      setShowTimeWarning(false);
       
       // Update timer for the next question
       const nextQuestion = questions[currentQuestionIndex + 1];
@@ -120,6 +133,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
+      setShowTimeWarning(false);
       
       // Update timer for the previous question
       const prevQuestion = questions[currentQuestionIndex - 1];
@@ -143,6 +157,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   };
   
   const formatTime = (seconds: number): string => {
+    if (seconds < 0) return "0:00";
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -198,8 +213,8 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         </div>
         
         {timeRemaining !== null && (
-          <div className="flex items-center">
-            <Clock className="mr-2 h-5 w-5 text-orange-500" />
+          <div className={`flex items-center sticky top-0 z-10 ${showTimeWarning ? 'animate-pulse text-red-500' : ''}`}>
+            <Clock className={`mr-2 h-5 w-5 ${showTimeWarning ? 'text-red-500' : 'text-orange-500'}`} />
             <span className="font-mono font-medium">
               {formatTime(timeRemaining)}
             </span>
@@ -210,13 +225,25 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       <Progress value={progress} className="mb-6" />
       
       <Card className="mb-6">
-        <CardContent className="pt-6">
+        <CardContent className={`pt-6 ${skillType === 'reading' ? 'p-0 overflow-hidden' : ''}`}>
           {currentQuestion.skillType === 'reading' && (
-            <ReadingQuestionView 
-              question={currentQuestion} 
-              onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+              <div className="border-r overflow-y-auto max-h-[600px] p-6">
+                <h2 className="text-xl font-bold mb-4">{(currentQuestion as any).passageTitle}</h2>
+                <div className="prose prose-sm max-w-none">
+                  {(currentQuestion as any).passageText.split('\n').map((paragraph: string, idx: number) => (
+                    <p key={idx} className="mb-4">{paragraph}</p>
+                  ))}
+                </div>
+              </div>
+              <div className="overflow-y-auto max-h-[600px] p-6">
+                <ReadingQuestionView 
+                  question={currentQuestion} 
+                  onAnswer={handleAnswer} 
+                  answer={answers[currentQuestion.id]}
+                />
+              </div>
+            </div>
           )}
           
           {currentQuestion.skillType === 'writing' && (
