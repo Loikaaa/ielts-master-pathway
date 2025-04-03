@@ -54,6 +54,7 @@ import { Progress } from '@/components/ui/progress';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import DatabaseManager from '@/components/admin/DatabaseManager';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("reading");
@@ -546,6 +547,8 @@ const AdminDashboard = () => {
       case "listening":
       case "speaking":
         return <QuestionEditor questionType={selectedFeature} />;
+      case "database":
+        return <DatabaseManager />;
       default:
         return (
           <div className="space-y-8">

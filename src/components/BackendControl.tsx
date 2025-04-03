@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, 
@@ -20,12 +19,18 @@ import {
   BookOpen,
   FileText,
   Mic,
-  Brain
+  Brain,
+  Link as LinkIcon,
+  CheckCircle,
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 const BackendControl = () => {
   const { questions, loading } = useQuestions();
@@ -36,6 +41,14 @@ const BackendControl = () => {
   const listeningCount = questions.filter(q => q.skillType === 'listening').length;
   const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
   const totalCount = questions.length;
+
+  // Mock connected data sources
+  const connectedSources = [
+    { name: 'Main Database', status: 'connected', type: 'postgres', lastSynced: '5 minutes ago' },
+    { name: 'User Authentication', status: 'connected', type: 'auth', lastSynced: '10 minutes ago' },
+    { name: 'File Storage', status: 'connected', type: 'storage', lastSynced: '30 minutes ago' },
+    { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,6 +123,63 @@ const BackendControl = () => {
             API Logs
           </Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Connected Data Sources</CardTitle>
+          <CardDescription>
+            Database and external API connections
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {connectedSources.map((source, index) => (
+              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-full ${
+                    source.status === 'connected' ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
+                    {source.type === 'postgres' ? <Database className={`h-5 w-5 ${
+                      source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                    }`} /> :
+                    source.type === 'auth' ? <Users className={`h-5 w-5 ${
+                      source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                    }`} /> :
+                    source.type === 'storage' ? <FileJson className={`h-5 w-5 ${
+                      source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                    }`} /> :
+                    <BarChart4 className={`h-5 w-5 ${
+                      source.status === 'connected' ? 'text-green-600' : 'text-red-600'
+                    }`} />}
+                  </div>
+                  <div>
+                    <div className="font-medium flex items-center">
+                      {source.name}
+                      {source.status === 'connected' ? 
+                        <CheckCircle className="ml-2 h-4 w-4 text-green-600" /> : 
+                        <AlertCircle className="ml-2 h-4 w-4 text-red-600" />}
+                    </div>
+                    <div className="text-xs text-muted-foreground">Last synced: {source.lastSynced}</div>
+                  </div>
+                </div>
+                <Button size="sm" variant={source.status === 'connected' ? 'outline' : 'default'}>
+                  {source.status === 'connected' ? (
+                    <LinkIcon className="mr-1 h-4 w-4" />
+                  ) : (
+                    <LinkIcon className="mr-1 h-4 w-4" />
+                  )}
+                  {source.status === 'connected' ? 'Configure' : 'Connect'}
+                </Button>
+              </div>
+            ))}
+
+            <Button className="w-full mt-4">
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Data Source
+            </Button>
+          </div>
+        </CardContent>
       </Card>
 
       <Card>

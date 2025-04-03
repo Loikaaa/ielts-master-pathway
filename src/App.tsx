@@ -24,6 +24,7 @@ import SuccessStories from "./pages/resources/SuccessStories";
 import IeltsTips from "./pages/resources/IeltsTips";
 import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
+import BackendControl from "./components/BackendControl";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => {
                   <Route path="/exam-content" element={<ExamContent />} />
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
                   <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
+                  <Route path="/admin-backend" element={<BackendControl />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
