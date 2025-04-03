@@ -1,11 +1,21 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Book, Menu, X, Database, LogIn, UserPlus } from "lucide-react";
+import { 
+  Book, 
+  Menu, 
+  X, 
+  LogIn, 
+  UserPlus, 
+  Shield, 
+  User
+} from "lucide-react";
 
 const NavBar = () => {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // For demo purposes, this would typically come from an auth context
+  const isAdmin = true; // Set to true to show admin functionality
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b">
@@ -33,6 +43,14 @@ const NavBar = () => {
             Resources
           </Link>
           <div className="flex space-x-2">
+            {isAdmin && (
+              <Button variant="outline" size="sm" className="mr-2" asChild>
+                <Link to="/admin-dashboard">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin
+                </Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/signin">
                 <LogIn className="h-4 w-4 mr-2" />
@@ -96,6 +114,16 @@ const NavBar = () => {
             >
               Resources
             </Link>
+            {isAdmin && (
+              <Link 
+                to="/admin-dashboard" 
+                className="px-4 py-2 hover:bg-accent rounded-md transition-colors flex items-center"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Dashboard
+              </Link>
+            )}
             <div className="flex flex-col space-y-2">
               <Button variant="outline" className="w-full" asChild>
                 <Link to="/signin" onClick={() => setIsMenuOpen(false)}>

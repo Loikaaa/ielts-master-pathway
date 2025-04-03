@@ -3,315 +3,333 @@ import React from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, Download, FileText, Headphones, Video, Book, BookMarked, FileType2 } from 'lucide-react';
+import { 
+  BookOpen, 
+  MessageSquare, 
+  Trophy, 
+  LightbulbIcon, 
+  Calendar, 
+  Clock, 
+  User, 
+  ChevronRight 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Resources = () => {
+  // Sample data for each section
+  const blogPosts = [
+    {
+      id: 1,
+      title: "5 Most Common Mistakes in IELTS Writing Task 2",
+      excerpt: "Learn about the frequent errors that candidates make in their essays and how to avoid them.",
+      date: "April 2, 2025",
+      readTime: "8 min read",
+      author: "Sarah Johnson",
+      category: "Writing",
+      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      id: 2,
+      title: "Strategies for IELTS Listening Section",
+      excerpt: "Effective techniques to improve your score in the listening module of the IELTS test.",
+      date: "March 28, 2025",
+      readTime: "6 min read",
+      author: "Michael Chen",
+      category: "Listening",
+      image: "https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      id: 3,
+      title: "How to Practice English Speaking Every Day",
+      excerpt: "Practical ways to incorporate English speaking practice into your daily routine.",
+      date: "March 20, 2025",
+      readTime: "5 min read",
+      author: "Emma Wilson",
+      category: "Speaking",
+      image: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+  ];
+  
+  const faqs = [
+    {
+      question: "What is the difference between IELTS Academic and General Training?",
+      answer: "IELTS Academic is typically required for admission to universities and professional institutions, while IELTS General Training is usually required for migration purposes to English-speaking countries or for secondary education and work experience."
+    },
+    {
+      question: "How long is an IELTS score valid?",
+      answer: "IELTS scores are valid for 2 years from the test date. Most universities and immigration authorities require results that are less than 2 years old."
+    },
+    {
+      question: "How is the IELTS test scored?",
+      answer: "IELTS is scored on a 9-band scale, with each band corresponding to a level of English competence. Your overall band score is calculated by taking the mean of your scores in the four test components: Listening, Reading, Writing, and Speaking."
+    },
+    {
+      question: "How long does it take to prepare for IELTS?",
+      answer: "Preparation time varies greatly depending on your current English level, target score, and how much time you can dedicate to study. On average, candidates spend 4-12 weeks preparing for the test."
+    },
+    {
+      question: "Can I retake only one section of the IELTS test?",
+      answer: "No, if you want to improve your score in any section, you must retake the complete test, including all four components."
+    },
+  ];
+  
+  const successStories = [
+    {
+      name: "Priya Sharma",
+      score: "8.5",
+      destination: "University of Toronto",
+      quote: "The focused practice on the platform helped me identify and improve my weaknesses in writing. I exceeded my target score and secured admission to my dream university.",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      name: "Carlos Mendez",
+      score: "7.0",
+      destination: "Australia PR",
+      quote: "The mock tests were incredibly similar to the actual IELTS exam. The detailed feedback improved my confidence and I achieved the score I needed for my visa application.",
+      image: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+    {
+      name: "Liu Wei",
+      score: "7.5",
+      destination: "University College London",
+      quote: "I struggled with speaking until I used the AI practice tool. The personalized feedback was invaluable, and I improved from 6.0 to 7.5 in just two months.",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+    },
+  ];
+  
+  const ieltsQuickTips = [
+    {
+      module: "Reading",
+      tips: [
+        "Read the questions before reading the passage",
+        "Practice skimming and scanning techniques",
+        "Pay attention to keywords in questions",
+        "Be mindful of time management - allocate time for each section"
+      ]
+    },
+    {
+      module: "Writing",
+      tips: [
+        "Plan your essay before you start writing",
+        "Use a variety of sentence structures",
+        "Stay on topic and answer the question directly",
+        "Proofread your work for grammar and spelling errors"
+      ]
+    },
+    {
+      module: "Listening",
+      tips: [
+        "Read instructions carefully before the audio starts",
+        "Preview the questions to know what to listen for",
+        "Pay attention to signpost words like 'however', 'in addition'",
+        "Be aware of synonyms and paraphrasing"
+      ]
+    },
+    {
+      module: "Speaking",
+      tips: [
+        "Practice speaking English daily",
+        "Record yourself to identify pronunciation issues",
+        "Expand your vocabulary for different topics",
+        "Structure your responses with an introduction, details, and conclusion"
+      ]
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">IELTS Resources</h1>
-            <p className="text-muted-foreground">
-              Access comprehensive study materials, practice tests, and guides to help you prepare for IELTS.
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h1 className="text-3xl md:text-4xl font-bold mb-4">IELTS Resources</h1>
+            <p className="text-muted-foreground text-lg">
+              Access our comprehensive collection of resources to enhance your IELTS preparation
             </p>
           </div>
-
-          <Tabs defaultValue="study-materials">
-            <TabsList className="mb-6">
-              <TabsTrigger value="study-materials">
-                <BookOpen className="h-4 w-4 mr-2" />
-                Study Materials
+          
+          <Tabs defaultValue="blog">
+            <TabsList className="mb-8 flex justify-center">
+              <TabsTrigger value="blog" className="flex items-center">
+                <BookOpen className="mr-2 h-4 w-4" />
+                Blog
               </TabsTrigger>
-              <TabsTrigger value="practice-tests">
-                <FileText className="h-4 w-4 mr-2" />
-                Practice Tests
+              <TabsTrigger value="faq" className="flex items-center">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                FAQ
               </TabsTrigger>
-              <TabsTrigger value="video-tutorials">
-                <Video className="h-4 w-4 mr-2" />
-                Video Tutorials
+              <TabsTrigger value="success-stories" className="flex items-center">
+                <Trophy className="mr-2 h-4 w-4" />
+                Success Stories
               </TabsTrigger>
-              <TabsTrigger value="audio-samples">
-                <Headphones className="h-4 w-4 mr-2" />
-                Audio Samples
+              <TabsTrigger value="tips" className="flex items-center">
+                <LightbulbIcon className="mr-2 h-4 w-4" />
+                IELTS Tips
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="study-materials">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Reading Comprehension Strategies",
-                    description: "Learn techniques for skimming, scanning, and detailed reading to improve your score",
-                    icon: Book,
-                    skillType: "reading"
-                  },
-                  {
-                    title: "Academic Writing Guide",
-                    description: "Master Task 1 and Task 2 writing with templates and model answers",
-                    icon: FileText,
-                    skillType: "writing"
-                  },
-                  {
-                    title: "Speaking Test Preparation",
-                    description: "Comprehensive guide for all three parts of the speaking test",
-                    icon: Headphones,
-                    skillType: "speaking"
-                  },
-                  {
-                    title: "Listening Skills Development",
-                    description: "Strategies for the four sections of the listening test",
-                    icon: Headphones,
-                    skillType: "listening"
-                  },
-                  {
-                    title: "Grammar for IELTS",
-                    description: "Essential grammar structures to boost your band score",
-                    icon: BookMarked,
-                    skillType: "writing"
-                  },
-                  {
-                    title: "Vocabulary Builder",
-                    description: "Topic-specific vocabulary with example sentences and collocations",
-                    icon: FileType2,
-                    skillType: "speaking"
-                  }
-                ].map((resource, index) => (
-                  <Card key={index} className={`border-l-4 border-${resource.skillType}`}>
+            
+            {/* Blog Section */}
+            <TabsContent value="blog">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {blogPosts.map(post => (
+                  <Card key={post.id} className="overflow-hidden">
+                    <div className="h-48 overflow-hidden">
+                      <img 
+                        src={post.image} 
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+                      />
+                    </div>
                     <CardHeader>
-                      <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">{resource.title}</CardTitle>
-                        <resource.icon className={`h-8 w-8 text-${resource.skillType}`} />
+                      <div className="flex items-center mb-2">
+                        <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded-full">
+                          {post.category}
+                        </span>
                       </div>
-                      <CardDescription>{resource.description}</CardDescription>
+                      <CardTitle className="text-xl">{post.title}</CardTitle>
                     </CardHeader>
-                    <CardFooter>
-                      <Button variant="outline" className="w-full" asChild>
-                        <a href="#">
-                          <Download className="h-4 w-4 mr-2" />
-                          Download PDF
-                        </a>
+                    <CardContent>
+                      <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        <span className="mr-4">{post.date}</span>
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>{post.readTime}</span>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between items-center border-t pt-4">
+                      <div className="flex items-center">
+                        <User className="h-4 w-4 mr-1" />
+                        <span className="text-sm">{post.author}</span>
+                      </div>
+                      <Button variant="ghost" size="sm">
+                        Read More <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </CardFooter>
                   </Card>
                 ))}
               </div>
-            </TabsContent>
-
-            <TabsContent value="practice-tests">
-              <div className="space-y-6">
-                <div className="bg-card border rounded-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Complete IELTS Practice Tests</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Full-length practice tests that simulate the actual IELTS exam. Each test includes Reading, Writing, Listening, and Speaking sections.
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1, 2, 3, 4, 5, 6].map((testNumber) => (
-                      <Card key={testNumber} className="border">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-lg">Practice Test {testNumber}</CardTitle>
-                          <CardDescription>Academic Format</CardDescription>
-                        </CardHeader>
-                        <CardContent className="pb-2">
-                          <div className="text-sm text-muted-foreground">
-                            Includes Answer Key and Band Score Calculator
-                          </div>
-                        </CardContent>
-                        <CardFooter>
-                          <Button variant="outline" size="sm" className="w-full" asChild>
-                            <a href="#">Start Test</a>
-                          </Button>
-                        </CardFooter>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-card border rounded-lg p-6">
-                  <h3 className="text-xl font-bold mb-4">Section-Specific Practice</h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Card className="border-l-4 border-reading">
-                      <CardHeader>
-                        <CardTitle>Reading Practice</CardTitle>
-                        <CardDescription>10 practice tests with various question types</CardDescription>
-                      </CardHeader>
-                      <CardFooter>
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <a href="#">Practice Reading</a>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                    
-                    <Card className="border-l-4 border-writing">
-                      <CardHeader>
-                        <CardTitle>Writing Practice</CardTitle>
-                        <CardDescription>Task 1 and Task 2 with model answers</CardDescription>
-                      </CardHeader>
-                      <CardFooter>
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <a href="#">Practice Writing</a>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                    
-                    <Card className="border-l-4 border-listening">
-                      <CardHeader>
-                        <CardTitle>Listening Practice</CardTitle>
-                        <CardDescription>All section types with audio recordings</CardDescription>
-                      </CardHeader>
-                      <CardFooter>
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <a href="#">Practice Listening</a>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                    
-                    <Card className="border-l-4 border-speaking">
-                      <CardHeader>
-                        <CardTitle>Speaking Practice</CardTitle>
-                        <CardDescription>Parts 1, 2, and 3 with sample responses</CardDescription>
-                      </CardHeader>
-                      <CardFooter>
-                        <Button variant="outline" size="sm" className="w-full" asChild>
-                          <a href="#">Practice Speaking</a>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </div>
-                </div>
+              <div className="mt-8 text-center">
+                <Button>View All Blog Posts</Button>
               </div>
             </TabsContent>
-
-            <TabsContent value="video-tutorials" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[
-                  {
-                    title: "Reading Section Strategy",
-                    duration: "45 min",
-                    instructor: "Dr. Emily Chen",
-                    thumbnail: "https://placehold.co/600x400/eef/ddf",
-                    skillType: "reading"
-                  },
-                  {
-                    title: "Writing Task 1: How to Describe Graphs",
-                    duration: "38 min",
-                    instructor: "Michael Brown",
-                    thumbnail: "https://placehold.co/600x400/efe/ded",
-                    skillType: "writing"
-                  },
-                  {
-                    title: "Speaking Part 2: The Long Turn",
-                    duration: "42 min",
-                    instructor: "Sarah Thompson",
-                    thumbnail: "https://placehold.co/600x400/fed/fdd",
-                    skillType: "speaking"
-                  },
-                  {
-                    title: "Listening Section 3: Understanding Discussions",
-                    duration: "36 min",
-                    instructor: "Robert Kim",
-                    thumbnail: "https://placehold.co/600x400/edf/dde",
-                    skillType: "listening"
-                  },
-                  {
-                    title: "Writing Task 2: Argument Essays",
-                    duration: "52 min",
-                    instructor: "Jane Stewart",
-                    thumbnail: "https://placehold.co/600x400/efe/ded",
-                    skillType: "writing"
-                  },
-                  {
-                    title: "Common IELTS Mistakes to Avoid",
-                    duration: "49 min",
-                    instructor: "David Wilson",
-                    thumbnail: "https://placehold.co/600x400/eee/ddd",
-                    skillType: "reading"
-                  }
-                ].map((video, index) => (
-                  <Card key={index} className={`border-l-4 border-${video.skillType}`}>
-                    <div className="relative">
-                      <img src={video.thumbnail} alt={video.title} className="w-full h-48 object-cover rounded-t-lg" />
-                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <Button variant="outline" className="text-white border-white">
-                          <Video className="h-4 w-4 mr-2" />
-                          Watch Now
-                        </Button>
-                      </div>
-                    </div>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">{video.title}</CardTitle>
-                      <CardDescription>
-                        {video.duration} • {video.instructor}
-                      </CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="audio-samples" className="space-y-6">
+            
+            {/* FAQ Section */}
+            <TabsContent value="faq">
               <Card>
                 <CardHeader>
-                  <CardTitle>IELTS Listening Practice Audio Collection</CardTitle>
+                  <CardTitle>Frequently Asked Questions</CardTitle>
                   <CardDescription>
-                    Practice with authentic audio samples covering all four sections of the IELTS Listening test.
+                    Find answers to common questions about IELTS and our platform
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      {
-                        title: "Section 1: Daily Conversation",
-                        description: "Practice with everyday conversations like accommodation inquiries",
-                        duration: "8:32"
-                      },
-                      {
-                        title: "Section 2: Monologue on Everyday Topic",
-                        description: "Listen to a speech about community facilities",
-                        duration: "9:15"
-                      },
-                      {
-                        title: "Section 3: Educational Discussion",
-                        description: "Conversation between students discussing a project",
-                        duration: "10:42"
-                      },
-                      {
-                        title: "Section 4: Academic Lecture",
-                        description: "University lecture on environmental science",
-                        duration: "11:03"
-                      },
-                      {
-                        title: "British vs. Australian Accents",
-                        description: "Compare different English accents used in IELTS",
-                        duration: "14:27"
-                      }
-                    ].map((audio, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 hover:bg-muted rounded-md transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-primary/10 text-primary rounded-full w-8 h-8 flex items-center justify-center">
-                            {index + 1}
-                          </div>
-                          <div>
-                            <h4 className="font-medium">{audio.title}</h4>
-                            <p className="text-sm text-muted-foreground">{audio.description}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-muted-foreground">{audio.duration}</span>
-                          <Button variant="ghost" size="sm">
-                            <Headphones className="h-4 w-4" />
-                          </Button>
-                        </div>
+                  <div className="space-y-6">
+                    {faqs.map((faq, index) => (
+                      <div key={index} className="border-b pb-4 last:border-0">
+                        <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                        <p className="text-muted-foreground">{faq.answer}</p>
                       </div>
                     ))}
                   </div>
                 </CardContent>
+                <CardFooter>
+                  <p className="text-sm text-muted-foreground">
+                    Don't see your question here? <Link to="/contact" className="text-primary hover:underline">Contact us</Link> for more information.
+                  </p>
+                </CardFooter>
               </Card>
+            </TabsContent>
+            
+            {/* Success Stories */}
+            <TabsContent value="success-stories">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {successStories.map((story, index) => (
+                  <Card key={index} className="overflow-hidden">
+                    <div className="relative">
+                      <div className="h-48 overflow-hidden">
+                        <img 
+                          src={story.image} 
+                          alt={story.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="absolute top-4 right-4 bg-primary text-white text-xl font-bold h-16 w-16 rounded-full flex items-center justify-center">
+                        {story.score}
+                      </div>
+                    </div>
+                    <CardHeader>
+                      <CardTitle>{story.name}</CardTitle>
+                      <CardDescription>{story.destination}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="italic text-muted-foreground">"{story.quote}"</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button variant="outline" size="sm" className="w-full">
+                        Read Full Story
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+              <div className="mt-8 text-center">
+                <p className="mb-4 text-muted-foreground">Inspired by these stories? Start your own success journey today.</p>
+                <Button asChild>
+                  <Link to="/signup">Begin Your IELTS Preparation</Link>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            {/* IELTS Tips */}
+            <TabsContent value="tips">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {ieltsQuickTips.map((section, index) => {
+                  const colors = ["reading", "writing", "listening", "speaking"];
+                  const icons = [BookOpen, Pencil, Headphones, Mic];
+                  const Icon = icons[index];
+                  
+                  return (
+                    <Card key={index} className={`border-${colors[index]}/20`}>
+                      <CardHeader className={`bg-${colors[index]}/10`}>
+                        <CardTitle className="flex items-center">
+                          <div className={`bg-${colors[index]}/20 p-2 rounded-full mr-2`}>
+                            <Icon className={`h-5 w-5 text-${colors[index]}`} />
+                          </div>
+                          {section.module} Tips
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <ul className="space-y-2">
+                          {section.tips.map((tip, tipIndex) => (
+                            <li key={tipIndex} className="flex items-start">
+                              <span className={`bg-${colors[index]}/20 text-${colors[index]} h-5 w-5 rounded-full flex items-center justify-center text-xs mr-2 mt-0.5`}>
+                                {tipIndex + 1}
+                              </span>
+                              <span>{tip}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                      <CardFooter>
+                        <Button variant="outline" size="sm" className="w-full" asChild>
+                          <Link to={`/practice?skill=${section.module.toLowerCase()}`}>
+                            Practice {section.module}
+                          </Link>
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+              <div className="mt-8 text-center">
+                <p className="mb-4 text-muted-foreground">Want more detailed strategies and tips?</p>
+                <Button asChild>
+                  <Link to="/resources/advanced-tips">View Advanced IELTS Strategies</Link>
+                </Button>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

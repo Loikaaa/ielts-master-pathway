@@ -15,6 +15,7 @@ import Resources from "./pages/Resources";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ExamContent from "./pages/ExamContent";
+import AdminDashboard from "./pages/AdminDashboard";
 
 // Create a new QueryClient instance outside of the component
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/exam-content" element={<ExamContent />} />
+            <Route path="/admin-dashboard" element={<AdminDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
