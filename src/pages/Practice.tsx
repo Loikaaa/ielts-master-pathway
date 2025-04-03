@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -179,6 +179,12 @@ const practiceItems = {
 };
 
 const Practice = () => {
+  const navigate = useNavigate();
+
+  const startPractice = (skillType: string, itemId: string) => {
+    navigate(`/practice/session/${skillType}/${itemId}`);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -244,7 +250,6 @@ const Practice = () => {
               </TabsTrigger>
             </TabsList>
             
-            {/* Reading Content */}
             <TabsContent value="reading">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {practiceItems.reading.map((item) => (
@@ -279,14 +284,18 @@ const Practice = () => {
                           <span>Completion rate: {item.completionRate}%</span>
                         </div>
                       </div>
-                      <Button className="w-full">Start Practice</Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => startPractice('reading', item.id)}
+                      >
+                        Start Practice
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
             </TabsContent>
             
-            {/* Writing Content */}
             <TabsContent value="writing">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {practiceItems.writing.map((item) => (
@@ -321,14 +330,18 @@ const Practice = () => {
                           <span>Completion rate: {item.completionRate}%</span>
                         </div>
                       </div>
-                      <Button className="w-full">Start Practice</Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => startPractice('writing', item.id)}
+                      >
+                        Start Practice
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
             </TabsContent>
             
-            {/* Speaking Content */}
             <TabsContent value="speaking">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {practiceItems.speaking.map((item) => (
@@ -363,14 +376,18 @@ const Practice = () => {
                           <span>Completion rate: {item.completionRate}%</span>
                         </div>
                       </div>
-                      <Button className="w-full">Start Practice</Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => startPractice('speaking', item.id)}
+                      >
+                        Start Practice
+                      </Button>
                     </div>
                   </div>
                 ))}
               </div>
             </TabsContent>
             
-            {/* Listening Content */}
             <TabsContent value="listening">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {practiceItems.listening.map((item) => (
@@ -405,7 +422,12 @@ const Practice = () => {
                           <span>Completion rate: {item.completionRate}%</span>
                         </div>
                       </div>
-                      <Button className="w-full">Start Practice</Button>
+                      <Button 
+                        className="w-full"
+                        onClick={() => startPractice('listening', item.id)}
+                      >
+                        Start Practice
+                      </Button>
                     </div>
                   </div>
                 ))}

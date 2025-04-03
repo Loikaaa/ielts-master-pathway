@@ -61,7 +61,7 @@ const SkillsSection = () => {
             <Link 
               key={skill.id}
               to={skill.link}
-              className={`skill-card ${skill.id} bg-card hover:shadow-lg transition-all duration-300 p-6 rounded-xl`}
+              className={`skill-card ${skill.id} bg-card hover:shadow-lg transition-all duration-300 p-6 rounded-xl border hover:border-${skill.color}`}
             >
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-${skill.color}/10 text-${skill.color} mb-4`}>
                 <skill.icon className="h-6 w-6" />
@@ -70,7 +70,7 @@ const SkillsSection = () => {
               <p className="text-muted-foreground mb-4">{skill.description}</p>
               <Button 
                 variant="ghost" 
-                className={`p-0 text-${skill.color} hover:text-${skill.color}-dark hover:bg-transparent mt-2`}
+                className={`p-0 text-${skill.color} hover:text-${skill.color} hover:bg-transparent mt-2`}
               >
                 Practice Now <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
