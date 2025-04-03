@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -25,11 +25,63 @@ import IeltsTips from "./pages/resources/IeltsTips";
 import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
 import BackendControl from "./components/BackendControl";
+import MaintenancePage from "./pages/MaintenancePage";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isInMaintenanceMode, setIsInMaintenanceMode] = useState(false);
+
+  useEffect(() => {
+    // Check for maintenance mode settings in localStorage
+    const checkMaintenanceMode = () => {
+      try {
+        const settingsJson = localStorage.getItem('settings');
+        if (settingsJson) {
+          const settings = JSON.parse(settingsJson);
+          if (settings.maintenance && settings.maintenance.scheduledMaintenance) {
+            // Save the maintenance message for the maintenance page
+            if (settings.maintenance.maintenanceMessage) {
+              localStorage.setItem('maintenanceMessage', settings.maintenance.maintenanceMessage);
+            }
+            setIsInMaintenanceMode(true);
+          } else {
+            setIsInMaintenanceMode(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking maintenance mode:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkMaintenanceMode();
+
+    // Check for maintenance mode changes every minute
+    const intervalId = setInterval(checkMaintenanceMode, 60000);
+    
+    return () => clearInterval(intervalId);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  // Show maintenance page if in maintenance mode
+  // Exception for admin routes
+  if (isInMaintenanceMode && 
+      !window.location.pathname.includes('admin') && 
+      !window.location.pathname.includes('backend')) {
+    return <MaintenancePage />;
+  }
+
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
