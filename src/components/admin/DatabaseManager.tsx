@@ -9,440 +9,330 @@ import {
   CardTitle 
 } from '@/components/ui/card';
 import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
+import { 
   Table, 
   TableBody, 
+  TableCaption, 
   TableCell, 
   TableHead, 
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/components/ui/use-toast';
 import { 
   Database, 
-  Table as TableIcon, 
+  Server, 
   FileJson, 
   RefreshCw, 
-  PlusCircle, 
   Download, 
   Upload, 
-  Trash2,
-  ChevronDown,
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle,
   Search,
-  Filter,
-  SlidersHorizontal
+  Plus,
+  MoreHorizontal,
+  Trash2,
+  Edit,
+  Copy
 } from 'lucide-react';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import Settings from './Settings';
 
 const DatabaseManager = () => {
-  const [activeTab, setActiveTab] = useState('questions');
-  const [selectedTable, setSelectedTable] = useState('questions');
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState<string>("tables");
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
-  // Mock data for tables and records
-  const mockTables = [
-    { name: 'questions', count: 419, lastUpdated: '2025-04-01' },
-    { name: 'users', count: 243, lastUpdated: '2025-04-02' },
-    { name: 'progress', count: 612, lastUpdated: '2025-04-03' },
-    { name: 'blog_posts', count: 38, lastUpdated: '2025-04-01' },
-    { name: 'feedback', count: 127, lastUpdated: '2025-03-30' }
+  // Mock tables for the database
+  const tables = [
+    { name: "users", rows: 2458, lastModified: "2025-04-01", size: "4.2 MB", status: "healthy" },
+    { name: "questions", rows: 419, lastModified: "2025-04-02", size: "8.7 MB", status: "healthy" },
+    { name: "responses", rows: 28654, lastModified: "2025-04-03", size: "15.3 MB", status: "warning" },
+    { name: "practice_sessions", rows: 3471, lastModified: "2025-04-02", size: "2.8 MB", status: "healthy" },
+    { name: "blog_posts", rows: 87, lastModified: "2025-04-01", size: "1.2 MB", status: "healthy" },
+    { name: "user_progress", rows: 2104, lastModified: "2025-04-03", size: "3.6 MB", status: "error" },
   ];
 
-  const mockRecords = {
-    questions: [
-      { id: 'q-001', title: 'Reading Passage on Climate Change', type: 'reading', difficulty: 'medium', created_at: '2025-03-15' },
-      { id: 'q-002', title: 'Writing Task 2: Environment Essay', type: 'writing', difficulty: 'hard', created_at: '2025-03-18' },
-      { id: 'q-003', title: 'Listening Section 3: University Housing', type: 'listening', difficulty: 'medium', created_at: '2025-03-21' },
-      { id: 'q-004', title: 'Speaking Part 2: Describe a Place', type: 'speaking', difficulty: 'easy', created_at: '2025-03-25' },
-      { id: 'q-005', title: 'Reading Passage on Technology', type: 'reading', difficulty: 'hard', created_at: '2025-03-28' }
-    ],
-    users: [
-      { id: 'u-001', name: 'John Doe', email: 'john@example.com', status: 'active', last_login: '2025-04-02' },
-      { id: 'u-002', name: 'Jane Smith', email: 'jane@example.com', status: 'inactive', last_login: '2025-03-25' },
-      { id: 'u-003', name: 'Mike Johnson', email: 'mike@example.com', status: 'active', last_login: '2025-04-01' }
-    ],
-    blog_posts: [
-      { id: 'b-001', title: 'Top IELTS Tips for 2025', status: 'published', author: 'Admin', created_at: '2025-03-10' },
-      { id: 'b-002', title: 'How to Improve Your Writing Score', status: 'draft', author: 'Admin', created_at: '2025-03-20' }
-    ]
+  // Recent SQL queries
+  const recentQueries = [
+    { 
+      query: "SELECT * FROM users WHERE last_login > NOW() - INTERVAL '7 days'", 
+      timestamp: "10 minutes ago",
+      duration: "234ms",
+      status: "success"
+    },
+    { 
+      query: "UPDATE questions SET difficulty = 'medium' WHERE id = 142", 
+      timestamp: "25 minutes ago",
+      duration: "105ms",
+      status: "success"
+    },
+    { 
+      query: "DELETE FROM responses WHERE created_at < NOW() - INTERVAL '1 year'", 
+      timestamp: "1 hour ago",
+      duration: "890ms",
+      status: "success"
+    },
+    { 
+      query: "INSERT INTO blog_posts (title, content, author_id) VALUES ('New IELTS Tips', 'Content here...', 12)", 
+      timestamp: "3 hours ago",
+      duration: "118ms",
+      status: "success"
+    },
+    { 
+      query: "SELECT AVG(score) FROM user_progress GROUP BY user_id ORDER BY AVG(score) DESC LIMIT 10", 
+      timestamp: "5 hours ago",
+      duration: "456ms",
+      status: "error"
+    },
+  ];
+
+  // Handle database actions
+  const handleBackupDatabase = () => {
+    toast.success("Database backup started");
   };
 
-  const handleRefreshData = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      toast({
-        title: "Database Refreshed",
-        description: "The latest data has been fetched from the database.",
-      });
-      setIsLoading(false);
-    }, 1500);
+  const handleOptimizeDatabase = () => {
+    toast.success("Database optimization complete");
   };
 
-  const handleImportData = () => {
-    toast({
-      title: "Import Started",
-      description: "Data import process has been initiated.",
-    });
+  const handleRestoreDatabase = () => {
+    toast.success("Database restore completed successfully");
   };
 
-  const handleExportData = () => {
-    toast({
-      title: "Export Complete",
-      description: "Data has been exported successfully.",
-    });
+  const handleShowSettings = () => {
+    setShowSettings(true);
   };
 
-  const handleTableSelect = (table: string) => {
-    setSelectedTable(table);
-    setActiveTab(table);
-  };
-
-  const handleDeleteRecord = (id: string) => {
-    if (confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
-      toast({
-        title: "Record Deleted",
-        description: `Record ${id} has been successfully deleted.`,
-      });
-    }
-  };
-
-  // Helper function to render badges with custom styling
-  const renderStatusBadge = (status: string) => {
-    if (status === 'active' || status === 'published') {
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
-          {status}
-        </Badge>
-      );
-    } else if (status === 'inactive') {
-      return (
-        <Badge variant="secondary">
-          {status}
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="outline">
-          {status}
-        </Badge>
-      );
-    }
-  };
-
-  // Helper function to render difficulty badges
-  const renderDifficultyBadge = (difficulty: string) => {
-    if (difficulty === 'easy') {
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
-          {difficulty}
-        </Badge>
-      );
-    } else if (difficulty === 'medium') {
-      return (
-        <Badge variant="outline" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-200">
-          {difficulty}
-        </Badge>
-      );
-    } else if (difficulty === 'hard') {
-      return (
-        <Badge variant="outline" className="bg-red-100 text-red-800 hover:bg-red-200 border-red-200">
-          {difficulty}
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="outline">
-          {difficulty}
-        </Badge>
-      );
-    }
-  };
-
-  // Helper function to determine appropriate badge for operation result
-  const renderOperationBadge = (status: string) => {
-    if (status === 'success') {
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200 border-green-200">
-          {status}
-        </Badge>
-      );
-    } else {
-      return (
-        <Badge variant="destructive">
-          {status}
-        </Badge>
-      );
-    }
-  };
+  if (showSettings) {
+    return <Settings />;
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold mb-1">Database Management</h1>
-          <p className="text-muted-foreground">Connect and manage your IELTS data collections</p>
+          <h2 className="text-2xl font-bold">Database Management</h2>
+          <p className="text-muted-foreground">Manage your database tables and configuration</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRefreshData} disabled={isLoading}>
-            {isLoading ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            Refresh
+          <Button variant="outline" onClick={handleBackupDatabase}>
+            <Download className="h-4 w-4 mr-2" />
+            Backup
           </Button>
-          <Button>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Table
+          <Button variant="outline" onClick={handleRestoreDatabase}>
+            <Upload className="h-4 w-4 mr-2" />
+            Restore
+          </Button>
+          <Button variant="outline" onClick={handleOptimizeDatabase}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Optimize
+          </Button>
+          <Button variant="outline" onClick={handleShowSettings}>
+            <FileJson className="h-4 w-4 mr-2" />
+            Settings
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="md:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Database className="h-5 w-5 mr-2 text-primary" />
-              Tables
-            </CardTitle>
-            <CardDescription>
-              Database tables and collections
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search tables..." className="pl-8" />
+      {/* Database overview cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-2">
+              <div className="p-2 bg-blue-100 rounded-full">
+                <Database className="h-5 w-5 text-blue-600" />
               </div>
+              <Badge>PostgreSQL</Badge>
             </div>
-            <div className="space-y-1 max-h-[400px] overflow-y-auto">
-              {mockTables.map((table) => (
-                <div 
-                  key={table.name}
-                  className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
-                    selectedTable === table.name ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
-                  }`}
-                  onClick={() => handleTableSelect(table.name)}
-                >
-                  <div className="flex items-center">
-                    <TableIcon className="h-4 w-4 mr-2 text-primary" />
-                    <span className="font-medium">{table.name}</span>
-                  </div>
-                  <Badge variant="outline">{table.count}</Badge>
-                </div>
-              ))}
-            </div>
+            <h3 className="text-2xl font-bold">37.8 GB</h3>
+            <p className="text-sm text-muted-foreground">Total Database Size</p>
           </CardContent>
-          <CardFooter className="flex justify-between border-t pt-4">
-            <Button variant="outline" size="sm" onClick={handleExportData}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleImportData}>
-              <Upload className="h-4 w-4 mr-2" />
-              Import
-            </Button>
-          </CardFooter>
         </Card>
-
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="capitalize">{selectedTable} Data</CardTitle>
-                <CardDescription>
-                  Manage your {selectedTable} collection
-                </CardDescription>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-2">
+              <div className="p-2 bg-green-100 rounded-full">
+                <Server className="h-5 w-5 text-green-600" />
               </div>
-              <Button>
-                <PlusCircle className="h-4 w-4 mr-2" />
-                Add Record
-              </Button>
+              <Badge variant="outline">Online</Badge>
             </div>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="mb-4">
-                {Object.keys(mockRecords).map((tableName) => (
-                  <TabsTrigger 
-                    key={tableName} 
-                    value={tableName}
-                    className="capitalize"
-                  >
-                    {tableName}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {Object.entries(mockRecords).map(([tableName, records]) => (
-                <TabsContent key={tableName} value={tableName} className="space-y-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="relative w-64">
-                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder={`Search ${tableName}...`} className="pl-8" />
-                      </div>
-                      <Button variant="outline" size="icon">
-                        <Filter className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="icon">
-                        <SlidersHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <Select defaultValue="10">
-                      <SelectTrigger className="w-[100px]">
-                        <SelectValue placeholder="Rows" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="10">10 rows</SelectItem>
-                        <SelectItem value="25">25 rows</SelectItem>
-                        <SelectItem value="50">50 rows</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          {records.length > 0 && Object.keys(records[0]).map((key) => (
-                            <TableHead key={key} className="capitalize">
-                              <div className="flex items-center">
-                                {key.replace('_', ' ')}
-                                <ChevronDown className="ml-1 h-3 w-3" />
-                              </div>
-                            </TableHead>
-                          ))}
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {records.map((record, index) => (
-                          <TableRow key={index}>
-                            {Object.entries(record).map(([key, value]) => (
-                              <TableCell key={key}>
-                                {key === 'status' && typeof value === 'string' ? (
-                                  renderStatusBadge(value)
-                                ) : key === 'difficulty' && typeof value === 'string' ? (
-                                  renderDifficultyBadge(value)
-                                ) : (
-                                  value as React.ReactNode
-                                )}
-                              </TableCell>
-                            ))}
-                            <TableCell className="text-right">
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <FileJson className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                className="h-8 w-8 text-destructive"
-                                onClick={() => handleDeleteRecord(record.id as string)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-4">
-                    <div className="text-sm text-muted-foreground">
-                      Showing {records.length} of {mockTables.find(t => t.name === tableName)?.count || 0} entries
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" disabled>Previous</Button>
-                      <Button variant="outline" size="sm">Next</Button>
-                    </div>
-                  </div>
-                </TabsContent>
-              ))}
-            </Tabs>
+            <h3 className="text-2xl font-bold">99.98%</h3>
+            <p className="text-sm text-muted-foreground">Uptime This Month</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center mb-2">
+              <div className="p-2 bg-purple-100 rounded-full">
+                <FileJson className="h-5 w-5 text-purple-600" />
+              </div>
+              <Badge variant="secondary">16</Badge>
+            </div>
+            <h3 className="text-2xl font-bold">385,712</h3>
+            <p className="text-sm text-muted-foreground">Total Records</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Database Status</CardTitle>
-          <CardDescription>
-            Performance metrics and storage information
-          </CardDescription>
+          <CardTitle>Database Explorer</CardTitle>
+          <CardDescription>Browse and manage your database tables and queries</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-accent/50 p-4 rounded-lg">
-              <div className="text-sm text-muted-foreground mb-1">Storage Used</div>
-              <div className="flex justify-between mb-1">
-                <div className="text-2xl font-bold">68%</div>
-                <div className="text-sm text-muted-foreground">5.4/8 GB</div>
-              </div>
-              <Progress value={68} className="h-2" />
-            </div>
-            
-            <div className="bg-accent/50 p-4 rounded-lg">
-              <div className="text-sm text-muted-foreground mb-1">Database Operations</div>
-              <div className="text-2xl font-bold">1,432</div>
-              <div className="text-xs text-green-600">↑ 12% from last week</div>
-            </div>
-            
-            <div className="bg-accent/50 p-4 rounded-lg">
-              <div className="text-sm text-muted-foreground mb-1">Average Query Time</div>
-              <div className="text-2xl font-bold">53ms</div>
-              <div className="text-xs text-green-600">↓ 8% from last week</div>
-            </div>
-            
-            <div className="bg-accent/50 p-4 rounded-lg">
-              <div className="text-sm text-muted-foreground mb-1">Total Tables</div>
-              <div className="text-2xl font-bold">{mockTables.length}</div>
-              <div className="text-xs text-muted-foreground">Last created: 2025-04-01</div>
-            </div>
-          </div>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="tables">Tables</TabsTrigger>
+              <TabsTrigger value="queries">Recent Queries</TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Recent Database Operations</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Operation</TableHead>
-                  <TableHead>Table</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[
-                  { op: 'INSERT', table: 'questions', status: 'success', time: '2m ago' },
-                  { op: 'UPDATE', table: 'users', status: 'success', time: '15m ago' },
-                  { op: 'DELETE', table: 'feedback', status: 'success', time: '30m ago' },
-                  { op: 'SELECT', table: 'blog_posts', status: 'success', time: '1h ago' },
-                  { op: 'INSERT BATCH', table: 'progress', status: 'failed', time: '2h ago' }
-                ].map((op, i) => (
-                  <TableRow key={i}>
-                    <TableCell className="font-medium">{op.op}</TableCell>
-                    <TableCell>{op.table}</TableCell>
-                    <TableCell>
-                      {renderOperationBadge(op.status)}
-                    </TableCell>
-                    <TableCell>{op.time}</TableCell>
-                  </TableRow>
+            <TabsContent value="tables">
+              <div className="flex justify-between items-center mb-4">
+                <div className="relative w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Search tables..." className="pl-8" />
+                </div>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Table
+                </Button>
+              </div>
+              
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead className="text-right">Rows</TableHead>
+                      <TableHead>Last Modified</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {tables.map((table) => (
+                      <TableRow key={table.name}>
+                        <TableCell className="font-medium">{table.name}</TableCell>
+                        <TableCell className="text-right">{table.rows.toLocaleString()}</TableCell>
+                        <TableCell>{table.lastModified}</TableCell>
+                        <TableCell>{table.size}</TableCell>
+                        <TableCell>
+                          {table.status === "healthy" ? (
+                            <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                              Healthy
+                            </Badge>
+                          ) : table.status === "warning" ? (
+                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200">
+                              <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                              Warning
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
+                              <XCircle className="h-3.5 w-3.5 mr-1" />
+                              Error
+                            </Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => toast.success(`Viewing ${table.name} table`)}>
+                                <Search className="h-4 w-4 mr-2" />
+                                View Data
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast.success(`Editing ${table.name} structure`)}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Structure
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => toast.success(`Created backup of ${table.name}`)}>
+                                <Copy className="h-4 w-4 mr-2" />
+                                Backup Table
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => toast.error(`This would delete the ${table.name} table (operation not performed)`)}
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Table
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="queries">
+              <div className="space-y-4">
+                {recentQueries.map((query, index) => (
+                  <div key={index} className="border rounded-lg p-3">
+                    <div className="flex justify-between mb-2">
+                      <div className="text-xs text-muted-foreground">{query.timestamp}</div>
+                      <Badge variant={query.status === "success" ? "outline" : "destructive"}>
+                        {query.status === "success" ? "Success" : "Error"} - {query.duration}
+                      </Badge>
+                    </div>
+                    <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto">
+                      {query.query}
+                    </pre>
+                    <div className="mt-2 flex justify-end gap-2">
+                      <Button size="sm" variant="ghost" 
+                        onClick={() => {
+                          navigator.clipboard.writeText(query.query);
+                          toast.success("Query copied to clipboard");
+                        }}
+                      >
+                        <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                      </Button>
+                      <Button size="sm" variant="ghost" 
+                        onClick={() => toast.success("Query would run again (operation simulated)")}
+                      >
+                        <RefreshCw className="h-3.5 w-3.5 mr-1" /> Run Again
+                      </Button>
+                    </div>
+                  </div>
                 ))}
-              </TableBody>
-            </Table>
-          </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
+        <CardFooter className="border-t flex justify-between px-6 py-4">
+          <div className="text-sm text-muted-foreground">
+            Last backup: <span className="font-medium">April 3, 2025 at 08:45 AM</span>
+          </div>
+          <Button onClick={handleShowSettings}>Database Settings</Button>
+        </CardFooter>
       </Card>
     </div>
   );
