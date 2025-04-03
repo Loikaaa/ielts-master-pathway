@@ -12,6 +12,7 @@ import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import { Separator } from '@/components/ui/separator';
+import ResultsView from './ResultsView';
 
 // This would normally come from an API or database
 import { mockQuestions } from '@/data/mockQuestions';
@@ -42,6 +43,12 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showTimeWarning, setShowTimeWarning] = useState(false);
   const [stickyTimer, setStickyTimer] = useState(false);
+  const [examCompleted, setExamCompleted] = useState(false);
+  const [examResults, setExamResults] = useState<{
+    score: number;
+    totalPossible: number;
+    resultTime: string;
+  } | null>(null);
   
   useEffect(() => {
     // In a real app, this would be an API call
@@ -65,9 +72,21 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         
         setQuestions(filteredQuestions);
         
-        // Set initial timer based on the first question
-        if (filteredQuestions[0].timeLimit) {
-          setTimeRemaining(filteredQuestions[0].timeLimit);
+        // Set initial timer based on the skill type (IELTS timing rules)
+        if (skillType === 'reading') {
+          // IELTS Reading: 60 minutes for 40 questions
+          setTimeRemaining(60 * 60); // 60 minutes in seconds
+        } else if (skillType === 'listening') {
+          // IELTS Listening: around 30 minutes for 40 questions
+          setTimeRemaining(30 * 60); // 30 minutes in seconds
+        } else if (skillType === 'writing') {
+          // IELTS Writing: 60 minutes for 2 tasks
+          setTimeRemaining(60 * 60); // 60 minutes in seconds
+        } else if (skillType === 'speaking') {
+          // Individual questions will have their own timers
+          if (filteredQuestions[0].timeLimit) {
+            setTimeRemaining(filteredQuestions[0].timeLimit);
+          }
         }
       } catch (error) {
         console.error("Error loading questions:", error);
@@ -109,11 +128,36 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setTimeRemaining(prev => {
         if (prev === null || prev <= 0) {
           clearInterval(timer);
+          // Auto-submit when time is up
+          if (prev === 0 && !examCompleted) {
+            handleSubmit();
+          }
           return 0;
         }
         
         // Show warning when 10% of time is left
-        if (prev === Math.floor(questions[currentQuestionIndex]?.timeLimit! * 0.1)) {
+        if (skillType === 'reading' && prev === Math.floor(60 * 60 * 0.1)) {
+          setShowTimeWarning(true);
+          toast({
+            title: "Time is running out!",
+            description: "You have less than 10% of your time remaining.",
+            variant: "destructive",
+          });
+        } else if (skillType === 'listening' && prev === Math.floor(30 * 60 * 0.1)) {
+          setShowTimeWarning(true);
+          toast({
+            title: "Time is running out!",
+            description: "You have less than 10% of your time remaining.",
+            variant: "destructive",
+          });
+        } else if (skillType === 'writing' && prev === Math.floor(60 * 60 * 0.1)) {
+          setShowTimeWarning(true);
+          toast({
+            title: "Time is running out!",
+            description: "You have less than 10% of your time remaining.",
+            variant: "destructive",
+          });
+        } else if (skillType === 'speaking' && prev === Math.floor(questions[currentQuestionIndex]?.timeLimit! * 0.1)) {
           setShowTimeWarning(true);
           toast({
             title: "Time is running out!",
@@ -127,7 +171,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [timeRemaining, currentQuestionIndex, questions, toast]);
+  }, [timeRemaining, currentQuestionIndex, questions, toast, skillType, examCompleted]);
   
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({
@@ -141,10 +185,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev + 1);
       setShowTimeWarning(false);
       
-      // Update timer for the next question
-      const nextQuestion = questions[currentQuestionIndex + 1];
-      if (nextQuestion.timeLimit) {
-        setTimeRemaining(nextQuestion.timeLimit);
+      // Only update timer for speaking questions
+      if (skillType === 'speaking') {
+        // Update timer for the next question
+        const nextQuestion = questions[currentQuestionIndex + 1];
+        if (nextQuestion.timeLimit) {
+          setTimeRemaining(nextQuestion.timeLimit);
+        }
       }
     } else {
       // Submit answers
@@ -157,10 +204,13 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev - 1);
       setShowTimeWarning(false);
       
-      // Update timer for the previous question
-      const prevQuestion = questions[currentQuestionIndex - 1];
-      if (prevQuestion.timeLimit) {
-        setTimeRemaining(prevQuestion.timeLimit);
+      // Only update timer for speaking questions
+      if (skillType === 'speaking') {
+        // Update timer for the previous question
+        const prevQuestion = questions[currentQuestionIndex - 1];
+        if (prevQuestion.timeLimit) {
+          setTimeRemaining(prevQuestion.timeLimit);
+        }
       }
     }
   };
@@ -169,13 +219,50 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     // In a real app, this would be an API call to submit answers
     console.log("Submitting answers:", answers);
     
+    // Calculate score (simplified for demo)
+    let correctAnswers = 0;
+    let totalQuestions = 0;
+    
+    questions.forEach(question => {
+      if ('questions' in question) {
+        question.questions.forEach(subQ => {
+          totalQuestions++;
+          const userAnswer = answers[subQ.id];
+          if (userAnswer && 
+             (Array.isArray(subQ.correctAnswer) 
+                ? subQ.correctAnswer.includes(userAnswer)
+                : subQ.correctAnswer === userAnswer)) {
+            correctAnswers++;
+          }
+        });
+      } else {
+        totalQuestions++;
+        // For writing and speaking, we'd normally have a human evaluation
+      }
+    });
+    
+    let resultTime = "";
+    if (skillType === 'reading' || skillType === 'listening') {
+      resultTime = "Available now";
+    } else if (skillType === 'writing') {
+      resultTime = "Available in 2 hours";
+    } else if (skillType === 'speaking') {
+      resultTime = "Available in 4 hours";
+    }
+    
+    // Set results
+    setExamResults({
+      score: correctAnswers,
+      totalPossible: totalQuestions,
+      resultTime
+    });
+    
+    setExamCompleted(true);
+    
     toast({
       title: "Practice completed!",
       description: "Your answers have been submitted for review.",
     });
-    
-    // Navigate back to practice page after submission
-    navigate('/practice');
   };
   
   const formatTime = (seconds: number): string => {
@@ -209,6 +296,18 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           <Button onClick={() => navigate('/practice')}>Back to Practice</Button>
         </CardFooter>
       </Card>
+    );
+  }
+
+  if (examCompleted && examResults) {
+    return (
+      <ResultsView 
+        skillType={skillType as 'reading' | 'writing' | 'speaking' | 'listening'}
+        score={examResults.score}
+        totalPossible={examResults.totalPossible}
+        resultTime={examResults.resultTime}
+        onBackToPractice={() => navigate('/practice')}
+      />
     );
   }
   
@@ -258,23 +357,11 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       <Card className="mb-6">
         <CardContent className={`pt-6 ${skillType === 'reading' ? 'p-0 overflow-hidden' : ''}`}>
           {currentQuestion.skillType === 'reading' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 h-full">
-              <div className="border-r overflow-y-auto max-h-[600px] p-6">
-                <h2 className="text-xl font-bold mb-4">{(currentQuestion as any).passageTitle}</h2>
-                <div className="prose prose-sm max-w-none">
-                  {(currentQuestion as any).passageText.split('\n').map((paragraph: string, idx: number) => (
-                    <p key={idx} className="mb-4">{paragraph}</p>
-                  ))}
-                </div>
-              </div>
-              <div className="overflow-y-auto max-h-[600px] p-6">
-                <ReadingQuestionView 
-                  question={currentQuestion} 
-                  onAnswer={handleAnswer} 
-                  answer={answers[currentQuestion.id]}
-                />
-              </div>
-            </div>
+            <ReadingQuestionView 
+              question={currentQuestion} 
+              onAnswer={handleAnswer} 
+              answer={answers[currentQuestion.id]}
+            />
           )}
           
           {currentQuestion.skillType === 'writing' && (
