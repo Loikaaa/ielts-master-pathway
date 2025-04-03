@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { PlusCircle, Upload, X, Image as ImageIcon, Calendar } from 'lucide-react';
+import { saveBlogPost } from '@/utils/settingsStorage';
 
 const blogPostSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -85,16 +86,23 @@ const BlogPostForm = ({ initialData = null }) => {
         day: 'numeric' 
       }),
       id: initialData?.id || Date.now().toString(),
+      readTime: `${Math.max(3, Math.ceil(data.content.length / 1000))} min read`
     };
     
-    // In a real application, you would save this to your database
-    console.log("Form submitted:", processedData);
-    toast.success(initialData ? "Blog post updated successfully!" : "Blog post created successfully!");
+    // Save to localStorage using our utility
+    const success = saveBlogPost(processedData);
     
-    // Reset form only for new posts
-    if (!initialData) {
-      form.reset();
-      setImagePreview(null);
+    if (success) {
+      toast.success(initialData ? "Blog post updated successfully!" : "Blog post created successfully!");
+      console.log("Blog post saved:", processedData);
+      
+      // Reset form only for new posts
+      if (!initialData) {
+        form.reset();
+        setImagePreview(null);
+      }
+    } else {
+      toast.error("Failed to save blog post. Please try again.");
     }
   };
 
@@ -336,10 +344,24 @@ const BlogPostForm = ({ initialData = null }) => {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline">
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={() => {
+                  form.setValue("status", "draft");
+                  form.handleSubmit(onSubmit)();
+                }}
+              >
                 Save as Draft
               </Button>
-              <Button type="submit">
+              <Button 
+                type="submit"
+                onClick={() => {
+                  if (form.getValues("status") === "draft") {
+                    form.setValue("status", "published");
+                  }
+                }}
+              >
                 {initialData ? 'Update' : 'Publish'} Blog Post
               </Button>
             </div>

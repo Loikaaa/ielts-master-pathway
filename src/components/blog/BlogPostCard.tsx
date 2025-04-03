@@ -13,20 +13,26 @@ interface BlogPostProps {
     coverImage: string;
     author: string;
     date: string;
-    readTime: string;
+    readTime?: string;
     category: string;
-    tags: string[];
+    tags?: string[];
     featured?: boolean;
+    content?: string;
+    status?: string;
   };
 }
 
 const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
+  // Calculate read time if not provided
+  const readTime = post.readTime || 
+    (post.content ? `${Math.max(3, Math.ceil(post.content.length / 1000))} min read` : '5 min read');
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col group">
       <Link to={`/resources/blog/${post.id}`} className="flex-grow flex flex-col">
         <div className="relative h-48 overflow-hidden">
           <img 
-            src={post.coverImage} 
+            src={post.coverImage || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} 
             alt={post.title} 
             className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
           />
@@ -49,7 +55,7 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
         <CardContent className="flex-grow">
           <p className="text-muted-foreground line-clamp-3 mb-4">{post.excerpt}</p>
           <div className="flex flex-wrap gap-1 mb-4">
-            {post.tags.map((tag, index) => (
+            {post.tags && post.tags.map((tag, index) => (
               <span key={index} className="text-xs bg-accent px-2 py-0.5 rounded-full">
                 {tag}
               </span>
@@ -70,7 +76,7 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
           </div>
           <div className="flex items-center">
             <Clock className="h-4 w-4 mr-1" />
-            <span>{post.readTime}</span>
+            <span>{readTime}</span>
           </div>
         </div>
       </CardFooter>

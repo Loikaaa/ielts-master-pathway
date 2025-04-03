@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,48 +53,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-const sampleBlogPosts = [
-  {
-    id: '1',
-    title: 'Top Strategies to Improve Your IELTS Reading Score',
-    excerpt: 'Master the reading section with these proven techniques that have helped thousands of students achieve band 7+.',
-    author: 'Dr. Sarah Johnson',
-    date: 'March 28, 2025',
-    category: 'Reading',
-    status: 'published',
-    coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    featured: true
-  },
-  {
-    id: '2',
-    title: 'Common Grammar Mistakes to Avoid in IELTS Writing',
-    excerpt: 'Eliminate these frequent errors that cost test-takers valuable points in the writing section.',
-    author: 'James Wilson',
-    date: 'March 20, 2025',
-    category: 'Writing',
-    status: 'published',
-    coverImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: '3',
-    title: 'How to Handle Difficult Accents in the Listening Test',
-    excerpt: 'Build your confidence with unfamiliar accents using these practical exercises and approach.',
-    author: 'Emma Reynolds',
-    date: 'March 15, 2025',
-    category: 'Listening',
-    status: 'draft',
-    coverImage: 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  }
-];
+import { toast } from "sonner";
+import { getBlogPosts, deleteBlogPost } from '@/utils/settingsStorage';
 
 const AdminBlogManager = () => {
   const [showForm, setShowForm] = useState(false);
   const [currentPost, setCurrentPost] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [blogPosts, setBlogPosts] = useState([]);
 
-  const filteredBlogPosts = sampleBlogPosts.filter(post => {
+  // Load blog posts from localStorage
+  useEffect(() => {
+    const posts = getBlogPosts();
+    console.log("Loaded blog posts:", posts);
+    setBlogPosts(posts);
+  }, []);
+
+  const filteredBlogPosts = blogPosts.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           post.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTab = activeTab === 'all' || 
@@ -116,6 +92,21 @@ const AdminBlogManager = () => {
   const handleBackToList = () => {
     setShowForm(false);
     setCurrentPost(null);
+    // Refresh blog posts
+    setBlogPosts(getBlogPosts());
+  };
+
+  const handleDeletePost = (postId) => {
+    if (window.confirm("Are you sure you want to delete this blog post?")) {
+      const success = deleteBlogPost(postId);
+      if (success) {
+        toast.success("Blog post deleted successfully");
+        // Refresh blog posts
+        setBlogPosts(getBlogPosts());
+      } else {
+        toast.error("Failed to delete blog post");
+      }
+    }
   };
 
   const getStatusBadgeClass = (status) => {
@@ -168,6 +159,14 @@ const AdminBlogManager = () => {
                 <Link to="/admin-blog-manager" className="group">
                   <PenSquare className="h-4 w-4 transition-colors group-hover:text-primary" />
                   <span>Blog Manager</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild>
+                <Link to="/admin-backend" className="group">
+                  <ServerCog className="h-4 w-4 transition-colors group-hover:text-primary" />
+                  <span>System Settings</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -386,12 +385,17 @@ const AdminBlogManager = () => {
                                         <Edit className="h-4 w-4 mr-2" />
                                         Edit
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem>
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        Preview
+                                      <DropdownMenuItem asChild>
+                                        <Link to={`/resources/blog`}>
+                                          <Eye className="h-4 w-4 mr-2" />
+                                          Preview
+                                        </Link>
                                       </DropdownMenuItem>
                                       <DropdownMenuSeparator />
-                                      <DropdownMenuItem className="text-destructive">
+                                      <DropdownMenuItem 
+                                        className="text-destructive" 
+                                        onClick={() => handleDeletePost(post.id)}
+                                      >
                                         <Trash2 className="h-4 w-4 mr-2" />
                                         Delete
                                       </DropdownMenuItem>
@@ -401,7 +405,11 @@ const AdminBlogManager = () => {
                                     <Edit className="h-4 w-4 mr-1" />
                                     Edit
                                   </Button>
-                                  <Button variant="destructive" size="sm">
+                                  <Button 
+                                    variant="destructive" 
+                                    size="sm"
+                                    onClick={() => handleDeletePost(post.id)}
+                                  >
                                     <Trash2 className="h-4 w-4 mr-1" />
                                     Delete
                                   </Button>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,92 +7,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Search, Tag, Filter } from 'lucide-react';
 import BlogPostCard from '@/components/blog/BlogPostCard';
-
-// Sample blog posts data
-const blogPosts = [
-  {
-    id: 'blog1',
-    title: 'Top Strategies to Improve Your IELTS Reading Score',
-    excerpt: 'Master the reading section with these proven techniques that have helped thousands of students achieve band 7+.',
-    coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'Dr. Sarah Johnson',
-    date: 'March 28, 2025',
-    readTime: '8 min read',
-    category: 'Reading',
-    tags: ['reading', 'strategy', 'time management'],
-    featured: true
-  },
-  {
-    id: 'blog2',
-    title: 'Common Grammar Mistakes to Avoid in IELTS Writing',
-    excerpt: 'Eliminate these frequent errors that cost test-takers valuable points in the writing section.',
-    coverImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'James Wilson',
-    date: 'March 20, 2025',
-    readTime: '6 min read',
-    category: 'Writing',
-    tags: ['writing', 'grammar', 'mistakes']
-  },
-  {
-    id: 'blog3',
-    title: 'How to Handle Difficult Accents in the Listening Test',
-    excerpt: 'Build your confidence with unfamiliar accents using these practical exercises and approach.',
-    coverImage: 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'Emma Reynolds',
-    date: 'March 15, 2025',
-    readTime: '7 min read',
-    category: 'Listening',
-    tags: ['listening', 'accents', 'comprehension']
-  },
-  {
-    id: 'blog4',
-    title: 'Speaking Confidently: Overcoming Nervousness in Part 2',
-    excerpt: 'Learn techniques to remain calm and articulate during the challenging individual long turn.',
-    coverImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'Michael Chang',
-    date: 'March 10, 2025',
-    readTime: '5 min read',
-    category: 'Speaking',
-    tags: ['speaking', 'confidence', 'nervousness']
-  },
-  {
-    id: 'blog5',
-    title: 'IELTS vs TOEFL: Which English Test Should You Take?',
-    excerpt: 'A comprehensive comparison of the two major English proficiency tests to help you make the right choice.',
-    coverImage: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'Dr. Lisa Zhang',
-    date: 'March 5, 2025',
-    readTime: '10 min read',
-    category: 'General',
-    tags: ['comparison', 'exams', 'decision']
-  },
-  {
-    id: 'blog6',
-    title: 'The Ultimate IELTS Preparation Timeline',
-    excerpt: 'Plan your study schedule efficiently with this week-by-week guide to maximize your score.',
-    coverImage: 'https://images.unsplash.com/photo-1531297484001-80022131f5a1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-    author: 'Robert Garcia',
-    date: 'February 28, 2025',
-    readTime: '9 min read',
-    category: 'General',
-    tags: ['planning', 'schedule', 'preparation']
-  }
-];
+import { getBlogPosts } from '@/utils/settingsStorage';
 
 const Blog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [activeTag, setActiveTag] = useState('');
+  const [blogPosts, setBlogPosts] = useState([]);
   
+  // Load blog posts from localStorage
+  useEffect(() => {
+    const posts = getBlogPosts().filter(post => post.status === 'published');
+    console.log("Loaded published blog posts:", posts);
+    setBlogPosts(posts);
+  }, []);
+
   // Get all unique tags
-  const allTags = [...new Set(blogPosts.flatMap(post => post.tags))];
+  const allTags = [...new Set(blogPosts.flatMap(post => post.tags ? post.tags : []))];
   
   // Filter posts based on search term, active tab and tag
   const filteredPosts = blogPosts.filter(post => {
     const matchesSearch = 
       post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
       post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+      (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
     
     const matchesCategory = 
       activeTab === 'all' || 
@@ -100,7 +38,7 @@ const Blog = () => {
     
     const matchesTag = 
       activeTag === '' || 
-      post.tags.includes(activeTag);
+      (post.tags && post.tags.includes(activeTag));
     
     return matchesSearch && matchesCategory && matchesTag;
   });
@@ -206,11 +144,11 @@ const Blog = () => {
           >
             <TabsList className="mb-8">
               <TabsTrigger value="all">All Posts</TabsTrigger>
-              <TabsTrigger value="reading">Reading</TabsTrigger>
-              <TabsTrigger value="writing">Writing</TabsTrigger>
-              <TabsTrigger value="speaking">Speaking</TabsTrigger>
-              <TabsTrigger value="listening">Listening</TabsTrigger>
-              <TabsTrigger value="general">General</TabsTrigger>
+              <TabsTrigger value="Reading">Reading</TabsTrigger>
+              <TabsTrigger value="Writing">Writing</TabsTrigger>
+              <TabsTrigger value="Speaking">Speaking</TabsTrigger>
+              <TabsTrigger value="Listening">Listening</TabsTrigger>
+              <TabsTrigger value="General">General</TabsTrigger>
             </TabsList>
             
             <TabsContent value="all" className="mt-0">
@@ -237,7 +175,7 @@ const Blog = () => {
               )}
             </TabsContent>
             
-            {['reading', 'writing', 'speaking', 'listening', 'general'].map((category) => (
+            {['Reading', 'Writing', 'Speaking', 'Listening', 'General'].map((category) => (
               <TabsContent key={category} value={category} className="mt-0">
                 {filteredPosts.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

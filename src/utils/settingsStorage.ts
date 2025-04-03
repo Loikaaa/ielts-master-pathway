@@ -202,3 +202,80 @@ export const saveDataSourceConnection = (name: string, status: string, type: str
     return false;
   }
 };
+
+// Blog post functions
+export const getBlogPosts = () => {
+  try {
+    const settings = getSettings();
+    return settings?.blogPosts || [
+      {
+        id: 'blog1',
+        title: 'Top Strategies to Improve Your IELTS Reading Score',
+        excerpt: 'Master the reading section with these proven techniques that have helped thousands of students achieve band 7+.',
+        coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        author: 'Dr. Sarah Johnson',
+        date: 'March 28, 2025',
+        readTime: '8 min read',
+        category: 'Reading',
+        tags: ['reading', 'strategy', 'time management'],
+        featured: true,
+        content: 'This is a sample blog post about IELTS reading strategies. In this post, we explore various techniques to improve your reading score.\n\nTime management is crucial in the IELTS reading section. Many test-takers struggle to complete all questions within the given time frame.\n\nHere are some key strategies:\n\n1. Skim the passage before reading in detail\n2. Look for keywords in questions\n3. Don\'t spend too much time on difficult questions\n4. Practice reading academic texts regularly',
+        status: 'published'
+      },
+      {
+        id: 'blog2',
+        title: 'Common Grammar Mistakes to Avoid in IELTS Writing',
+        excerpt: 'Eliminate these frequent errors that cost test-takers valuable points in the writing section.',
+        coverImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        author: 'James Wilson',
+        date: 'March 20, 2025',
+        readTime: '6 min read',
+        category: 'Writing',
+        tags: ['writing', 'grammar', 'mistakes'],
+        featured: false,
+        content: 'Grammar mistakes can significantly impact your IELTS writing score. This post covers the most common errors and how to avoid them.\n\nSubject-verb agreement is a frequent issue among test-takers. Remember that a singular subject requires a singular verb, and a plural subject requires a plural verb.\n\nArticle usage (a, an, the) is another challenging area, especially for speakers of languages that don\'t have articles.\n\nHere are some commonly confused words:\n\n- Effect vs. Affect\n- Their vs. There vs. They\'re\n- Its vs. It\'s',
+        status: 'published'
+      }
+    ];
+  } catch (error) {
+    console.error('Error getting blog posts:', error);
+    return [];
+  }
+};
+
+export const saveBlogPost = (post: any) => {
+  try {
+    const settings = getSettings() || {};
+    const blogPosts = settings.blogPosts || [];
+    
+    // Check if post exists already (for updates)
+    const existingPostIndex = blogPosts.findIndex(p => p.id === post.id);
+    
+    if (existingPostIndex >= 0) {
+      // Update existing post
+      blogPosts[existingPostIndex] = post;
+    } else {
+      // Add new post
+      blogPosts.push(post);
+    }
+    
+    settings.blogPosts = blogPosts;
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error saving blog post:', error);
+    return false;
+  }
+};
+
+export const deleteBlogPost = (postId: string) => {
+  try {
+    const settings = getSettings() || {};
+    const blogPosts = settings.blogPosts || [];
+    
+    settings.blogPosts = blogPosts.filter(post => post.id !== postId);
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error deleting blog post:', error);
+    return false;
+  }
+};

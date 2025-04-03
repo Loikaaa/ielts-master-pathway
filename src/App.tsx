@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,6 +19,7 @@ import ExamContent from "./pages/ExamContent";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminBlogManager from "./pages/AdminBlogManager";
 import Blog from "./pages/resources/Blog";
+import BlogPost from "./pages/resources/BlogPost";
 import FAQ from "./pages/resources/FAQ";
 import SuccessStories from "./pages/resources/SuccessStories";
 import IeltsTips from "./pages/resources/IeltsTips";
@@ -169,6 +171,7 @@ const App = () => {
                     <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/resources" element={<Resources />} />
                     <Route path="/resources/blog" element={<Blog />} />
+                    <Route path="/resources/blog/:postId" element={<BlogPost />} />
                     <Route path="/resources/faq" element={<FAQ />} />
                     <Route path="/resources/success-stories" element={<SuccessStories />} />
                     <Route path="/resources/ielts-tips" element={<IeltsTips />} />
