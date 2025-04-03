@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -24,24 +24,21 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { 
   Database, 
   Server, 
-  FileJson, 
   RefreshCw, 
   Download, 
   Upload, 
-  CheckCircle2, 
-  XCircle, 
-  AlertTriangle,
   Search,
   Plus,
   MoreHorizontal,
   Trash2,
   Edit,
-  Copy
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -53,75 +50,186 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Settings from './Settings';
+import { useQuestions } from '@/contexts/QuestionsContext';
+
+// Interface for table data
+interface TableData {
+  name: string;
+  rows: number;
+  lastModified: string;
+  size: string;
+  status: 'healthy' | 'warning' | 'error';
+}
+
+// Interface for query data
+interface QueryData {
+  query: string;
+  timestamp: string;
+  duration: string;
+  status: 'success' | 'error';
+}
 
 const DatabaseManager = () => {
   const [activeTab, setActiveTab] = useState<string>("tables");
-  const [showSettings, setShowSettings] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const { questions } = useQuestions();
+  
+  // Derived table data based on questions context
+  const [tables, setTables] = useState<TableData[]>([]);
+  const [recentQueries, setRecentQueries] = useState<QueryData[]>([]);
+  
+  useEffect(() => {
+    // Simulate loading time for database connection
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1200);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  useEffect(() => {
+    if (!isLoading) {
+      // Generate table data based on questions
+      const questionsByType = {
+        reading: questions.filter(q => q.skillType === 'reading'),
+        writing: questions.filter(q => q.skillType === 'writing'),
+        speaking: questions.filter(q => q.skillType === 'speaking'),
+        listening: questions.filter(q => q.skillType === 'listening')
+      };
+      
+      // Create table representation for the database
+      const generatedTables: TableData[] = [
+        {
+          name: "users",
+          rows: Math.floor(Math.random() * 2000) + 1000,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(Math.random() * 10).toFixed(1)} MB`,
+          status: 'healthy'
+        },
+        {
+          name: "questions",
+          rows: questions.length,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(questions.length * 0.02).toFixed(1)} MB`,
+          status: 'healthy'
+        },
+        {
+          name: "reading_questions",
+          rows: questionsByType.reading.length,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(questionsByType.reading.length * 0.05).toFixed(1)} MB`,
+          status: questionsByType.reading.length > 0 ? 'healthy' : 'warning'
+        },
+        {
+          name: "writing_questions",
+          rows: questionsByType.writing.length,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(questionsByType.writing.length * 0.03).toFixed(1)} MB`,
+          status: questionsByType.writing.length > 0 ? 'healthy' : 'warning'
+        },
+        {
+          name: "speaking_questions",
+          rows: questionsByType.speaking.length,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(questionsByType.speaking.length * 0.02).toFixed(1)} MB`,
+          status: questionsByType.speaking.length > 0 ? 'healthy' : 'warning'
+        },
+        {
+          name: "listening_questions",
+          rows: questionsByType.listening.length,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(questionsByType.listening.length * 0.04).toFixed(1)} MB`,
+          status: questionsByType.listening.length > 0 ? 'healthy' : 'warning'
+        },
+        {
+          name: "user_responses",
+          rows: Math.floor(Math.random() * 5000) + 500,
+          lastModified: new Date().toISOString().split('T')[0],
+          size: `${(Math.random() * 15).toFixed(1)} MB`,
+          status: Math.random() > 0.8 ? 'error' : 'healthy'
+        }
+      ];
+      
+      setTables(generatedTables);
+      
+      // Generate realistic query data
+      const tableNames = generatedTables.map(t => t.name);
+      const generatedQueries: QueryData[] = [
+        {
+          query: `SELECT * FROM ${tableNames[Math.floor(Math.random() * tableNames.length)]} LIMIT 100`,
+          timestamp: "2 minutes ago",
+          duration: `${Math.floor(Math.random() * 200) + 50}ms`,
+          status: 'success'
+        },
+        {
+          query: `SELECT COUNT(*) FROM questions GROUP BY skill_type`,
+          timestamp: "15 minutes ago",
+          duration: `${Math.floor(Math.random() * 100) + 20}ms`,
+          status: 'success'
+        },
+        {
+          query: `UPDATE ${tableNames[Math.floor(Math.random() * tableNames.length)]} SET updated_at = NOW() WHERE id = ${Math.floor(Math.random() * 100) + 1}`,
+          timestamp: "45 minutes ago",
+          duration: `${Math.floor(Math.random() * 150) + 30}ms`,
+          status: 'success'
+        },
+        {
+          query: `INSERT INTO ${tableNames[Math.floor(Math.random() * tableNames.length)]} (name, created_at) VALUES ('New Record', NOW())`,
+          timestamp: "2 hours ago",
+          duration: `${Math.floor(Math.random() * 80) + 40}ms`,
+          status: 'success'
+        },
+        {
+          query: `SELECT * FROM non_existent_table WHERE invalid_column = 'value'`,
+          timestamp: "3 hours ago",
+          duration: `${Math.floor(Math.random() * 50) + 10}ms`,
+          status: 'error'
+        }
+      ];
+      
+      setRecentQueries(generatedQueries);
+    }
+  }, [isLoading, questions]);
+  
+  const filteredTables = tables.filter(table => 
+    table.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-  // Mock tables for the database
-  const tables = [
-    { name: "users", rows: 2458, lastModified: "2025-04-01", size: "4.2 MB", status: "healthy" },
-    { name: "questions", rows: 419, lastModified: "2025-04-02", size: "8.7 MB", status: "healthy" },
-    { name: "responses", rows: 28654, lastModified: "2025-04-03", size: "15.3 MB", status: "warning" },
-    { name: "practice_sessions", rows: 3471, lastModified: "2025-04-02", size: "2.8 MB", status: "healthy" },
-    { name: "blog_posts", rows: 87, lastModified: "2025-04-01", size: "1.2 MB", status: "healthy" },
-    { name: "user_progress", rows: 2104, lastModified: "2025-04-03", size: "3.6 MB", status: "error" },
-  ];
-
-  // Recent SQL queries
-  const recentQueries = [
-    { 
-      query: "SELECT * FROM users WHERE last_login > NOW() - INTERVAL '7 days'", 
-      timestamp: "10 minutes ago",
-      duration: "234ms",
-      status: "success"
-    },
-    { 
-      query: "UPDATE questions SET difficulty = 'medium' WHERE id = 142", 
-      timestamp: "25 minutes ago",
-      duration: "105ms",
-      status: "success"
-    },
-    { 
-      query: "DELETE FROM responses WHERE created_at < NOW() - INTERVAL '1 year'", 
-      timestamp: "1 hour ago",
-      duration: "890ms",
-      status: "success"
-    },
-    { 
-      query: "INSERT INTO blog_posts (title, content, author_id) VALUES ('New IELTS Tips', 'Content here...', 12)", 
-      timestamp: "3 hours ago",
-      duration: "118ms",
-      status: "success"
-    },
-    { 
-      query: "SELECT AVG(score) FROM user_progress GROUP BY user_id ORDER BY AVG(score) DESC LIMIT 10", 
-      timestamp: "5 hours ago",
-      duration: "456ms",
-      status: "error"
-    },
-  ];
-
-  // Handle database actions
   const handleBackupDatabase = () => {
     toast.success("Database backup started");
+    // In a real application, this would trigger an API call to backup the database
   };
 
   const handleOptimizeDatabase = () => {
     toast.success("Database optimization complete");
+    // In a real application, this would trigger an API call to optimize the database
   };
 
   const handleRestoreDatabase = () => {
     toast.success("Database restore completed successfully");
+    // In a real application, this would trigger an API call to restore the database
+  };
+  
+  const handleRefreshData = () => {
+    setIsLoading(true);
+    // Simulate refreshing database data
+    setTimeout(() => {
+      setIsLoading(false);
+      toast.success("Database data refreshed");
+    }, 1000);
   };
 
-  const handleShowSettings = () => {
-    setShowSettings(true);
-  };
-
-  if (showSettings) {
-    return <Settings />;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="relative w-16 h-16">
+          <div className="absolute inset-0 rounded-full border-4 border-primary border-opacity-20"></div>
+          <div className="absolute inset-0 rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent animate-spin"></div>
+        </div>
+        <p className="text-lg font-medium text-muted-foreground">Connecting to database...</p>
+      </div>
+    );
   }
 
   return (
@@ -129,7 +237,7 @@ const DatabaseManager = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Database Management</h2>
-          <p className="text-muted-foreground">Manage your database tables and configuration</p>
+          <p className="text-muted-foreground">View and manage your database tables and data</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleBackupDatabase}>
@@ -144,16 +252,16 @@ const DatabaseManager = () => {
             <RefreshCw className="h-4 w-4 mr-2" />
             Optimize
           </Button>
-          <Button variant="outline" onClick={handleShowSettings}>
-            <FileJson className="h-4 w-4 mr-2" />
-            Settings
+          <Button variant="outline" onClick={handleRefreshData}>
+            <Server className="h-4 w-4 mr-2" />
+            Refresh
           </Button>
         </div>
       </div>
 
       {/* Database overview cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="shadow-md transition-transform hover:scale-[1.01]">
           <CardContent className="pt-6">
             <div className="flex justify-between items-center mb-2">
               <div className="p-2 bg-blue-100 rounded-full">
@@ -161,39 +269,39 @@ const DatabaseManager = () => {
               </div>
               <Badge>PostgreSQL</Badge>
             </div>
-            <h3 className="text-2xl font-bold">37.8 GB</h3>
-            <p className="text-sm text-muted-foreground">Total Database Size</p>
+            <h3 className="text-2xl font-bold">{tables.reduce((acc, table) => acc + table.rows, 0).toLocaleString()} rows</h3>
+            <p className="text-sm text-muted-foreground">Total Records</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-md transition-transform hover:scale-[1.01]">
           <CardContent className="pt-6">
             <div className="flex justify-between items-center mb-2">
               <div className="p-2 bg-green-100 rounded-full">
                 <Server className="h-5 w-5 text-green-600" />
               </div>
-              <Badge variant="outline">Online</Badge>
+              <Badge variant="outline" className="bg-green-50 text-green-800">Online</Badge>
             </div>
-            <h3 className="text-2xl font-bold">99.98%</h3>
-            <p className="text-sm text-muted-foreground">Uptime This Month</p>
+            <h3 className="text-2xl font-bold">{tables.length}</h3>
+            <p className="text-sm text-muted-foreground">Database Tables</p>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="shadow-md transition-transform hover:scale-[1.01]">
           <CardContent className="pt-6">
             <div className="flex justify-between items-center mb-2">
               <div className="p-2 bg-purple-100 rounded-full">
-                <FileJson className="h-5 w-5 text-purple-600" />
+                <Database className="h-5 w-5 text-purple-600" />
               </div>
-              <Badge variant="secondary">16</Badge>
+              <Badge variant="secondary">Active</Badge>
             </div>
-            <h3 className="text-2xl font-bold">385,712</h3>
-            <p className="text-sm text-muted-foreground">Total Records</p>
+            <h3 className="text-2xl font-bold">{tables.reduce((acc, table) => acc + parseFloat(table.size), 0).toFixed(1)} MB</h3>
+            <p className="text-sm text-muted-foreground">Total Database Size</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="shadow-md">
         <CardHeader>
           <CardTitle>Database Explorer</CardTitle>
           <CardDescription>Browse and manage your database tables and queries</CardDescription>
@@ -209,9 +317,14 @@ const DatabaseManager = () => {
               <div className="flex justify-between items-center mb-4">
                 <div className="relative w-64">
                   <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search tables..." className="pl-8" />
+                  <Input 
+                    placeholder="Search tables..." 
+                    className="pl-8" 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
-                <Button size="sm">
+                <Button size="sm" onClick={() => toast.info("Table creation would be implemented here")}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Table
                 </Button>
@@ -230,64 +343,68 @@ const DatabaseManager = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tables.map((table) => (
-                      <TableRow key={table.name}>
-                        <TableCell className="font-medium">{table.name}</TableCell>
-                        <TableCell className="text-right">{table.rows.toLocaleString()}</TableCell>
-                        <TableCell>{table.lastModified}</TableCell>
-                        <TableCell>{table.size}</TableCell>
-                        <TableCell>
-                          {table.status === "healthy" ? (
-                            <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
-                              <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                              Healthy
-                            </Badge>
-                          ) : table.status === "warning" ? (
-                            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200">
-                              <AlertTriangle className="h-3.5 w-3.5 mr-1" />
-                              Warning
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
-                              <XCircle className="h-3.5 w-3.5 mr-1" />
-                              Error
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => toast.success(`Viewing ${table.name} table`)}>
-                                <Search className="h-4 w-4 mr-2" />
-                                View Data
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toast.success(`Editing ${table.name} structure`)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit Structure
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => toast.success(`Created backup of ${table.name}`)}>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Backup Table
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-600"
-                                onClick={() => toast.error(`This would delete the ${table.name} table (operation not performed)`)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete Table
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    {filteredTables.length > 0 ? (
+                      filteredTables.map((table) => (
+                        <TableRow key={table.name} className="hover:bg-accent/20 transition-colors">
+                          <TableCell className="font-medium">{table.name}</TableCell>
+                          <TableCell className="text-right">{table.rows.toLocaleString()}</TableCell>
+                          <TableCell>{table.lastModified}</TableCell>
+                          <TableCell>{table.size}</TableCell>
+                          <TableCell>
+                            {table.status === "healthy" ? (
+                              <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50 border-green-200">
+                                <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                                Healthy
+                              </Badge>
+                            ) : table.status === "warning" ? (
+                              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 hover:bg-yellow-50 border-yellow-200">
+                                <AlertTriangle className="h-3.5 w-3.5 mr-1" />
+                                Warning
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="bg-red-50 text-red-700 hover:bg-red-50 border-red-200">
+                                <XCircle className="h-3.5 w-3.5 mr-1" />
+                                Error
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuItem onClick={() => toast.success(`Viewing ${table.name} table`)}>
+                                  <Search className="h-4 w-4 mr-2" />
+                                  View Data
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => toast.success(`Editing ${table.name} structure`)}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Structure
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  className="text-red-600"
+                                  onClick={() => toast.error(`This would delete the ${table.name} table (operation not performed)`)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete Table
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                          {searchTerm ? "No tables found matching your search" : "No tables found in database"}
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </div>
@@ -296,10 +413,10 @@ const DatabaseManager = () => {
             <TabsContent value="queries">
               <div className="space-y-4">
                 {recentQueries.map((query, index) => (
-                  <div key={index} className="border rounded-lg p-3">
+                  <div key={index} className="border rounded-lg p-3 transition-colors hover:bg-accent/10">
                     <div className="flex justify-between mb-2">
                       <div className="text-xs text-muted-foreground">{query.timestamp}</div>
-                      <Badge variant={query.status === "success" ? "outline" : "destructive"}>
+                      <Badge variant={query.status === "success" ? "outline" : "destructive"} className={query.status === "success" ? "bg-green-50 text-green-700" : ""}>
                         {query.status === "success" ? "Success" : "Error"} - {query.duration}
                       </Badge>
                     </div>
@@ -313,12 +430,12 @@ const DatabaseManager = () => {
                           toast.success("Query copied to clipboard");
                         }}
                       >
-                        <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                        Copy
                       </Button>
                       <Button size="sm" variant="ghost" 
                         onClick={() => toast.success("Query would run again (operation simulated)")}
                       >
-                        <RefreshCw className="h-3.5 w-3.5 mr-1" /> Run Again
+                        Run Again
                       </Button>
                     </div>
                   </div>
@@ -329,9 +446,9 @@ const DatabaseManager = () => {
         </CardContent>
         <CardFooter className="border-t flex justify-between px-6 py-4">
           <div className="text-sm text-muted-foreground">
-            Last backup: <span className="font-medium">April 3, 2025 at 08:45 AM</span>
+            Last refresh: <span className="font-medium">{new Date().toLocaleString()}</span>
           </div>
-          <Button onClick={handleShowSettings}>Database Settings</Button>
+          <Button onClick={handleRefreshData}>Refresh Data</Button>
         </CardFooter>
       </Card>
     </div>
