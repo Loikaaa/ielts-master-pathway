@@ -10,9 +10,52 @@ import WritingQuestionForm from '@/components/admin/WritingQuestionForm';
 import ListeningQuestionForm from '@/components/admin/ListeningQuestionForm';
 import SpeakingQuestionForm from '@/components/admin/SpeakingQuestionForm';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/components/ui/use-toast';
+import { useQuestions } from '@/contexts/QuestionsContext';
+import { toast } from 'sonner';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("reading");
+  const { addQuestion } = useQuestions();
+  const { toast: uiToast } = useToast();
+
+  // Form save and cancel handlers
+  const handleSaveQuestion = (formData: any) => {
+    console.log('Saving question data:', formData);
+    
+    // Prepare the question data with the proper format
+    const questionData = {
+      ...formData,
+      id: `${activeTab}-${Date.now()}`,
+      skillType: activeTab,
+      points: formData.points || 10,
+      // Convert minutes to seconds for time limit if needed
+      timeLimit: activeTab === 'reading' || activeTab === 'writing' 
+        ? formData.timeLimit * 60 
+        : formData.timeLimit,
+    };
+    
+    // Add the question to the context
+    addQuestion(questionData);
+    
+    // Show success notification
+    toast.success('Question saved successfully!');
+    uiToast({
+      title: "Question Added",
+      description: "The question has been successfully added to the database.",
+    });
+    
+    // Reset form or other state as needed
+    // You could implement form reset logic here if needed
+  };
+
+  const handleCancelForm = () => {
+    // Handle cancellation (e.g., reset form, show confirmation, etc.)
+    if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
+      // Reset form or other state as needed
+      toast.info('Question creation cancelled');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -119,19 +162,31 @@ const AdminDashboard = () => {
               </TabsList>
 
               <TabsContent value="reading" className="mt-0">
-                <ReadingQuestionForm />
+                <ReadingQuestionForm 
+                  onSave={handleSaveQuestion} 
+                  onCancel={handleCancelForm} 
+                />
               </TabsContent>
 
               <TabsContent value="writing" className="mt-0">
-                <WritingQuestionForm />
+                <WritingQuestionForm 
+                  onSave={handleSaveQuestion} 
+                  onCancel={handleCancelForm} 
+                />
               </TabsContent>
 
               <TabsContent value="listening" className="mt-0">
-                <ListeningQuestionForm />
+                <ListeningQuestionForm 
+                  onSave={handleSaveQuestion} 
+                  onCancel={handleCancelForm} 
+                />
               </TabsContent>
 
               <TabsContent value="speaking" className="mt-0">
-                <SpeakingQuestionForm />
+                <SpeakingQuestionForm 
+                  onSave={handleSaveQuestion} 
+                  onCancel={handleCancelForm} 
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
