@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -27,7 +26,8 @@ import {
   Plus,
   ArrowLeft,
   ArrowRight,
-  Settings
+  Settings,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -38,13 +38,25 @@ import { Separator } from '@/components/ui/separator';
 import SettingsComponent from '@/components/admin/Settings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { getDataSourceConnections, saveDataSourceConnection } from '@/utils/settingsStorage';
+import { getDataSourceConnections, saveDataSourceConnection, getDatabaseConfig } from '@/utils/settingsStorage';
+import DatabaseConfig from '@/components/admin/DatabaseConfig';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const BackendControl = () => {
   const { questions, loading } = useQuestions();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [connectedSources, setConnectedSources] = useState([]);
+  const [selectedSource, setSelectedSource] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   // Get question counts by type
   const readingCount = questions.filter(q => q.skillType === 'reading').length;
@@ -63,30 +75,23 @@ const BackendControl = () => {
   const handleBack = () => navigate(-1);
   const handleForward = () => navigate(1);
 
-  // Connect data source handler
-  const handleConnectSource = (sourceName: string) => {
-    // Find the source in our list
-    const updatedSources = connectedSources.map(source => {
-      if (source.name === sourceName) {
-        // Toggle status
-        const newStatus = source.status === 'connected' ? 'disconnected' : 'connected';
-        // Save to storage
-        saveDataSourceConnection(sourceName, newStatus, source.type);
-        // Return updated source
-        return { ...source, status: newStatus, lastSynced: newStatus === 'connected' ? new Date().toLocaleString() : source.lastSynced };
-      }
-      return source;
-    });
-    
-    setConnectedSources(updatedSources);
-    
-    // Show success message
-    const isConnected = updatedSources.find(s => s.name === sourceName)?.status === 'connected';
-    if (isConnected) {
-      toast.success(`Connected to ${sourceName} successfully!`);
-    } else {
-      toast.info(`Disconnected from ${sourceName}`);
-    }
+  // Handle open connection dialog
+  const handleOpenConnectionDialog = (source) => {
+    setSelectedSource(source);
+    setIsDialogOpen(true);
+  };
+
+  // Handle adding new data source
+  const handleAddNewSource = () => {
+    toast.info("To add a new data source, you need to configure it manually in the database settings");
+    navigate("/admin-backend?tab=settings");
+    setActiveTab("settings");
+  };
+
+  // Check database connection status
+  const isDatabaseConnected = () => {
+    const dbConfig = getDatabaseConfig();
+    return dbConfig.connected === true;
   };
 
   return (
@@ -206,7 +211,7 @@ const BackendControl = () => {
             <CardHeader>
               <CardTitle>Connected Data Sources</CardTitle>
               <CardDescription>
-                Database and external API connections
+                Database and external API connections (manual configuration required)
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -242,16 +247,15 @@ const BackendControl = () => {
                     </div>
                     <Button 
                       size="sm" 
-                      variant={source.status === 'connected' ? 'outline' : 'default'}
-                      onClick={() => handleConnectSource(source.name)}
+                      onClick={() => handleOpenConnectionDialog(source)}
                     >
-                      <LinkIcon className="mr-1 h-4 w-4" />
-                      {source.status === 'connected' ? 'Disconnect' : 'Connect'}
+                      <ExternalLink className="mr-1 h-4 w-4" />
+                      Configure
                     </Button>
                   </div>
                 ))}
 
-                <Button className="w-full mt-4" onClick={() => toast.success("Adding new data source")}>
+                <Button className="w-full mt-4" onClick={handleAddNewSource}>
                   <Plus className="mr-2 h-4 w-4" />
                   Add New Data Source
                 </Button>
@@ -349,6 +353,77 @@ const BackendControl = () => {
           <SettingsComponent />
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Configure {selectedSource?.name}</DialogTitle>
+            <DialogDescription>
+              Manual configuration required for database connections
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-4">
+            {selectedSource?.type === 'postgres' ? (
+              <div className="text-center">
+                <Database className="h-12 w-12 mx-auto text-primary mb-4" />
+                <p className="mb-4">
+                  To configure your database connection, please use the dedicated Database Configuration interface.
+                </p>
+                <Button 
+                  onClick={() => {
+                    setIsDialogOpen(false);
+                    setActiveTab("settings");
+                  }}
+                  className="w-full"
+                >
+                  Go to Database Settings
+                </Button>
+              </div>
+            ) : (
+              <div className="text-center">
+                <div className="p-3 rounded-full bg-primary/10 mx-auto w-fit mb-4">
+                  {selectedSource?.type === 'auth' ? <Users className="h-12 w-12 text-primary" /> :
+                   selectedSource?.type === 'storage' ? <FileJson className="h-12 w-12 text-primary" /> :
+                   <BarChart4 className="h-12 w-12 text-primary" />}
+                </div>
+                <p className="mb-4">
+                  To configure this connection, you must access the dedicated admin interface for {selectedSource?.name}.
+                </p>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Connection status is determined by manually setting up integration parameters and credentials.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      toast.info(`Configuration for ${selectedSource?.name} would open in a new tab in a real environment`);
+                      setIsDialogOpen(false);
+                    }}
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Open Configuration Interface
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setIsDialogOpen(false);
+                      setActiveTab("settings");
+                    }}
+                  >
+                    Go to Settings
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+            <Button variant="secondary" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
