@@ -32,7 +32,8 @@ import {
   Shield,
   ArrowLeft,
   ArrowRight,
-  ServerOff
+  ServerOff,
+  Eye
 } from "lucide-react";
 import ReadingQuestionForm from '@/components/admin/ReadingQuestionForm';
 import WritingQuestionForm from '@/components/admin/WritingQuestionForm';
@@ -65,32 +66,79 @@ import DatabaseManager from '@/components/admin/DatabaseManager';
 import MaintenanceSettings from '@/components/admin/MaintenanceSettings';
 import AnalyticsSettings from '@/components/admin/AnalyticsSettings';
 import DatabaseConfig from '@/components/admin/DatabaseConfig';
-import { getDataSourceConnections } from '@/utils/settingsStorage';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { 
+  Form, 
+  FormControl, 
+  FormDescription, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+// Schema for the create test form
+const createTestFormSchema = z.object({
+  testName: z.string().min(3, {
+    message: "Test name must be at least 3 characters.",
+  }),
+  includeReading: z.boolean().default(true),
+  includeWriting: z.boolean().default(true),
+  includeListening: z.boolean().default(true),
+  includeSpeaking: z.boolean().default(true),
+});
+
+type CreateTestFormValues = z.infer<typeof createTestFormSchema>;
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("reading");
   const [selectedFeature, setSelectedFeature] = useState("dashboard");
   const [activeSystemTab, setActiveSystemTab] = useState("general");
-  const { addQuestion, questions } = useQuestions();
+  const { addQuestion, questions, createNewTest, getRecentQuestions } = useQuestions();
   const { toast: uiToast } = useToast();
   const navigate = useNavigate();
-  const [connectedSources, setConnectedSources] = useState([]);
+  const [isCreateTestDialogOpen, setIsCreateTestDialogOpen] = useState(false);
+  const [recentQuestions, setRecentQuestions] = useState([]);
 
-  // Load data sources on component mount
+  // Form for creating new tests
+  const createTestForm = useForm<CreateTestFormValues>({
+    resolver: zodResolver(createTestFormSchema),
+    defaultValues: {
+      testName: "",
+      includeReading: true,
+      includeWriting: true,
+      includeListening: true,
+      includeSpeaking: true,
+    },
+  });
+
+  // Load recent questions on component mount and when questions change
   useEffect(() => {
-    const sources = getDataSourceConnections();
-    setConnectedSources(sources);
-  }, []);
+    setRecentQuestions(getRecentQuestions(5));
+  }, [questions, getRecentQuestions]);
 
   // Navigation handlers
   const handleBack = () => navigate(-1);
   const handleForward = () => navigate(1);
 
   // Get question counts by type
-  const readingCount = questions.filter(q => q.skillType === 'reading').length || 124;
-  const writingCount = questions.filter(q => q.skillType === 'writing').length || 87;
-  const listeningCount = questions.filter(q => q.skillType === 'listening').length || 96;
-  const speakingCount = questions.filter(q => q.skillType === 'speaking').length || 112;
+  const readingCount = questions.filter(q => q.skillType === 'reading').length || 0;
+  const writingCount = questions.filter(q => q.skillType === 'writing').length || 0;
+  const listeningCount = questions.filter(q => q.skillType === 'listening').length || 0;
+  const speakingCount = questions.filter(q => q.skillType === 'speaking').length || 0;
   const totalQuestions = readingCount + writingCount + listeningCount + speakingCount;
 
   // Mock stats for the dashboard
@@ -128,6 +176,9 @@ const AdminDashboard = () => {
       title: "Question Added",
       description: "The question has been successfully added to the database.",
     });
+
+    // Update recent questions list
+    setRecentQuestions(getRecentQuestions(5));
   };
 
   const handleCancelForm = () => {
@@ -141,6 +192,49 @@ const AdminDashboard = () => {
   // Handle settings save
   const handleSaveSettings = () => {
     toast.success('Settings saved successfully!');
+  };
+
+  // Handle creating a new test
+  const onCreateTestSubmit = (data: CreateTestFormValues) => {
+    // Determine which skill types to include
+    const skillTypes = [];
+    if (data.includeReading) skillTypes.push('reading');
+    if (data.includeWriting) skillTypes.push('writing');
+    if (data.includeListening) skillTypes.push('listening');
+    if (data.includeSpeaking) skillTypes.push('speaking');
+    
+    // Don't create test if no skill types selected
+    if (skillTypes.length === 0) {
+      toast.error('Please select at least one skill type');
+      return;
+    }
+    
+    // Create the test
+    const testId = createNewTest(data.testName, skillTypes);
+    
+    // Close dialog
+    setIsCreateTestDialogOpen(false);
+    
+    // Reset form
+    createTestForm.reset();
+    
+    // Show success notification
+    toast.success(`New test "${data.testName}" created successfully!`);
+    
+    // In a real app, you might redirect to the new test editor
+    // navigate(`/admin-dashboard/tests/${testId}`);
+  };
+
+  const handleViewQuestion = (question) => {
+    // Set the appropriate feature and skill type
+    setSelectedFeature(question.skillType);
+    setActiveTab(question.skillType);
+    
+    // Show toast
+    toast.info(`Viewing ${question.skillType} question: ${question.title || question.id}`);
+    
+    // In a real app, you might navigate to the question detail view
+    // navigate(`/admin-dashboard/questions/${question.id}`);
   };
 
   const AdminSidebar = () => (
@@ -253,21 +347,13 @@ const AdminDashboard = () => {
                 </button>
               </SidebarMenuButton>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={selectedFeature === "backend"} onClick={() => setSelectedFeature("backend")}>
-                <Link to="/admin-backend">
-                  <ServerCog className="h-4 w-4" />
-                  <span>Backend Control</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <div className="space-y-2 p-3">
           <div className="text-sm text-muted-foreground">
-            Connected data sources: {connectedSources.filter(s => s.status === 'connected').length}/{connectedSources.length}
+            {totalQuestions} questions in database
           </div>
         </div>
       </SidebarFooter>
@@ -452,7 +538,7 @@ const AdminDashboard = () => {
                 <div className="text-sm text-muted-foreground">Completed</div>
               </div>
             </div>
-            <Button className="w-full">
+            <Button className="w-full" onClick={() => setIsCreateTestDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create New Test
             </Button>
@@ -469,37 +555,168 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {[
-                { title: "IELTS Reading Passage on Climate Change", type: "reading", date: "Apr 2, 2025" },
-                { title: "Writing Task 2: Environment Essay", type: "writing", date: "Apr 1, 2025" },
-                { title: "Listening Section 3: University Housing", type: "listening", date: "Mar 30, 2025" }
-              ].map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-accent/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-8 w-8 rounded-md flex items-center justify-center 
-                      ${item.type === 'reading' ? 'bg-reading/20 text-reading' : 
-                      item.type === 'writing' ? 'bg-writing/20 text-writing' : 
-                      item.type === 'listening' ? 'bg-listening/20 text-listening' : 
-                      'bg-speaking/20 text-speaking'}`}>
-                      {item.type === 'reading' ? <FileText className="h-4 w-4" /> : 
-                       item.type === 'writing' ? <PenSquare className="h-4 w-4" /> : 
-                       item.type === 'listening' ? <Headphones className="h-4 w-4" /> : 
-                       <Mic className="h-4 w-4" />}
+              {recentQuestions.length > 0 ? (
+                recentQuestions.map((question, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 rounded-md hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => handleViewQuestion(question)}>
+                    <div className="flex items-center gap-3">
+                      <div className={`h-8 w-8 rounded-md flex items-center justify-center 
+                        ${question.skillType === 'reading' ? 'bg-reading/20 text-reading' : 
+                        question.skillType === 'writing' ? 'bg-writing/20 text-writing' : 
+                        question.skillType === 'listening' ? 'bg-listening/20 text-listening' : 
+                        'bg-speaking/20 text-speaking'}`}>
+                        {question.skillType === 'reading' ? <FileText className="h-4 w-4" /> : 
+                         question.skillType === 'writing' ? <PenSquare className="h-4 w-4" /> : 
+                         question.skillType === 'listening' ? <Headphones className="h-4 w-4" /> : 
+                         <Mic className="h-4 w-4" />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">{question.title || `${question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Question`}</div>
+                        <div className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-sm font-medium">{item.title}</div>
-                      <div className="text-xs text-muted-foreground">{item.date}</div>
-                    </div>
+                    <Button size="sm" variant="ghost">
+                      <Eye className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button size="sm" variant="ghost">
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  No questions added yet. Create your first question in the Question Creator.
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Test Dialog */}
+      <Dialog open={isCreateTestDialogOpen} onOpenChange={setIsCreateTestDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create New Test</DialogTitle>
+            <DialogDescription>
+              Configure your test settings and included question types.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...createTestForm}>
+            <form onSubmit={createTestForm.handleSubmit(onCreateTestSubmit)} className="space-y-5">
+              <FormField
+                control={createTestForm.control}
+                name="testName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Test Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="IELTS General Training - Full Test" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Enter a descriptive name for this test.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="space-y-3">
+                <FormLabel>Include Question Types</FormLabel>
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={createTestForm.control}
+                    name="includeReading"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start space-x-3 space-y-0 p-2 border rounded-md">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base flex items-center">
+                            <FileText className="h-4 w-4 mr-2 text-reading" />
+                            Reading
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createTestForm.control}
+                    name="includeWriting"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start space-x-3 space-y-0 p-2 border rounded-md">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base flex items-center">
+                            <PenSquare className="h-4 w-4 mr-2 text-writing" />
+                            Writing
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createTestForm.control}
+                    name="includeListening"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start space-x-3 space-y-0 p-2 border rounded-md">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base flex items-center">
+                            <Headphones className="h-4 w-4 mr-2 text-listening" />
+                            Listening
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createTestForm.control}
+                    name="includeSpeaking"
+                    render={({ field }) => (
+                      <FormItem className="flex items-start space-x-3 space-y-0 p-2 border rounded-md">
+                        <FormControl>
+                          <Checkbox 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base flex items-center">
+                            <Mic className="h-4 w-4 mr-2 text-speaking" />
+                            Speaking
+                          </FormLabel>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              
+              <DialogFooter className="mt-6">
+                <Button type="button" variant="outline" onClick={() => setIsCreateTestDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Create Test</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 

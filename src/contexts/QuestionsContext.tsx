@@ -10,6 +10,8 @@ type QuestionsContextType = {
   updateQuestion: (id: string, updatedQuestion: Question) => void;
   deleteQuestion: (id: string) => void;
   getQuestionsByType: (skillType: string) => Question[];
+  createNewTest: (name: string, skillTypes: string[]) => string;
+  getRecentQuestions: (limit?: number) => Question[];
   loading: boolean;
 };
 
@@ -20,6 +22,8 @@ const QuestionsContext = createContext<QuestionsContextType>({
   updateQuestion: () => {},
   deleteQuestion: () => {},
   getQuestionsByType: () => [],
+  createNewTest: () => '',
+  getRecentQuestions: () => [],
   loading: true,
 });
 
@@ -100,6 +104,37 @@ export const QuestionsProvider: React.FC<QuestionsProviderProps> = ({ children }
   const getQuestionsByType = (skillType: string): Question[] => {
     return questions.filter(q => q.skillType === skillType);
   };
+  
+  // Get recent questions with optional limit
+  const getRecentQuestions = (limit: number = 5): Question[] => {
+    // Sort questions by most recently added (assuming newer questions have higher IDs or later timestamps)
+    // In a real app, you would have a createdAt field to sort by
+    return [...questions]
+      .sort((a, b) => {
+        // Sort by ID as a proxy for creation time
+        // If you have a createdAt timestamp, use that instead
+        const idA = a.id.toString();
+        const idB = b.id.toString();
+        return idB.localeCompare(idA);
+      })
+      .slice(0, limit);
+  };
+  
+  // Create a new test composed of questions from specified skill types
+  const createNewTest = (name: string, skillTypes: string[]): string => {
+    const testId = `test-${Date.now()}`;
+    
+    // In a real implementation, you would likely:
+    // 1. Create a test entity in your database
+    // 2. Associate selected questions with this test
+    // 3. Return the test ID for navigation
+    
+    console.log(`Created new test: ${name} with skill types: ${skillTypes.join(', ')}`);
+    
+    // For now, we'll just return the test ID
+    // In a real app, you'd save this to localStorage or a database
+    return testId;
+  };
 
   // Context value
   const value = {
@@ -108,6 +143,8 @@ export const QuestionsProvider: React.FC<QuestionsProviderProps> = ({ children }
     updateQuestion,
     deleteQuestion,
     getQuestionsByType,
+    createNewTest,
+    getRecentQuestions,
     loading,
   };
 
