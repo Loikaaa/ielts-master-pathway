@@ -20,8 +20,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   onBackToPractice
 }) => {
   const getBandScoreEstimate = (skillType: string, percentCorrect: number): number => {
-    // This is a simplified band score estimation
-    // In a real IELTS test, band scores are determined by a complex formula
+    // This is a simplified band score estimation based on IELTS scoring guidelines
+    // In a real IELTS test, band scores are determined by complex formulas per section
     const percentage = (score / totalPossible) * 100;
     
     if (percentage >= 90) return 9.0;
@@ -51,6 +51,25 @@ const ResultsView: React.FC<ResultsViewProps> = ({
     } else {
       return "Your speaking responses will be evaluated within 4 hours. Check back later for your results.";
     }
+  };
+
+  const getEvaluationCriteria = () => {
+    if (skillType === 'writing') {
+      return [
+        "Task Achievement/Response",
+        "Coherence and Cohesion",
+        "Lexical Resource",
+        "Grammatical Range and Accuracy"
+      ];
+    } else if (skillType === 'speaking') {
+      return [
+        "Fluency and Coherence",
+        "Lexical Resource",
+        "Grammatical Range and Accuracy",
+        "Pronunciation"
+      ];
+    }
+    return [];
   };
   
   return (
@@ -95,32 +114,39 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               <p>{getResultDescription()}</p>
             </div>
             
-            {skillType === 'writing' && (
+            {(skillType === 'writing' || skillType === 'speaking') && (
               <div className="bg-orange-50 border-l-4 border-orange-500 p-4 text-orange-700">
-                <h4 className="font-medium mb-1">Writing Evaluation in Progress</h4>
+                <h4 className="font-medium mb-1">{skillType === 'writing' ? 'Writing' : 'Speaking'} Evaluation in Progress</h4>
                 <p className="text-sm">
-                  Your writing responses are being evaluated based on:
+                  Your {skillType} responses are being evaluated based on:
                 </p>
                 <ul className="text-sm list-disc ml-5 mt-2">
-                  <li>Task Achievement/Response</li>
-                  <li>Coherence and Cohesion</li>
-                  <li>Lexical Resource</li>
-                  <li>Grammatical Range and Accuracy</li>
+                  {getEvaluationCriteria().map((criteria, index) => (
+                    <li key={index}>{criteria}</li>
+                  ))}
                 </ul>
               </div>
             )}
-            
-            {skillType === 'speaking' && (
-              <div className="bg-orange-50 border-l-4 border-orange-500 p-4 text-orange-700">
-                <h4 className="font-medium mb-1">Speaking Evaluation in Progress</h4>
-                <p className="text-sm">
-                  Your speaking responses are being evaluated based on:
-                </p>
-                <ul className="text-sm list-disc ml-5 mt-2">
-                  <li>Fluency and Coherence</li>
-                  <li>Lexical Resource</li>
-                  <li>Grammatical Range and Accuracy</li>
-                  <li>Pronunciation</li>
+
+            {(skillType === 'reading' || skillType === 'listening') && (
+              <div className="mt-6 border-t pt-4">
+                <h4 className="font-medium mb-3">IELTS {skillType === 'reading' ? 'Reading' : 'Listening'} Rules:</h4>
+                <ul className="text-sm list-disc ml-5">
+                  {skillType === 'reading' ? (
+                    <>
+                      <li>40 questions must be completed in 60 minutes</li>
+                      <li>Spelling mistakes count as wrong answers</li>
+                      <li>Answers must match the text exactly</li>
+                      <li>No extra time is given to transfer answers</li>
+                    </>
+                  ) : (
+                    <>
+                      <li>40 questions with audio played once only</li>
+                      <li>30 minutes listening + 10 minutes to transfer answers</li>
+                      <li>Plurals must be marked correctly (e.g., book vs. books)</li>
+                      <li>Numbers should be written as digits (e.g., "20" not "twenty")</li>
+                    </>
+                  )}
                 </ul>
               </div>
             )}

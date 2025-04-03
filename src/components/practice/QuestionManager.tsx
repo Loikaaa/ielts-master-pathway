@@ -49,6 +49,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     totalPossible: number;
     resultTime: string;
   } | null>(null);
+  const [transferTime, setTransferTime] = useState(false);
   
   useEffect(() => {
     // In a real app, this would be an API call
@@ -72,19 +73,19 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         
         setQuestions(filteredQuestions);
         
-        // Set initial timer based on the skill type (IELTS timing rules)
+        // Set initial timer based on the IELTS timing rules
         if (skillType === 'reading') {
           // IELTS Reading: 60 minutes for 40 questions
           setTimeRemaining(60 * 60); // 60 minutes in seconds
         } else if (skillType === 'listening') {
-          // IELTS Listening: around 30 minutes for 40 questions
+          // IELTS Listening: 30 minutes + 10 minutes transfer time
           setTimeRemaining(30 * 60); // 30 minutes in seconds
         } else if (skillType === 'writing') {
-          // IELTS Writing: 60 minutes for 2 tasks
+          // IELTS Writing: 60 minutes total (20 mins Task 1, 40 mins Task 2)
           setTimeRemaining(60 * 60); // 60 minutes in seconds
         } else if (skillType === 'speaking') {
           // Individual questions will have their own timers
-          if (filteredQuestions[0].timeLimit) {
+          if (filteredQuestions[0]?.timeLimit) {
             setTimeRemaining(filteredQuestions[0].timeLimit);
           }
         }
@@ -128,9 +129,15 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setTimeRemaining(prev => {
         if (prev === null || prev <= 0) {
           clearInterval(timer);
-          // Auto-submit when time is up
-          if (prev === 0 && !examCompleted) {
-            handleSubmit();
+          // Auto-submit when time is up or switch to transfer time for listening
+          if (prev === 0) {
+            if (skillType === 'listening' && !transferTime) {
+              // Switch to 10 minutes transfer time for listening
+              setTransferTime(true);
+              return 10 * 60; // 10 minutes in seconds
+            } else if (!examCompleted) {
+              handleSubmit();
+            }
           }
           return 0;
         }
@@ -140,21 +147,29 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           setShowTimeWarning(true);
           toast({
             title: "Time is running out!",
-            description: "You have less than 10% of your time remaining.",
+            description: "You have less than 6 minutes remaining.",
             variant: "destructive",
           });
-        } else if (skillType === 'listening' && prev === Math.floor(30 * 60 * 0.1)) {
+        } else if (skillType === 'listening' && !transferTime && prev === Math.floor(30 * 60 * 0.1)) {
           setShowTimeWarning(true);
           toast({
             title: "Time is running out!",
-            description: "You have less than 10% of your time remaining.",
+            description: "You have less than 3 minutes remaining.",
             variant: "destructive",
           });
         } else if (skillType === 'writing' && prev === Math.floor(60 * 60 * 0.1)) {
           setShowTimeWarning(true);
           toast({
             title: "Time is running out!",
-            description: "You have less than 10% of your time remaining.",
+            description: "You have less than 6 minutes remaining.",
+            variant: "destructive",
+          });
+        } else if (transferTime && prev === Math.floor(10 * 60 * 0.2)) {
+          // 20% warning for transfer time (2 minutes)
+          setShowTimeWarning(true);
+          toast({
+            title: "Transfer time ending!",
+            description: "You have 2 minutes left to transfer answers.",
             variant: "destructive",
           });
         } else if (skillType === 'speaking' && prev === Math.floor(questions[currentQuestionIndex]?.timeLimit! * 0.1)) {
@@ -171,7 +186,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
     }, 1000);
     
     return () => clearInterval(timer);
-  }, [timeRemaining, currentQuestionIndex, questions, toast, skillType, examCompleted]);
+  }, [timeRemaining, currentQuestionIndex, questions, toast, skillType, examCompleted, transferTime]);
   
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({
@@ -185,13 +200,18 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev + 1);
       setShowTimeWarning(false);
       
-      // Only update timer for speaking questions
+      // Only update timer for speaking questions or when moving from task 1 to task 2 in writing
       if (skillType === 'speaking') {
         // Update timer for the next question
         const nextQuestion = questions[currentQuestionIndex + 1];
-        if (nextQuestion.timeLimit) {
+        if (nextQuestion?.timeLimit) {
           setTimeRemaining(nextQuestion.timeLimit);
         }
+      } else if (skillType === 'writing' && 
+                questions[currentQuestionIndex]?.taskType === 'task1' && 
+                questions[currentQuestionIndex + 1]?.taskType === 'task2') {
+        // When moving from Task 1 to Task 2 in writing, reset timer to 40 minutes
+        setTimeRemaining(40 * 60); // 40 minutes in seconds
       }
     } else {
       // Submit answers
@@ -204,13 +224,18 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
       setCurrentQuestionIndex(prev => prev - 1);
       setShowTimeWarning(false);
       
-      // Only update timer for speaking questions
+      // Only update timer for speaking questions or when moving from task 2 to task 1 in writing
       if (skillType === 'speaking') {
         // Update timer for the previous question
         const prevQuestion = questions[currentQuestionIndex - 1];
-        if (prevQuestion.timeLimit) {
+        if (prevQuestion?.timeLimit) {
           setTimeRemaining(prevQuestion.timeLimit);
         }
+      } else if (skillType === 'writing' && 
+                questions[currentQuestionIndex]?.taskType === 'task2' && 
+                questions[currentQuestionIndex - 1]?.taskType === 'task1') {
+        // When moving from Task 2 to Task 1 in writing, reset timer to 20 minutes
+        setTimeRemaining(20 * 60); // 20 minutes in seconds
       }
     }
   };
@@ -329,7 +354,8 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
         <div className="flex-1">
           <h1 className="text-2xl font-bold capitalize">{skillType} Practice</h1>
           <p className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {questions.length}
+            Question {currentQuestionIndex + 1} of {questions.length} 
+            {transferTime && " - Transfer Time"}
           </p>
         </div>
         
@@ -349,6 +375,9 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
           <span className="font-mono font-medium">
             {formatTime(timeRemaining)}
           </span>
+          {transferTime && (
+            <span className="text-xs ml-2">Transfer Time</span>
+          )}
         </div>
       )}
       
@@ -405,6 +434,49 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
             {currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit'}
           </Button>
         </CardFooter>
+      </Card>
+
+      {/* IELTS Rules Info Card */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">IELTS {skillType?.charAt(0).toUpperCase() + skillType?.slice(1)} Rules</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="text-sm space-y-1">
+            {skillType === 'reading' && (
+              <>
+                <li>• 60 minutes to complete 40 questions</li>
+                <li>• No extra time to transfer answers</li>
+                <li>• Spelling mistakes count as wrong answers</li>
+                <li>• Answers must be exactly as in the text</li>
+              </>
+            )}
+            {skillType === 'listening' && (
+              <>
+                <li>• 30 minutes listening + 10 minutes to transfer answers</li>
+                <li>• Audio plays ONCE only</li>
+                <li>• Write numbers as digits (e.g., "20" not "twenty")</li>
+                <li>• Pay attention to plurals (e.g., "book" vs "books")</li>
+              </>
+            )}
+            {skillType === 'writing' && (
+              <>
+                <li>• Task 1: 20 minutes, minimum 150 words</li>
+                <li>• Task 2: 40 minutes, minimum 250 words</li>
+                <li>• No bullet points/numbered lists – full sentences only</li>
+                <li>• -1 Band Score if below minimum words</li>
+              </>
+            )}
+            {skillType === 'speaking' && (
+              <>
+                <li>• Part 1: Introduction (4-5 minutes)</li>
+                <li>• Part 2: Long turn with 1 minute preparation (3-4 minutes)</li>
+                <li>• Part 3: Discussion (4-5 minutes)</li>
+                <li>• Entire test is recorded (for re-marking)</li>
+              </>
+            )}
+          </ul>
+        </CardContent>
       </Card>
     </div>
   );
