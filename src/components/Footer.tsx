@@ -62,24 +62,24 @@ const Footer = () => {
             <h4 className="font-medium text-lg mb-4">Resources</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/resources/blog" className="text-muted-foreground hover:text-primary transition-colors">
                   Blog
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/resources/faq" className="text-muted-foreground hover:text-primary transition-colors">
                   FAQ
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/resources/success-stories" className="text-muted-foreground hover:text-primary transition-colors">
                   Success Stories
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/resources/ielts-tips" className="text-muted-foreground hover:text-primary transition-colors">
                   IELTS Tips
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
