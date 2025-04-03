@@ -1,13 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { BookOpen, Calendar, Clock, Search, Tag, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Tag } from 'lucide-react';
+import BlogPostCard from '@/components/blog/BlogPostCard';
 
 // Sample blog posts data
 const blogPosts = [
@@ -80,6 +79,23 @@ const blogPosts = [
 ];
 
 const Blog = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  
+  // Filter posts based on search term and active tab
+  const filteredPosts = blogPosts.filter(post => {
+    const matchesSearch = 
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesCategory = 
+      activeTab === 'all' || 
+      post.category.toLowerCase() === activeTab.toLowerCase();
+    
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -96,7 +112,12 @@ const Blog = () => {
             <div className="flex flex-col md:flex-row justify-between gap-4">
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search blog posts..." className="pl-9" />
+                <Input 
+                  placeholder="Search blog posts..." 
+                  className="pl-9" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="whitespace-nowrap">
@@ -107,7 +128,11 @@ const Blog = () => {
             </div>
           </div>
           
-          <Tabs defaultValue="all">
+          <Tabs 
+            defaultValue="all" 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+          >
             <TabsList className="mb-8">
               <TabsTrigger value="all">All Posts</TabsTrigger>
               <TabsTrigger value="reading">Reading</TabsTrigger>
@@ -117,23 +142,51 @@ const Blog = () => {
               <TabsTrigger value="general">General</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="all">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blogPosts.map((post) => (
-                  <BlogPostCard key={post.id} post={post} />
-                ))}
-              </div>
+            <TabsContent value="all" className="mt-0">
+              {filteredPosts.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredPosts.map((post) => (
+                    <BlogPostCard key={post.id} post={post} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground mb-4">No blog posts found matching your search criteria.</p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setSearchTerm('');
+                      setActiveTab('all');
+                    }}
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
             </TabsContent>
             
             {['reading', 'writing', 'speaking', 'listening', 'general'].map((category) => (
-              <TabsContent key={category} value={category}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {blogPosts
-                    .filter((post) => post.category.toLowerCase() === category)
-                    .map((post) => (
+              <TabsContent key={category} value={category} className="mt-0">
+                {filteredPosts.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredPosts.map((post) => (
                       <BlogPostCard key={post.id} post={post} />
                     ))}
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground mb-4">No blog posts found in this category.</p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setSearchTerm('');
+                        setActiveTab('all');
+                      }}
+                    >
+                      View All Posts
+                    </Button>
+                  </div>
+                )}
               </TabsContent>
             ))}
           </Tabs>
@@ -147,70 +200,6 @@ const Blog = () => {
       </main>
       <Footer />
     </div>
-  );
-};
-
-// Blog post card component
-interface BlogPostProps {
-  post: {
-    id: string;
-    title: string;
-    excerpt: string;
-    coverImage: string;
-    author: string;
-    date: string;
-    readTime: string;
-    category: string;
-    tags: string[];
-  };
-}
-
-const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
-  return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
-      <div className="relative h-48 overflow-hidden">
-        <img 
-          src={post.coverImage} 
-          alt={post.title} 
-          className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
-        />
-        <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
-          {post.category}
-        </div>
-      </div>
-      
-      <CardHeader className="pb-2">
-        <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
-      </CardHeader>
-      
-      <CardContent className="flex-grow">
-        <p className="text-muted-foreground line-clamp-3 mb-4">{post.excerpt}</p>
-        <div className="flex flex-wrap gap-1 mb-4">
-          {post.tags.map((tag, index) => (
-            <span key={index} className="text-xs bg-accent px-2 py-0.5 rounded-full">
-              {tag}
-            </span>
-          ))}
-        </div>
-      </CardContent>
-      
-      <CardFooter className="border-t pt-4 flex justify-between items-center">
-        <div className="flex items-center">
-          <User className="h-4 w-4 mr-1 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">{post.author}</span>
-        </div>
-        <div className="flex items-center space-x-3 text-sm text-muted-foreground">
-          <div className="flex items-center">
-            <Calendar className="h-4 w-4 mr-1" />
-            <span>{post.date}</span>
-          </div>
-          <div className="flex items-center">
-            <Clock className="h-4 w-4 mr-1" />
-            <span>{post.readTime}</span>
-          </div>
-        </div>
-      </CardFooter>
-    </Card>
   );
 };
 

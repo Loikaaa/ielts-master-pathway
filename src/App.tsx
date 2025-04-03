@@ -17,6 +17,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ExamContent from "./pages/ExamContent";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminBlogManager from "./pages/AdminBlogManager";
 import Blog from "./pages/resources/Blog";
 import FAQ from "./pages/resources/FAQ";
 import SuccessStories from "./pages/resources/SuccessStories";
@@ -54,6 +55,7 @@ const App = () => {
                   <Route path="/signup" element={<SignUp />} />
                   <Route path="/exam-content" element={<ExamContent />} />
                   <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                  <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
