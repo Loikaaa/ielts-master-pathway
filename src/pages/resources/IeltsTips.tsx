@@ -124,7 +124,7 @@ const tipsByCategory = {
     {
       id: 'tip16',
       title: 'Leave Time for Review',
-      content: 'Reserve 3-5 minutes at the end to review your writing. Check for common errors such as subject-verb agreement, article usage, spelling, and punctuation. Ensure your writing flows logically and that you've fulfilled all parts of the task. Making these final corrections can significantly improve your score.',
+      content: "Reserve 3-5 minutes at the end to review your writing. Check for common errors such as subject-verb agreement, article usage, spelling, and punctuation. Ensure your writing flows logically and that you've fulfilled all parts of the task. Making these final corrections can significantly improve your score.",
       author: 'Writing Mentor',
       icon: Pencil
     }

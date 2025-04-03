@@ -80,7 +80,7 @@ const successStories = [
     targetScore: 'Band 6.5',
     achievedScore: 'Band 7.0',
     studyDuration: '6 months',
-    testimonial: 'The community support on Neplia IELTS was incredible. Being able to practice speaking with other students and get feedback from teachers motivated me to keep improving. The detailed grammar lessons helped me correct mistakes I didn't even know I was making.',
+    testimonial: "The community support on Neplia IELTS was incredible. Being able to practice speaking with other students and get feedback from teachers motivated me to keep improving. The detailed grammar lessons helped me correct mistakes I didn't even know I was making.",
     challenge: 'Grammar and vocabulary',
     occupation: 'Graduate Student',
     destination: 'United States',
