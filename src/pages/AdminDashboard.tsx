@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -30,7 +31,8 @@ import {
   Cog,
   Shield,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  ServerOff
 } from "lucide-react";
 import ReadingQuestionForm from '@/components/admin/ReadingQuestionForm';
 import WritingQuestionForm from '@/components/admin/WritingQuestionForm';
@@ -60,13 +62,25 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import DatabaseManager from '@/components/admin/DatabaseManager';
+import MaintenanceSettings from '@/components/admin/MaintenanceSettings';
+import AnalyticsSettings from '@/components/admin/AnalyticsSettings';
+import DatabaseConfig from '@/components/admin/DatabaseConfig';
+import { getDataSourceConnections } from '@/utils/settingsStorage';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState("reading");
   const [selectedFeature, setSelectedFeature] = useState("dashboard");
+  const [activeSystemTab, setActiveSystemTab] = useState("general");
   const { addQuestion, questions } = useQuestions();
   const { toast: uiToast } = useToast();
   const navigate = useNavigate();
+  const [connectedSources, setConnectedSources] = useState([]);
+
+  // Load data sources on component mount
+  useEffect(() => {
+    const sources = getDataSourceConnections();
+    setConnectedSources(sources);
+  }, []);
 
   // Navigation handlers
   const handleBack = () => navigate(-1);
@@ -251,13 +265,9 @@ const AdminDashboard = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <div className="space-y-4 p-3">
-          <div>
-            <div className="flex justify-between items-center text-xs mb-1">
-              <span>Database Storage</span>
-              <span className="font-medium">68%</span>
-            </div>
-            <Progress value={68} className="h-2" />
+        <div className="space-y-2 p-3">
+          <div className="text-sm text-muted-foreground">
+            Connected data sources: {connectedSources.filter(s => s.status === 'connected').length}/{connectedSources.length}
           </div>
         </div>
       </SidebarFooter>
@@ -506,109 +516,144 @@ const AdminDashboard = () => {
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Shield className="h-5 w-5 mr-2 text-primary" />
-              Security Settings
-            </CardTitle>
-            <CardDescription>
-              Configure security and access controls
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Two-Factor Authentication</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Enable for all administrators</span>
-                <Badge>Enabled</Badge>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Session Timeout</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Automatic logout after inactivity</span>
-                <Badge variant="outline">30 minutes</Badge>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Login Attempts</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Max attempts before lockout</span>
-                <Badge variant="outline">5 attempts</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <Tabs value={activeSystemTab} onValueChange={setActiveSystemTab}>
+        <TabsList className="mb-6">
+          <TabsTrigger value="general" className="flex items-center gap-1">
+            <Cog className="h-4 w-4" />
+            General
+          </TabsTrigger>
+          <TabsTrigger value="maintenance" className="flex items-center gap-1">
+            <ServerOff className="h-4 w-4" />
+            Maintenance
+          </TabsTrigger>
+          <TabsTrigger value="database" className="flex items-center gap-1">
+            <Database className="h-4 w-4" />
+            Database
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="flex items-center gap-1">
+            <BarChart2 className="h-4 w-4" />
+            Analytics
+          </TabsTrigger>
+        </TabsList>
         
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Cog className="h-5 w-5 mr-2 text-primary" />
-              General Settings
-            </CardTitle>
-            <CardDescription>
-              System-wide configuration options
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Maintenance Mode</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Site availability for users</span>
-                <Badge variant="secondary">Disabled</Badge>
-              </div>
-            </div>
+        <TabsContent value="general">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Shield className="h-5 w-5 mr-2 text-primary" />
+                  Security Settings
+                </CardTitle>
+                <CardDescription>
+                  Configure security and access controls
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Two-Factor Authentication</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Enable for all administrators</span>
+                    <Badge>Enabled</Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Session Timeout</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Automatic logout after inactivity</span>
+                    <Badge variant="outline">30 minutes</Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Login Attempts</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Max attempts before lockout</span>
+                    <Badge variant="outline">5 attempts</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Auto Backup</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Scheduled database backups</span>
-                <Badge>Enabled</Badge>
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Cog className="h-5 w-5 mr-2 text-primary" />
+                  General Settings
+                </CardTitle>
+                <CardDescription>
+                  System-wide configuration options
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Auto Backup</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Scheduled database backups</span>
+                    <Badge>Enabled</Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Error Logging</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Detail level of error logs</span>
+                    <Badge variant="outline">Detailed</Badge>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">System Timezone</h3>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Default system timezone</span>
+                    <Badge variant="outline">UTC</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Error Logging</h3>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Detail level of error logs</span>
-                <Badge variant="outline">Detailed</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            <Card className="md:col-span-2">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <RefreshCcw className="h-5 w-5 mr-2 text-primary" />
+                  System Maintenance
+                </CardTitle>
+                <CardDescription>
+                  Maintain system performance and data integrity
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.success("Cache cleared successfully")}>
+                    <RefreshCcw className="h-4 w-4 mr-2" />
+                    Clear Cache
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.success("Database backup started")}>
+                    <Database className="h-4 w-4 mr-2" />
+                    Backup Database
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start" onClick={() => toast.success("API connections tested")}>
+                    <ServerCog className="h-4 w-4 mr-2" />
+                    Test API Connections
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
         
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <RefreshCcw className="h-5 w-5 mr-2 text-primary" />
-              System Maintenance
-            </CardTitle>
-            <CardDescription>
-              Maintain system performance and data integrity
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button variant="outline" className="w-full justify-start">
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                Clear Cache
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <Database className="h-4 w-4 mr-2" />
-                Backup Database
-              </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <ServerCog className="h-4 w-4 mr-2" />
-                Test API Connections
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="maintenance">
+          <MaintenanceSettings />
+        </TabsContent>
+        
+        <TabsContent value="database">
+          <DatabaseConfig />
+        </TabsContent>
+        
+        <TabsContent value="analytics">
+          <AnalyticsSettings />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 
@@ -684,6 +729,28 @@ const AdminDashboard = () => {
         return <DatabaseManager />;
       case "settings":
         return <SystemSettings />;
+      case "statistics":
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Statistics Dashboard</h2>
+            <p>Detailed analytics and performance data will be displayed here.</p>
+            <Card className="h-96 flex items-center justify-center">
+              <LineChart className="h-16 w-16 text-muted-foreground/50" />
+              <span className="ml-2 text-muted-foreground/70">Statistics coming soon</span>
+            </Card>
+          </div>
+        );
+      case "users":
+        return (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">User Management</h2>
+            <p>User accounts administration will be displayed here.</p>
+            <Card className="h-96 flex items-center justify-center">
+              <Users className="h-16 w-16 text-muted-foreground/50" />
+              <span className="ml-2 text-muted-foreground/70">User management coming soon</span>
+            </Card>
+          </div>
+        );
       default:
         return (
           <div className="space-y-8">

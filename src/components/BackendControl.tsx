@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Card, 
   CardContent, 
@@ -38,11 +38,13 @@ import { Separator } from '@/components/ui/separator';
 import SettingsComponent from '@/components/admin/Settings';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { getDataSourceConnections, saveDataSourceConnection } from '@/utils/settingsStorage';
 
 const BackendControl = () => {
   const { questions, loading } = useQuestions();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [connectedSources, setConnectedSources] = useState([]);
   
   // Get question counts by type
   const readingCount = questions.filter(q => q.skillType === 'reading').length;
@@ -51,21 +53,40 @@ const BackendControl = () => {
   const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
   const totalCount = questions.length;
 
+  // Load data sources on component mount
+  useEffect(() => {
+    const sources = getDataSourceConnections();
+    setConnectedSources(sources);
+  }, []);
+
   // Navigation handlers
   const handleBack = () => navigate(-1);
   const handleForward = () => navigate(1);
 
-  // Mock connected data sources
-  const connectedSources = [
-    { name: 'Main Database', status: 'connected', type: 'postgres', lastSynced: '5 minutes ago' },
-    { name: 'User Authentication', status: 'connected', type: 'auth', lastSynced: '10 minutes ago' },
-    { name: 'File Storage', status: 'connected', type: 'storage', lastSynced: '30 minutes ago' },
-    { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
-  ];
-
   // Connect data source handler
   const handleConnectSource = (sourceName: string) => {
-    toast.success(`Connected to ${sourceName} successfully!`);
+    // Find the source in our list
+    const updatedSources = connectedSources.map(source => {
+      if (source.name === sourceName) {
+        // Toggle status
+        const newStatus = source.status === 'connected' ? 'disconnected' : 'connected';
+        // Save to storage
+        saveDataSourceConnection(sourceName, newStatus, source.type);
+        // Return updated source
+        return { ...source, status: newStatus, lastSynced: newStatus === 'connected' ? new Date().toLocaleString() : source.lastSynced };
+      }
+      return source;
+    });
+    
+    setConnectedSources(updatedSources);
+    
+    // Show success message
+    const isConnected = updatedSources.find(s => s.name === sourceName)?.status === 'connected';
+    if (isConnected) {
+      toast.success(`Connected to ${sourceName} successfully!`);
+    } else {
+      toast.info(`Disconnected from ${sourceName}`);
+    }
   };
 
   return (
@@ -222,14 +243,10 @@ const BackendControl = () => {
                     <Button 
                       size="sm" 
                       variant={source.status === 'connected' ? 'outline' : 'default'}
-                      onClick={() => source.status !== 'connected' && handleConnectSource(source.name)}
+                      onClick={() => handleConnectSource(source.name)}
                     >
-                      {source.status === 'connected' ? (
-                        <LinkIcon className="mr-1 h-4 w-4" />
-                      ) : (
-                        <LinkIcon className="mr-1 h-4 w-4" />
-                      )}
-                      {source.status === 'connected' ? 'Configure' : 'Connect'}
+                      <LinkIcon className="mr-1 h-4 w-4" />
+                      {source.status === 'connected' ? 'Disconnect' : 'Connect'}
                     </Button>
                   </div>
                 ))}

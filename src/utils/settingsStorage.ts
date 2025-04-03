@@ -6,8 +6,12 @@
 // Save settings to localStorage
 export const saveSettings = (settings: any) => {
   try {
-    localStorage.setItem('settings', JSON.stringify(settings));
-    console.info('Saving settings:', settings);
+    // Merge with existing settings instead of replacing them
+    const existingSettings = getSettings() || {};
+    const mergedSettings = { ...existingSettings, ...settings };
+    
+    localStorage.setItem('settings', JSON.stringify(mergedSettings));
+    console.info('Saving settings:', mergedSettings);
     return true;
   } catch (error) {
     console.error('Error saving settings:', error);
@@ -36,6 +40,7 @@ export const getSetting = (key: string) => {
 export const isMaintenanceMode = () => {
   try {
     const settings = getSettings();
+    console.info('Checking maintenance mode with settings:', settings);
     // Ensure we check for exact true value
     return settings?.maintenance?.scheduledMaintenance === true;
   } catch (error) {
@@ -99,6 +104,29 @@ export const getAnalyticsConfig = () => {
   }
 };
 
+// Get security settings
+export const getSecuritySettings = () => {
+  try {
+    const settings = getSettings();
+    return settings?.security || {
+      twoFactorAuth: false,
+      sessionTimeout: 30,
+      maxLoginAttempts: 5,
+      passwordExpiry: 90,
+      blockUnknownIPs: false
+    };
+  } catch (error) {
+    console.error('Error getting security settings:', error);
+    return {
+      twoFactorAuth: false,
+      sessionTimeout: 30,
+      maxLoginAttempts: 5,
+      passwordExpiry: 90,
+      blockUnknownIPs: false
+    };
+  }
+};
+
 // Save database configuration
 export const saveDatabaseConfig = (config: any) => {
   const settings = getSettings() || {};
@@ -118,4 +146,59 @@ export const saveMaintenanceSettings = (maintenance: any) => {
   const settings = getSettings() || {};
   settings.maintenance = maintenance;
   return saveSettings(settings);
+};
+
+// Save security settings
+export const saveSecuritySettings = (security: any) => {
+  const settings = getSettings() || {};
+  settings.security = security;
+  return saveSettings(settings);
+};
+
+// Get data source connections
+export const getDataSourceConnections = () => {
+  try {
+    const settings = getSettings();
+    return settings?.dataSources || [
+      { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
+      { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
+      { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
+    ];
+  } catch (error) {
+    console.error('Error getting data sources:', error);
+    return [
+      { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
+      { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
+      { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
+    ];
+  }
+};
+
+// Save data source connection
+export const saveDataSourceConnection = (name: string, status: string, type: string) => {
+  try {
+    const settings = getSettings() || {};
+    const dataSources = settings.dataSources || [
+      { name: 'Main Database', status: 'disconnected', type: 'postgres', lastSynced: 'Never' },
+      { name: 'User Authentication', status: 'disconnected', type: 'auth', lastSynced: 'Never' },
+      { name: 'File Storage', status: 'disconnected', type: 'storage', lastSynced: 'Never' },
+      { name: 'Analytics', status: 'disconnected', type: 'analytics', lastSynced: 'Never' }
+    ];
+    
+    const now = new Date().toLocaleString();
+    const updatedSources = dataSources.map(source => {
+      if (source.name === name) {
+        return { ...source, status, lastSynced: status === 'connected' ? now : source.lastSynced };
+      }
+      return source;
+    });
+    
+    settings.dataSources = updatedSources;
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error saving data source connection:', error);
+    return false;
+  }
 };

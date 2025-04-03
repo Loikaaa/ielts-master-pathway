@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink, AlertTriangle } from 'lucide-react';
 import { getMaintenanceMessage } from '@/utils/settingsStorage';
@@ -7,7 +7,12 @@ import { getMaintenanceMessage } from '@/utils/settingsStorage';
 const MaintenancePage = () => {
   // Get the maintenance message from our utility function
   const maintenanceMessage = getMaintenanceMessage();
-  console.log('Rendering maintenance page with message:', maintenanceMessage);
+  
+  useEffect(() => {
+    console.log('Rendering maintenance page with message:', maintenanceMessage);
+    // Log to make sure this component is being rendered
+    document.title = 'Site Under Maintenance';
+  }, [maintenanceMessage]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 p-4">
