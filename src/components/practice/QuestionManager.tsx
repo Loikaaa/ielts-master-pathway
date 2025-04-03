@@ -145,6 +145,47 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     setShowResults(true);
   };
 
+  // Calculate score for results
+  const calculateScore = (): number => {
+    if (!questions.length) return 0;
+    
+    let score = 0;
+    questions.forEach(question => {
+      if (isReadingQuestion(question) || isListeningQuestion(question)) {
+        question.questions.forEach(subQuestion => {
+          const userAnswer = answers[subQuestion.id];
+          if (userAnswer && 
+             (userAnswer === subQuestion.correctAnswer || 
+              (Array.isArray(userAnswer) && 
+               Array.isArray(subQuestion.correctAnswer) && 
+               JSON.stringify(userAnswer.sort()) === JSON.stringify(subQuestion.correctAnswer.sort())))) {
+            score += 1;
+          }
+        });
+      }
+    });
+    return score;
+  };
+
+  // Calculate total possible score
+  const calculateTotalPossible = (): number => {
+    if (!questions.length) return 0;
+    
+    let total = 0;
+    questions.forEach(question => {
+      if (isReadingQuestion(question) || isListeningQuestion(question)) {
+        total += question.questions.length;
+      }
+    });
+    return total;
+  };
+
+  // Format test time for results
+  const getTestTime = (): string => {
+    const date = new Date();
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
   if (!skillType || questions.length === 0) {
     return (
       <div className="container mx-auto p-4 mt-4">
@@ -159,7 +200,15 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   }
 
   if (showResults) {
-    return <ResultsView questions={questions} answers={answers} onRetry={() => setShowResults(false)} />;
+    return (
+      <ResultsView 
+        skillType={skillType as 'reading' | 'writing' | 'speaking' | 'listening'} 
+        score={calculateScore()}
+        totalPossible={calculateTotalPossible()}
+        resultTime={getTestTime()}
+        onBackToPractice={() => setShowResults(false)} 
+      />
+    );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
