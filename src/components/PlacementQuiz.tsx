@@ -12,11 +12,17 @@ import {
 import { 
   CheckCircle, 
   ChevronRight,
-  ChevronLeft 
+  ChevronLeft,
+  Calendar
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 
-// Quiz questions data
+// Enhanced quiz questions data
 const quizQuestions = [
   {
     id: 1,
@@ -66,6 +72,36 @@ const quizQuestions = [
       { id: 'c', text: "10-15 hours" },
       { id: 'd', text: "More than 15 hours" }
     ]
+  },
+  {
+    id: 6,
+    question: "What type of content do you prefer for learning English?",
+    options: [
+      { id: 'a', text: "Videos and visual content" },
+      { id: 'b', text: "Reading articles and books" },
+      { id: 'c', text: "Interactive exercises and quizzes" },
+      { id: 'd', text: "Conversation practice with others" }
+    ]
+  },
+  {
+    id: 7,
+    question: "Do you have a specific deadline for taking the IELTS exam?",
+    options: [
+      { id: 'a', text: "Within 1 month" },
+      { id: 'b', text: "Within 3 months" },
+      { id: 'c', text: "Within 6 months" },
+      { id: 'd', text: "No specific deadline" }
+    ]
+  },
+  {
+    id: 8,
+    question: "What is your primary reason for taking the IELTS test?",
+    options: [
+      { id: 'a', text: "Higher education (university admission)" },
+      { id: 'b', text: "Immigration purposes" },
+      { id: 'c', text: "Employment opportunities" },
+      { id: 'd', text: "Personal development" }
+    ]
   }
 ];
 
@@ -73,6 +109,7 @@ const PlacementQuiz = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState(false);
+  const [examDate, setExamDate] = useState<string>("");
   
   const handleAnswer = (questionId: number, optionId: string) => {
     setAnswers({
@@ -93,6 +130,10 @@ const PlacementQuiz = () => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
+  };
+  
+  const handleExamDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setExamDate(e.target.value);
   };
   
   const progress = ((currentQuestion + 1) / quizQuestions.length) * 100;
@@ -144,6 +185,25 @@ const PlacementQuiz = () => {
                 </div>
               ))}
             </div>
+            
+            {/* Special question for exam date if they have a deadline */}
+            {currentQuestion === 6 && answers[7] !== 'd' && (
+              <div className="mt-4 p-4 border rounded-lg bg-accent/20">
+                <div className="space-y-2">
+                  <Label htmlFor="exam-date">When do you plan to take your IELTS exam?</Label>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="exam-date" 
+                      type="date" 
+                      value={examDate} 
+                      onChange={handleExamDateChange} 
+                      className="max-w-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8">

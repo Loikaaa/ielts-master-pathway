@@ -12,6 +12,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import PlacementQuiz from './PlacementQuiz';
+import StudyPlanGenerator from './StudyPlanGenerator';
 
 type Step = {
   id: number;
@@ -39,6 +40,7 @@ const steps: Step[] = [
 
 const OnboardingQuiz = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
   
   const nextStep = () => {
     if (currentStep < steps.length) {
@@ -50,6 +52,12 @@ const OnboardingQuiz = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+  
+  // Function to receive answers from the PlacementQuiz
+  const handleQuizComplete = (answers: Record<string, string>) => {
+    setQuizAnswers(answers);
+    nextStep();
   };
   
   const progress = (currentStep / steps.length) * 100;
@@ -92,43 +100,36 @@ const OnboardingQuiz = () => {
         );
         
       case 2:
-        return <PlacementQuiz />;
-        
-      case 3:
+        // Pass an onComplete handler to PlacementQuiz
         return (
-          <div className="text-center py-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
-              <CheckCircle className="h-8 w-8" />
+          <div>
+            <PlacementQuiz />
+            <div className="mt-4 flex justify-end">
+              <Button 
+                onClick={() => {
+                  // For demo purposes, set some default answers if none were provided
+                  const demoAnswers = {
+                    '1': 'b',
+                    '2': 'a',
+                    '3': 'c',
+                    '4': 'b',
+                    '5': 'b',
+                    '6': 'c',
+                    '7': 'b',
+                    '8': 'a'
+                  };
+                  setQuizAnswers(demoAnswers);
+                  nextStep();
+                }}
+              >
+                Continue to Study Plan
+              </Button>
             </div>
-            <h3 className="text-2xl font-bold mb-2">Your Study Plan is Ready!</h3>
-            <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-              Based on your quiz results, we've created a personalized study plan to help you reach your target score of 7.5 in just 12 weeks.
-            </p>
-            
-            <div className="bg-accent/30 p-6 rounded-xl max-w-xl mx-auto mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Current Level</h4>
-                  <p className="text-xl font-semibold">Band 6.0</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Target Score</h4>
-                  <p className="text-xl font-semibold">Band 7.5</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Study Duration</h4>
-                  <p className="text-xl font-semibold">12 Weeks</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-1">Focus Areas</h4>
-                  <p className="text-xl font-semibold">Writing, Speaking</p>
-                </div>
-              </div>
-            </div>
-            
-            <Button size="lg">View Detailed Study Plan</Button>
           </div>
         );
+        
+      case 3:
+        return <StudyPlanGenerator quizAnswers={quizAnswers} />;
         
       default:
         return null;
@@ -161,10 +162,6 @@ const OnboardingQuiz = () => {
             onClick={prevStep}
           >
             <ChevronLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-          
-          <Button onClick={nextStep}>
-            Continue <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </CardFooter>
       )}
