@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Calendar, Clock, User } from 'lucide-react';
+import { Calendar, Clock, User, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface BlogPostProps {
   post: {
@@ -15,26 +16,34 @@ interface BlogPostProps {
     readTime: string;
     category: string;
     tags: string[];
+    featured?: boolean;
   };
 }
 
 const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col group">
       <Link to={`/resources/blog/${post.id}`} className="flex-grow flex flex-col">
         <div className="relative h-48 overflow-hidden">
           <img 
             src={post.coverImage} 
             alt={post.title} 
-            className="w-full h-full object-cover transition-transform hover:scale-105 duration-300"
+            className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
           />
           <div className="absolute top-4 right-4 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full font-medium">
             {post.category}
           </div>
+          {post.featured && (
+            <div className="absolute top-4 left-4 bg-amber-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+              Featured
+            </div>
+          )}
         </div>
         
         <CardHeader className="pb-2">
-          <CardTitle className="text-xl line-clamp-2">{post.title}</CardTitle>
+          <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
+            {post.title}
+          </CardTitle>
         </CardHeader>
         
         <CardContent className="flex-grow">

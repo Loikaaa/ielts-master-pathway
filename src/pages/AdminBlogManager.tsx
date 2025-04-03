@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, ChevronLeft, Eye, Image as ImageIcon } from 'lucide-react';
 import BlogPostForm from '@/components/admin/BlogPostForm';
+import { Link } from 'react-router-dom';
 
 // Sample blog posts data
 const sampleBlogPosts = [
@@ -17,7 +18,9 @@ const sampleBlogPosts = [
     author: 'Dr. Sarah Johnson',
     date: 'March 28, 2025',
     category: 'Reading',
-    status: 'published'
+    status: 'published',
+    coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+    featured: true
   },
   {
     id: '2',
@@ -26,7 +29,8 @@ const sampleBlogPosts = [
     author: 'James Wilson',
     date: 'March 20, 2025',
     category: 'Writing',
-    status: 'published'
+    status: 'published',
+    coverImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   },
   {
     id: '3',
@@ -35,12 +39,14 @@ const sampleBlogPosts = [
     author: 'Emma Reynolds',
     date: 'March 15, 2025',
     category: 'Listening',
-    status: 'draft'
+    status: 'draft',
+    coverImage: 'https://images.unsplash.com/photo-1516223725307-6f76b9ec8742?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   }
 ];
 
 const AdminBlogManager = () => {
   const [showForm, setShowForm] = useState(false);
+  const [currentPost, setCurrentPost] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
@@ -53,19 +59,58 @@ const AdminBlogManager = () => {
     return matchesSearch && matchesTab;
   });
 
+  const handleEditPost = (post) => {
+    setCurrentPost(post);
+    setShowForm(true);
+  };
+
+  const handleNewPost = () => {
+    setCurrentPost(null);
+    setShowForm(true);
+  };
+
+  const handleBackToList = () => {
+    setShowForm(false);
+    setCurrentPost(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <h1 className="text-3xl font-bold">Blog Management</h1>
-          <Button onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'View All Posts' : <><Plus className="mr-2 h-4 w-4" /> Create New Post</>}
-          </Button>
+          <div className="flex items-center gap-2">
+            {showForm && (
+              <Button variant="ghost" size="sm" onClick={handleBackToList} className="mr-2">
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+            )}
+            <h1 className="text-3xl font-bold">
+              {showForm 
+                ? currentPost 
+                  ? `Edit Blog Post: ${currentPost.title}` 
+                  : 'Create New Blog Post' 
+                : 'Blog Management'}
+            </h1>
+          </div>
+          {!showForm ? (
+            <Button onClick={handleNewPost}>
+              <Plus className="mr-2 h-4 w-4" /> Create New Post
+            </Button>
+          ) : (
+            <div className="flex space-x-2">
+              <Button variant="outline" asChild>
+                <Link to="/resources/blog">
+                  <Eye className="mr-2 h-4 w-4" /> Preview Blog
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {showForm ? (
-          <BlogPostForm />
+          <BlogPostForm initialData={currentPost} />
         ) : (
           <>
             <Card className="mb-6">
@@ -99,37 +144,57 @@ const AdminBlogManager = () => {
             <div className="grid gap-4">
               {filteredBlogPosts.length > 0 ? (
                 filteredBlogPosts.map((post) => (
-                  <Card key={post.id}>
+                  <Card key={post.id} className="overflow-hidden">
                     <CardContent className="p-0">
-                      <div className="flex flex-col md:flex-row justify-between p-6">
-                        <div className="flex-grow">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-                            }`}>
-                              {post.status === 'published' ? 'Published' : 'Draft'}
-                            </span>
-                            <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                              {post.category}
-                            </span>
-                          </div>
-                          <h3 className="text-lg font-semibold">{post.title}</h3>
-                          <p className="text-sm text-muted-foreground mt-1">{post.excerpt}</p>
-                          <div className="flex items-center mt-2 text-xs text-muted-foreground">
-                            <span>{post.author}</span>
-                            <span className="mx-2">•</span>
-                            <span>{post.date}</span>
-                          </div>
+                      <div className="flex flex-col md:flex-row">
+                        <div className="md:w-48 h-32 relative">
+                          {post.coverImage ? (
+                            <img 
+                              src={post.coverImage} 
+                              alt={post.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-muted">
+                              <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                            </div>
+                          )}
+                          {post.featured && (
+                            <div className="absolute top-2 left-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
+                              Featured
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center gap-2 mt-4 md:mt-0">
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4 mr-1" />
-                            Edit
-                          </Button>
-                          <Button variant="destructive" size="sm">
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Delete
-                          </Button>
+                        <div className="flex flex-col md:flex-row justify-between p-6 flex-grow">
+                          <div className="flex-grow">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                post.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {post.status === 'published' ? 'Published' : 'Draft'}
+                              </span>
+                              <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                                {post.category}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-semibold">{post.title}</h3>
+                            <p className="text-sm text-muted-foreground mt-1">{post.excerpt}</p>
+                            <div className="flex items-center mt-2 text-xs text-muted-foreground">
+                              <span>{post.author}</span>
+                              <span className="mx-2">•</span>
+                              <span>{post.date}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 mt-4 md:mt-0 md:ml-4">
+                            <Button variant="outline" size="sm" onClick={() => handleEditPost(post)}>
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button variant="destructive" size="sm">
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
