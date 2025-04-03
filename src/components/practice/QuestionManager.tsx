@@ -1,397 +1,219 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Question, WritingQuestion } from '@/types/questions';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { mockQuestions } from '@/data/mockQuestions';
+import { Question, ReadingQuestion, WritingQuestion, SpeakingQuestion, ListeningQuestion } from '@/types/questions';
 import ReadingQuestionView from './ReadingQuestionView';
 import WritingQuestionView from './WritingQuestionView';
 import SpeakingQuestionView from './SpeakingQuestionView';
 import ListeningQuestionView from './ListeningQuestionView';
-import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/components/ui/use-toast';
-import { Separator } from '@/components/ui/separator';
 import ResultsView from './ResultsView';
-
-// This would normally come from an API or database
-import { mockQuestions } from '@/data/mockQuestions';
-
-// Type guard function to check if a question is a WritingQuestion
-const isWritingQuestion = (question: Question): question is WritingQuestion => {
-  return question.skillType === 'writing';
-};
+import { useToast } from '@/components/ui/use-toast';
+import { Clock, AlertTriangle } from 'lucide-react';
 
 interface QuestionManagerProps {
-  skillType?: 'reading' | 'writing' | 'speaking' | 'listening';
-  practiceItemId?: string;
   audioPermissionGranted?: boolean;
 }
 
-const QuestionManager: React.FC<QuestionManagerProps> = ({ 
-  skillType: propSkillType,
-  practiceItemId: propPracticeItemId,
-  audioPermissionGranted
-}) => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const { skillType: paramSkillType, practiceId: paramPracticeId } = useParams();
-  const timerRef = useRef<HTMLDivElement>(null);
-  
-  const skillType = propSkillType || paramSkillType;
-  const practiceItemId = propPracticeItemId || paramPracticeId;
-  
-  const [questions, setQuestions] = useState<Question[]>([]);
+// Type guards to narrow down question types
+const isReadingQuestion = (question: Question): question is ReadingQuestion => 
+  question.skillType === 'reading';
+
+const isWritingQuestion = (question: Question): question is WritingQuestion => 
+  question.skillType === 'writing';
+
+const isSpeakingQuestion = (question: Question): question is SpeakingQuestion => 
+  question.skillType === 'speaking';
+
+const isListeningQuestion = (question: Question): question is ListeningQuestion => 
+  question.skillType === 'listening';
+
+const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGranted }) => {
+  const { skillType } = useParams<{ skillType: string }>();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [showResults, setShowResults] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showTimeWarning, setShowTimeWarning] = useState(false);
-  const [stickyTimer, setStickyTimer] = useState(false);
-  const [examCompleted, setExamCompleted] = useState(false);
-  const [examResults, setExamResults] = useState<{
-    score: number;
-    totalPossible: number;
-    resultTime: string;
-  } | null>(null);
-  const [transferTime, setTransferTime] = useState(false);
-  
-  useEffect(() => {
-    const loadQuestions = async () => {
-      setIsLoading(true);
-      try {
-        const filteredQuestions = mockQuestions.filter(
-          q => q.skillType === skillType
-        );
-        
-        if (filteredQuestions.length === 0) {
-          toast({
-            title: "No questions found",
-            description: "We couldn't find any questions for this practice session.",
-            variant: "destructive",
-          });
-          navigate('/practice');
-          return;
-        }
-        
-        setQuestions(filteredQuestions);
-        
-        if (skillType === 'reading') {
-          setTimeRemaining(60 * 60);
-        } else if (skillType === 'listening') {
-          setTimeRemaining(30 * 60);
-        } else if (skillType === 'writing') {
-          setTimeRemaining(60 * 60);
-        } else if (skillType === 'speaking') {
-          if (filteredQuestions[0]?.timeLimit) {
-            setTimeRemaining(filteredQuestions[0].timeLimit);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading questions:", error);
-        toast({
-          title: "Failed to load questions",
-          description: "There was an error loading the practice questions. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    loadQuestions();
+  const [warningShown, setWarningShown] = useState(false);
+  const { toast } = useToast();
 
-    const handleScroll = () => {
-      if (timerRef.current) {
-        const rect = timerRef.current.getBoundingClientRect();
-        if (rect.top <= 0) {
-          setStickyTimer(true);
-        } else {
-          setStickyTimer(false);
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [skillType, practiceItemId, toast, navigate]);
-  
+  // Load questions on component mount
   useEffect(() => {
-    if (timeRemaining === null) return;
+    if (!skillType) return;
+
+    // Filter questions based on the skillType param
+    const filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+    setQuestions(filteredQuestions);
     
+    // Reset state when questions change
+    setCurrentQuestionIndex(0);
+    setAnswers({});
+    setShowResults(false);
+    setTimeRemaining(filteredQuestions[0]?.timeLimit || null);
+  }, [skillType]);
+
+  // Timer effect
+  useEffect(() => {
+    if (!timeRemaining) return;
+
     const timer = setInterval(() => {
       setTimeRemaining(prev => {
-        if (prev === null || prev <= 0) {
+        if (!prev) return null;
+        
+        // Show 5-minute warning
+        if (prev === 300 && !warningShown) {
+          toast({
+            title: "5 Minutes Remaining",
+            description: "You have 5 minutes left to complete this section.",
+            variant: "destructive",
+          });
+          setWarningShown(true);
+        }
+        
+        if (prev <= 1) {
           clearInterval(timer);
-          if (prev === 0) {
-            if (skillType === 'listening' && !transferTime) {
-              setTransferTime(true);
-              return 10 * 60;
-            } else if (!examCompleted) {
-              handleSubmit();
-            }
-          }
+          // Auto-submit when time is up
+          handleSubmit();
           return 0;
         }
-        
-        if (skillType === 'reading' && prev === Math.floor(60 * 60 * 0.1)) {
-          setShowTimeWarning(true);
-          toast({
-            title: "Time is running out!",
-            description: "You have less than 6 minutes remaining.",
-            variant: "destructive",
-          });
-        } else if (skillType === 'listening' && !transferTime && prev === Math.floor(30 * 60 * 0.1)) {
-          setShowTimeWarning(true);
-          toast({
-            title: "Time is running out!",
-            description: "You have less than 3 minutes remaining.",
-            variant: "destructive",
-          });
-        } else if (skillType === 'writing' && prev === Math.floor(60 * 60 * 0.1)) {
-          setShowTimeWarning(true);
-          toast({
-            title: "Time is running out!",
-            description: "You have less than 6 minutes remaining.",
-            variant: "destructive",
-          });
-        } else if (transferTime && prev === Math.floor(10 * 60 * 0.2)) {
-          setShowTimeWarning(true);
-          toast({
-            title: "Transfer time ending!",
-            description: "You have 2 minutes left to transfer answers.",
-            variant: "destructive",
-          });
-        } else if (skillType === 'speaking' && prev === Math.floor(questions[currentQuestionIndex]?.timeLimit! * 0.1)) {
-          setShowTimeWarning(true);
-          toast({
-            title: "Time is running out!",
-            description: "You have less than 10% of your time remaining.",
-            variant: "destructive",
-          });
-        }
-        
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => clearInterval(timer);
-  }, [timeRemaining, currentQuestionIndex, questions, toast, skillType, examCompleted, transferTime]);
-  
+  }, [timeRemaining, warningShown]);
+
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   const handleAnswer = (questionId: string, answer: any) => {
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
+    console.log("Submitting answers:", { ...answers, [questionId]: answer });
   };
-  
+
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setShowTimeWarning(false);
-      
-      if (skillType === 'speaking') {
-        const nextQuestion = questions[currentQuestionIndex + 1];
-        if (nextQuestion?.timeLimit) {
-          setTimeRemaining(nextQuestion.timeLimit);
-        }
-      } else if (skillType === 'writing') {
-        const currentQuestion = questions[currentQuestionIndex];
-        const nextQuestion = questions[currentQuestionIndex + 1];
-        
-        if (isWritingQuestion(currentQuestion) && isWritingQuestion(nextQuestion)) {
-          if (currentQuestion.taskType === 'task1' && nextQuestion.taskType === 'task2') {
-            setTimeRemaining(40 * 60);
-          }
-        }
+
+      // Update timer for next question (only for writing and speaking which have per-question timers)
+      const nextQuestion = questions[currentQuestionIndex + 1];
+      if (isWritingQuestion(nextQuestion) && nextQuestion.taskType === 'task1' && currentQuestionIndex === 0) {
+        setTimeRemaining(nextQuestion.timeLimit || null);
+        setWarningShown(false);
+      } else if (isWritingQuestion(nextQuestion) && nextQuestion.taskType === 'task2' && currentQuestionIndex === 1) {
+        setTimeRemaining(nextQuestion.timeLimit || null);
+        setWarningShown(false);
+      } else if (isSpeakingQuestion(nextQuestion)) {
+        setTimeRemaining((nextQuestion.preparationTime || 0) + (nextQuestion.responseTime || 0));
+        setWarningShown(false);
       }
     } else {
       handleSubmit();
     }
   };
-  
+
   const handlePrevious = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
-      setShowTimeWarning(false);
-      
-      if (skillType === 'speaking') {
-        const prevQuestion = questions[currentQuestionIndex - 1];
-        if (prevQuestion?.timeLimit) {
-          setTimeRemaining(prevQuestion.timeLimit);
-        }
-      } else if (skillType === 'writing') {
-        const currentQuestion = questions[currentQuestionIndex];
-        const prevQuestion = questions[currentQuestionIndex - 1];
-        
-        if (isWritingQuestion(currentQuestion) && isWritingQuestion(prevQuestion)) {
-          if (currentQuestion.taskType === 'task2' && prevQuestion.taskType === 'task1') {
-            setTimeRemaining(20 * 60);
-          }
-        }
+
+      // Update timer for previous question (only for writing and speaking which have per-question timers)
+      const prevQuestion = questions[currentQuestionIndex - 1];
+      if (isWritingQuestion(prevQuestion) && prevQuestion.taskType === 'task1' && currentQuestionIndex === 1) {
+        setTimeRemaining(prevQuestion.timeLimit || null);
+        setWarningShown(false);
+      } else if (isWritingQuestion(prevQuestion) && prevQuestion.taskType === 'task2' && currentQuestionIndex === 2) {
+        setTimeRemaining(prevQuestion.timeLimit || null);
+        setWarningShown(false);
+      } else if (isSpeakingQuestion(prevQuestion)) {
+        setTimeRemaining((prevQuestion.preparationTime || 0) + (prevQuestion.responseTime || 0));
+        setWarningShown(false);
       }
     }
   };
-  
+
   const handleSubmit = () => {
-    console.log("Submitting answers:", answers);
-    
-    let correctAnswers = 0;
-    let totalQuestions = 0;
-    
-    questions.forEach(question => {
-      if ('questions' in question) {
-        question.questions.forEach(subQ => {
-          totalQuestions++;
-          const userAnswer = answers[subQ.id];
-          if (userAnswer && 
-             (Array.isArray(subQ.correctAnswer) 
-                ? subQ.correctAnswer.includes(userAnswer)
-                : subQ.correctAnswer === userAnswer)) {
-            correctAnswers++;
-          }
-        });
-      } else {
-        totalQuestions++;
-      }
-    });
-    
-    let resultTime = "";
-    if (skillType === 'reading' || skillType === 'listening') {
-      resultTime = "Available now";
-    } else if (skillType === 'writing') {
-      resultTime = "Available in 2 hours";
-    } else if (skillType === 'speaking') {
-      resultTime = "Available in 4 hours";
-    }
-    
-    setExamResults({
-      score: correctAnswers,
-      totalPossible: totalQuestions,
-      resultTime
-    });
-    
-    setExamCompleted(true);
-    
-    toast({
-      title: "Practice completed!",
-      description: "Your answers have been submitted for review.",
-    });
+    setShowResults(true);
   };
-  
-  const formatTime = (seconds: number): string => {
-    if (seconds < 0) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-  };
-  
-  if (isLoading) {
+
+  if (!skillType || questions.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-pulse w-16 h-16 rounded-full bg-primary/20 mx-auto mb-4"></div>
-          <p>Loading practice questions...</p>
-        </div>
+      <div className="container mx-auto p-4 mt-4">
+        <Card>
+          <CardContent className="p-6 text-center">
+            <h2 className="text-xl font-semibold mb-2">Loading...</h2>
+            <p>Please wait while we prepare your practice session.</p>
+          </CardContent>
+        </Card>
       </div>
-    );
-  }
-  
-  if (questions.length === 0) {
-    return (
-      <Card className="max-w-xl mx-auto mt-10">
-        <CardHeader>
-          <CardTitle>No questions available</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>There are no questions available for this practice session.</p>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={() => navigate('/practice')}>Back to Practice</Button>
-        </CardFooter>
-      </Card>
     );
   }
 
-  if (examCompleted && examResults) {
-    return (
-      <ResultsView 
-        skillType={skillType as 'reading' | 'writing' | 'speaking' | 'listening'}
-        score={examResults.score}
-        totalPossible={examResults.totalPossible}
-        resultTime={examResults.resultTime}
-        onBackToPractice={() => navigate('/practice')}
-      />
-    );
+  if (showResults) {
+    return <ResultsView questions={questions} answers={answers} onRetry={() => setShowResults(false)} />;
   }
-  
+
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-  
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center mb-6" ref={timerRef}>
-        <Button 
-          variant="ghost" 
-          onClick={() => navigate('/practice')}
-          className="mr-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Practice
-        </Button>
-        
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold capitalize">{skillType} Practice</h1>
-          <p className="text-sm text-muted-foreground">
-            Question {currentQuestionIndex + 1} of {questions.length} 
-            {transferTime && " - Transfer Time"}
-          </p>
-        </div>
-        
-        {timeRemaining !== null && (
-          <div className={`flex items-center ${showTimeWarning ? 'animate-pulse text-red-500' : ''}`}>
-            <Clock className={`mr-2 h-5 w-5 ${showTimeWarning ? 'text-red-500' : 'text-orange-500'}`} />
-            <span className="font-mono font-medium">
-              {formatTime(timeRemaining)}
-            </span>
-          </div>
-        )}
-      </div>
-      
-      {stickyTimer && timeRemaining !== null && (
-        <div className={`fixed top-0 right-0 z-50 bg-background/90 backdrop-blur-sm py-2 px-4 border-l border-b rounded-bl-lg shadow-md flex items-center ${showTimeWarning ? 'animate-pulse text-red-500 border-red-500' : ''}`}>
-          <Clock className={`mr-2 h-5 w-5 ${showTimeWarning ? 'text-red-500' : 'text-orange-500'}`} />
-          <span className="font-mono font-medium">
-            {formatTime(timeRemaining)}
-          </span>
-          {transferTime && (
-            <span className="text-xs ml-2">Transfer Time</span>
+    <div className="container mx-auto p-4">
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-2xl font-bold">
+            {skillType.charAt(0).toUpperCase() + skillType.slice(1)} Practice
+          </h2>
+          
+          {timeRemaining !== null && (
+            <div className="flex items-center bg-muted px-3 py-1 rounded-md">
+              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
+              <span className={`${timeRemaining < 300 ? 'text-destructive font-bold' : ''}`}>
+                Time: {formatTime(timeRemaining)}
+              </span>
+            </div>
           )}
         </div>
-      )}
-      
-      <Progress value={progress} className="mb-6" />
-      
+        
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-sm text-muted-foreground">
+            Question {currentQuestionIndex + 1} of {questions.length}
+          </span>
+          <span className="text-sm font-medium">
+            {Math.round(progress)}% Complete
+          </span>
+        </div>
+        
+        <Progress value={progress} className="h-2" />
+      </div>
+
       <Card className="mb-6">
-        <CardContent className={`pt-6 ${skillType === 'reading' ? 'p-0 overflow-hidden' : ''}`}>
-          {currentQuestion.skillType === 'reading' && (
+        <CardContent className="p-0">
+          {isReadingQuestion(currentQuestion) && (
             <ReadingQuestionView 
               question={currentQuestion} 
               onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]}
+              answer={answers[currentQuestion.id]} 
             />
           )}
           
-          {currentQuestion.skillType === 'writing' && (
+          {isWritingQuestion(currentQuestion) && (
             <WritingQuestionView 
               question={currentQuestion} 
               onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]}
+              answer={answers[currentQuestion.id]} 
             />
           )}
           
-          {currentQuestion.skillType === 'speaking' && (
+          {isSpeakingQuestion(currentQuestion) && (
             <SpeakingQuestionView 
               question={currentQuestion} 
               onAnswer={handleAnswer} 
@@ -400,73 +222,31 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({
             />
           )}
           
-          {currentQuestion.skillType === 'listening' && (
+          {isListeningQuestion(currentQuestion) && (
             <ListeningQuestionView 
               question={currentQuestion} 
               onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]}
+              answer={answers[currentQuestion.id]} 
             />
           )}
         </CardContent>
-        
-        <CardFooter className="flex justify-between">
-          <Button 
-            onClick={handlePrevious} 
-            disabled={currentQuestionIndex === 0} 
-            variant="outline"
-          >
-            Previous
-          </Button>
-          
-          <Button 
-            onClick={handleNext}
-          >
-            {currentQuestionIndex < questions.length - 1 ? 'Next' : 'Submit'}
-          </Button>
-        </CardFooter>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">IELTS {skillType?.charAt(0).toUpperCase() + skillType?.slice(1)} Rules</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="text-sm space-y-1">
-            {skillType === 'reading' && (
-              <>
-                <li>• 60 minutes to complete 40 questions</li>
-                <li>• No extra time to transfer answers</li>
-                <li>• Spelling mistakes count as wrong answers</li>
-                <li>• Answers must be exactly as in the text</li>
-              </>
-            )}
-            {skillType === 'listening' && (
-              <>
-                <li>• 30 minutes listening + 10 minutes to transfer answers</li>
-                <li>• Audio plays ONCE only</li>
-                <li>• Write numbers as digits (e.g., "20" not "twenty")</li>
-                <li>• Pay attention to plurals (e.g., "book" vs "books")</li>
-              </>
-            )}
-            {skillType === 'writing' && (
-              <>
-                <li>• Task 1: 20 minutes, minimum 150 words</li>
-                <li>• Task 2: 40 minutes, minimum 250 words</li>
-                <li>• No bullet points/numbered lists – full sentences only</li>
-                <li>• -1 Band Score if below minimum words</li>
-              </>
-            )}
-            {skillType === 'speaking' && (
-              <>
-                <li>• Part 1: Introduction (4-5 minutes)</li>
-                <li>• Part 2: Long turn with 1 minute preparation (3-4 minutes)</li>
-                <li>• Part 3: Discussion (4-5 minutes)</li>
-                <li>• Entire test is recorded (for re-marking)</li>
-              </>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={handlePrevious}
+          disabled={currentQuestionIndex === 0}
+        >
+          Previous
+        </Button>
+        
+        {currentQuestionIndex < questions.length - 1 ? (
+          <Button onClick={handleNext}>Next</Button>
+        ) : (
+          <Button onClick={handleSubmit} variant="default">Submit</Button>
+        )}
+      </div>
     </div>
   );
 };

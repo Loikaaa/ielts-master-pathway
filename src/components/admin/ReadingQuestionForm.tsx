@@ -9,6 +9,7 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface ReadingQuestionFormProps {
   onSave: (formData: any) => void;
@@ -27,7 +28,7 @@ const ReadingQuestionForm: React.FC<ReadingQuestionFormProps> = ({
     passageTitle: initialData?.passageTitle || '',
     passageText: initialData?.passageText || '',
     questions: initialData?.questions || [],
-    timeLimit: initialData?.timeLimit || 60,
+    timeLimit: initialData?.timeLimit ? initialData.timeLimit / 60 : 60, // Convert seconds to minutes for UI
   });
 
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
@@ -94,9 +95,396 @@ const ReadingQuestionForm: React.FC<ReadingQuestionFormProps> = ({
     setFormData({ ...formData, questions: newQuestions });
   };
 
+  // For matching-information question type
+  const updateParagraphRefs = (questionIndex: number, values: string[]) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex] = { 
+      ...newQuestions[questionIndex], 
+      paragraphRefs: values
+    };
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
+  // For matching-features question type
+  const updateFeatures = (questionIndex: number, values: string[]) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex] = { 
+      ...newQuestions[questionIndex], 
+      features: values
+    };
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
+  // For matching-sentence-endings question type
+  const updateSentenceEndings = (questionIndex: number, values: string[]) => {
+    const newQuestions = [...formData.questions];
+    newQuestions[questionIndex] = { 
+      ...newQuestions[questionIndex], 
+      sentenceEndings: values
+    };
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
+  const handleAddMatchingItem = (questionIndex: number, type: 'paragraphRefs' | 'features' | 'sentenceEndings') => {
+    const newQuestions = [...formData.questions];
+    const question = newQuestions[questionIndex];
+    
+    if (!question[type]) {
+      question[type] = [];
+    }
+    
+    question[type] = [...question[type], ''];
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
+  const handleUpdateMatchingItem = (
+    questionIndex: number, 
+    itemIndex: number, 
+    value: string, 
+    type: 'paragraphRefs' | 'features' | 'sentenceEndings'
+  ) => {
+    const newQuestions = [...formData.questions];
+    const question = newQuestions[questionIndex];
+    const items = [...question[type]];
+    items[itemIndex] = value;
+    question[type] = items;
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
+  const handleRemoveMatchingItem = (
+    questionIndex: number, 
+    itemIndex: number, 
+    type: 'paragraphRefs' | 'features' | 'sentenceEndings'
+  ) => {
+    const newQuestions = [...formData.questions];
+    const question = newQuestions[questionIndex];
+    const items = [...question[type]];
+    items.splice(itemIndex, 1);
+    question[type] = items;
+    setFormData({ ...formData, questions: newQuestions });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate questions
+    if (formData.questions.length === 0) {
+      alert("Please add at least one question");
+      return;
+    }
+    
+    // Make sure every question has required fields
+    for (const question of formData.questions) {
+      if (!question.questionText || !question.questionType) {
+        alert("Please fill in all required fields for each question");
+        return;
+      }
+      
+      if (!question.correctAnswer) {
+        alert("Please specify the correct answer for each question");
+        return;
+      }
+    }
+    
     onSave(formData);
+  };
+
+  const renderQuestionTypeFields = (questionIndex: number) => {
+    const question = formData.questions[questionIndex];
+    const questionType = question.questionType;
+    
+    switch (questionType) {
+      case 'multiple-choice':
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium">Options</label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => addOption(questionIndex)}
+              >
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Add Option
+              </Button>
+            </div>
+            
+            {question.options?.map((option, optionIndex) => (
+              <div key={optionIndex} className="flex items-center space-x-2 mb-2">
+                <Input
+                  value={option}
+                  onChange={(e) => updateOption(questionIndex, optionIndex, e.target.value)}
+                  placeholder={`Option ${optionIndex + 1}`}
+                  required
+                />
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`correct-${optionIndex}`}
+                    checked={question.correctAnswer === option}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        updateQuestion(questionIndex, 'correctAnswer', option);
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`correct-${optionIndex}`}>Correct</Label>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => removeOption(questionIndex, optionIndex)}
+                  disabled={question.options.length <= 2}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        );
+        
+      case 'true-false-not-given':
+      case 'yes-no-not-given':
+        const options = questionType === 'true-false-not-given'
+          ? ['True', 'False', 'Not Given']
+          : ['Yes', 'No', 'Not Given'];
+        
+        return (
+          <div>
+            <label className="block text-sm font-medium mb-2">Correct Answer</label>
+            <RadioGroup 
+              value={question.correctAnswer || options[0]}
+              onValueChange={(value) => updateQuestion(questionIndex, 'correctAnswer', value)}
+            >
+              <div className="flex space-x-4">
+                {options.map((option, i) => (
+                  <div key={i} className="flex items-center space-x-2">
+                    <RadioGroupItem value={option} id={`answer-${option.toLowerCase()}`} />
+                    <Label htmlFor={`answer-${option.toLowerCase()}`}>{option}</Label>
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          </div>
+        );
+        
+      case 'matching-information':
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium">Paragraph References</label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleAddMatchingItem(questionIndex, 'paragraphRefs')}
+              >
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Add Paragraph
+              </Button>
+            </div>
+            
+            {(question.paragraphRefs || []).map((ref, refIndex) => (
+              <div key={refIndex} className="flex items-center space-x-2 mb-2">
+                <Input
+                  value={ref}
+                  onChange={(e) => handleUpdateMatchingItem(
+                    questionIndex, 
+                    refIndex, 
+                    e.target.value, 
+                    'paragraphRefs'
+                  )}
+                  placeholder={`Paragraph ${refIndex + 1}`}
+                  className="flex-1"
+                />
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`correct-para-${refIndex}`}
+                    checked={question.correctAnswer === ref}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        updateQuestion(questionIndex, 'correctAnswer', ref);
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`correct-para-${refIndex}`}>Correct</Label>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleRemoveMatchingItem(
+                    questionIndex, 
+                    refIndex, 
+                    'paragraphRefs'
+                  )}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        );
+        
+      case 'matching-headings':
+      case 'matching-features':
+        const itemType = questionType === 'matching-headings' ? 'options' : 'features';
+        const itemLabel = questionType === 'matching-headings' ? 'Headings' : 'Features';
+        
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium">{itemLabel}</label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  if (questionType === 'matching-headings') {
+                    addOption(questionIndex);
+                  } else {
+                    handleAddMatchingItem(questionIndex, 'features');
+                  }
+                }}
+              >
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Add {itemLabel.slice(0, -1)}
+              </Button>
+            </div>
+            
+            {(question[itemType] || []).map((item, itemIndex) => (
+              <div key={itemIndex} className="flex items-center space-x-2 mb-2">
+                <Input
+                  value={item}
+                  onChange={(e) => {
+                    if (questionType === 'matching-headings') {
+                      updateOption(questionIndex, itemIndex, e.target.value);
+                    } else {
+                      handleUpdateMatchingItem(
+                        questionIndex, 
+                        itemIndex, 
+                        e.target.value, 
+                        'features'
+                      );
+                    }
+                  }}
+                  placeholder={`${itemLabel.slice(0, -1)} ${itemIndex + 1}`}
+                  className="flex-1"
+                />
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`correct-${itemType}-${itemIndex}`}
+                    checked={question.correctAnswer === item}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        updateQuestion(questionIndex, 'correctAnswer', item);
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`correct-${itemType}-${itemIndex}`}>Correct</Label>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    if (questionType === 'matching-headings') {
+                      removeOption(questionIndex, itemIndex);
+                    } else {
+                      handleRemoveMatchingItem(
+                        questionIndex, 
+                        itemIndex, 
+                        'features'
+                      );
+                    }
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        );
+        
+      case 'matching-sentence-endings':
+        return (
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium">Sentence Endings</label>
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleAddMatchingItem(questionIndex, 'sentenceEndings')}
+              >
+                <PlusCircle className="h-3 w-3 mr-1" />
+                Add Ending
+              </Button>
+            </div>
+            
+            {(question.sentenceEndings || []).map((ending, endingIndex) => (
+              <div key={endingIndex} className="flex items-center space-x-2 mb-2">
+                <Input
+                  value={ending}
+                  onChange={(e) => handleUpdateMatchingItem(
+                    questionIndex, 
+                    endingIndex, 
+                    e.target.value, 
+                    'sentenceEndings'
+                  )}
+                  placeholder={`Ending ${endingIndex + 1}`}
+                  className="flex-1"
+                />
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`correct-ending-${endingIndex}`}
+                    checked={question.correctAnswer === ending}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        updateQuestion(questionIndex, 'correctAnswer', ending);
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`correct-ending-${endingIndex}`}>Correct</Label>
+                </div>
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => handleRemoveMatchingItem(
+                    questionIndex, 
+                    endingIndex, 
+                    'sentenceEndings'
+                  )}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        );
+        
+      case 'sentence-completion':
+      case 'summary-completion':
+        return (
+          <div>
+            <label className="block text-sm font-medium mb-1">Correct Answer</label>
+            <Input
+              value={question.correctAnswer || ''}
+              onChange={(e) => updateQuestion(questionIndex, 'correctAnswer', e.target.value)}
+              placeholder="Enter the correct answer"
+              required
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              For multiple answer questions, separate answers with commas.
+            </p>
+          </div>
+        );
+        
+      default:
+        return null;
+    }
   };
 
   return (
@@ -226,115 +614,52 @@ const ReadingQuestionForm: React.FC<ReadingQuestionFormProps> = ({
                         
                         <div>
                           <label className="block text-sm font-medium mb-1">Question Type</label>
-                          <RadioGroup 
+                          <Select 
                             value={formData.questions[activeQuestionIndex]?.questionType || 'multiple-choice'}
-                            onValueChange={(value) => updateQuestion(activeQuestionIndex, 'questionType', value)}
+                            onValueChange={(value) => {
+                              // Reset options if changing question type
+                              const newQuestion = {
+                                ...formData.questions[activeQuestionIndex],
+                                questionType: value,
+                                correctAnswer: ''
+                              };
+                              
+                              // Initialize specific fields based on question type
+                              if (value === 'multiple-choice') {
+                                newQuestion.options = ['', '', '', ''];
+                              } else if (value === 'matching-headings') {
+                                newQuestion.options = ['', '', '', ''];
+                              } else if (value === 'matching-information') {
+                                newQuestion.paragraphRefs = ['A', 'B', 'C', 'D'];
+                              } else if (value === 'matching-features') {
+                                newQuestion.features = ['', '', '', ''];
+                              } else if (value === 'matching-sentence-endings') {
+                                newQuestion.sentenceEndings = ['', '', '', ''];
+                              }
+                              
+                              const newQuestions = [...formData.questions];
+                              newQuestions[activeQuestionIndex] = newQuestion;
+                              setFormData({ ...formData, questions: newQuestions });
+                            }}
                           >
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="multiple-choice" id="type-multiple-choice" />
-                                <Label htmlFor="type-multiple-choice">Multiple Choice</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="true-false-not-given" id="type-tfng" />
-                                <Label htmlFor="type-tfng">True/False/Not Given</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="matching-headings" id="type-matching" />
-                                <Label htmlFor="type-matching">Matching Headings</Label>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="summary-completion" id="type-summary" />
-                                <Label htmlFor="type-summary">Summary Completion</Label>
-                              </div>
-                            </div>
-                          </RadioGroup>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select question type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                              <SelectItem value="true-false-not-given">True/False/Not Given</SelectItem>
+                              <SelectItem value="yes-no-not-given">Yes/No/Not Given</SelectItem>
+                              <SelectItem value="matching-information">Matching Information</SelectItem>
+                              <SelectItem value="matching-headings">Matching Headings</SelectItem>
+                              <SelectItem value="matching-features">Matching Features</SelectItem>
+                              <SelectItem value="matching-sentence-endings">Matching Sentence Endings</SelectItem>
+                              <SelectItem value="sentence-completion">Sentence Completion</SelectItem>
+                              <SelectItem value="summary-completion">Summary Completion</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                         
-                        {['multiple-choice', 'matching-headings'].includes(formData.questions[activeQuestionIndex]?.questionType) && (
-                          <div>
-                            <div className="flex justify-between items-center mb-2">
-                              <label className="block text-sm font-medium">Options</label>
-                              <Button 
-                                type="button" 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => addOption(activeQuestionIndex)}
-                              >
-                                <PlusCircle className="h-3 w-3 mr-1" />
-                                Add Option
-                              </Button>
-                            </div>
-                            
-                            {formData.questions[activeQuestionIndex]?.options?.map((option, optionIndex) => (
-                              <div key={optionIndex} className="flex items-center space-x-2 mb-2">
-                                <Input
-                                  value={option}
-                                  onChange={(e) => updateOption(activeQuestionIndex, optionIndex, e.target.value)}
-                                  placeholder={`Option ${optionIndex + 1}`}
-                                  required
-                                />
-                                <div className="flex items-center space-x-2">
-                                  <Checkbox 
-                                    id={`correct-${optionIndex}`}
-                                    checked={formData.questions[activeQuestionIndex]?.correctAnswer === option}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        updateQuestion(activeQuestionIndex, 'correctAnswer', option);
-                                      }
-                                    }}
-                                  />
-                                  <Label htmlFor={`correct-${optionIndex}`}>Correct</Label>
-                                </div>
-                                <Button 
-                                  type="button" 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => removeOption(activeQuestionIndex, optionIndex)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {formData.questions[activeQuestionIndex]?.questionType === 'true-false-not-given' && (
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Correct Answer</label>
-                            <RadioGroup 
-                              value={formData.questions[activeQuestionIndex]?.correctAnswer || 'True'}
-                              onValueChange={(value) => updateQuestion(activeQuestionIndex, 'correctAnswer', value)}
-                            >
-                              <div className="flex space-x-4">
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="True" id="answer-true" />
-                                  <Label htmlFor="answer-true">True</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="False" id="answer-false" />
-                                  <Label htmlFor="answer-false">False</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                  <RadioGroupItem value="Not Given" id="answer-not-given" />
-                                  <Label htmlFor="answer-not-given">Not Given</Label>
-                                </div>
-                              </div>
-                            </RadioGroup>
-                          </div>
-                        )}
-                        
-                        {formData.questions[activeQuestionIndex]?.questionType === 'summary-completion' && (
-                          <div>
-                            <label className="block text-sm font-medium mb-1">Correct Answer</label>
-                            <Input
-                              value={formData.questions[activeQuestionIndex]?.correctAnswer || ''}
-                              onChange={(e) => updateQuestion(activeQuestionIndex, 'correctAnswer', e.target.value)}
-                              placeholder="Enter the correct answer"
-                              required
-                            />
-                          </div>
-                        )}
+                        {renderQuestionTypeFields(activeQuestionIndex)}
                       </div>
                     </CardContent>
                   </Card>
