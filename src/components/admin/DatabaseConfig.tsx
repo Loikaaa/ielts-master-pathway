@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,16 +24,16 @@ const DatabaseConfig = () => {
   const [formErrors, setFormErrors] = useState({
     host: false,
     database: false,
-    user: false
+    user: false,
+    password: false
   });
 
   useEffect(() => {
-    // Load existing database configuration
     const savedConfig = getDatabaseConfig();
     setConfig(prev => ({
       ...prev,
       ...savedConfig,
-      password: savedConfig.password ? '••••••••' : '' // Mask password if exists
+      password: savedConfig.password ? '••••••••' : ''
     }));
   }, []);
 
@@ -45,7 +44,6 @@ const DatabaseConfig = () => {
       [name]: value
     }));
     
-    // Clear error for this field if it was previously marked as error
     if (formErrors[name as keyof typeof formErrors]) {
       setFormErrors(prev => ({
         ...prev,
@@ -58,11 +56,16 @@ const DatabaseConfig = () => {
     const errors = {
       host: !config.host,
       database: !config.database,
-      user: !config.user
+      user: !config.user,
+      password: false
     };
     
+    if (!config.password && !getDatabaseConfig().password) {
+      errors.password = true;
+    }
+    
     setFormErrors(errors);
-    return !errors.host && !errors.database && !errors.user;
+    return !errors.host && !errors.database && !errors.user && !errors.password;
   };
 
   const handleSave = () => {
@@ -73,11 +76,10 @@ const DatabaseConfig = () => {
     
     setIsLoading(true);
     try {
-      // Don't save the masked password - only save if changed
       const configToSave = {
         ...config,
         password: config.password === '••••••••' ? undefined : config.password,
-        connected: false // Reset connection status when config changes
+        connected: false
       };
       
       saveDatabaseConfig(configToSave);
@@ -96,18 +98,9 @@ const DatabaseConfig = () => {
       return;
     }
     
-    // Check if password is provided or was saved previously
-    if (!config.password && !getDatabaseConfig().password) {
-      toast.error('Password is required for database connection');
-      setFormErrors(prev => ({ ...prev, password: true }));
-      return;
-    }
-    
     setIsTesting(true);
     
-    // Simulating a connection test with the database configuration
     setTimeout(() => {
-      // For demo, we're simulating that a connection is only successful when all required fields are provided
       const success = config.host && config.database && config.user && (config.password || getDatabaseConfig().password);
       
       if (success) {
@@ -118,7 +111,6 @@ const DatabaseConfig = () => {
           lastConnected: now
         }));
         
-        // Save the updated connection status
         saveDatabaseConfig({
           ...config,
           connected: true,
@@ -247,6 +239,9 @@ const DatabaseConfig = () => {
               onChange={handleInputChange}
               className={formErrors.password ? "border-red-500" : ""}
             />
+            {formErrors.password && (
+              <p className="text-red-500 text-xs mt-1">Password is required</p>
+            )}
           </div>
         </div>
 
