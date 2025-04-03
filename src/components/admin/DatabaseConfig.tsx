@@ -24,7 +24,8 @@ const DatabaseConfig = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [formErrors, setFormErrors] = useState({
     host: false,
-    database: false
+    database: false,
+    user: false
   });
 
   useEffect(() => {
@@ -56,11 +57,12 @@ const DatabaseConfig = () => {
   const validateForm = () => {
     const errors = {
       host: !config.host,
-      database: !config.database
+      database: !config.database,
+      user: !config.user
     };
     
     setFormErrors(errors);
-    return !errors.host && !errors.database;
+    return !errors.host && !errors.database && !errors.user;
   };
 
   const handleSave = () => {
@@ -90,7 +92,14 @@ const DatabaseConfig = () => {
 
   const testConnection = () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields');
+      toast.error('Please fill in all required fields. Database name and credentials are required.');
+      return;
+    }
+    
+    // Check if password is provided or was saved previously
+    if (!config.password && !getDatabaseConfig().password) {
+      toast.error('Password is required for database connection');
+      setFormErrors(prev => ({ ...prev, password: true }));
       return;
     }
     
@@ -98,8 +107,8 @@ const DatabaseConfig = () => {
     
     // Simulating a connection test with the database configuration
     setTimeout(() => {
-      // For demo, we're simulating that a connection is only successful when proper values are provided
-      const success = config.host && config.database && config.port;
+      // For demo, we're simulating that a connection is only successful when all required fields are provided
+      const success = config.host && config.database && config.user && (config.password || getDatabaseConfig().password);
       
       if (success) {
         const now = new Date().toISOString();
@@ -117,10 +126,10 @@ const DatabaseConfig = () => {
           password: config.password === '••••••••' ? undefined : config.password
         });
         
-        toast.success('Database connection successful!');
-        console.log('Connected to database:', config.database);
+        toast.success(`Database connection successful! Connected to ${config.database}`);
+        console.log('Connected to database:', config.database, 'as user:', config.user);
       } else {
-        toast.error('Database connection failed. Please check your credentials.');
+        toast.error('Database connection failed. Please check your credentials and try again.');
       }
       
       setIsTesting(false);
@@ -144,7 +153,8 @@ const DatabaseConfig = () => {
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <AlertTitle>Connected</AlertTitle>
             <AlertDescription>
-              Database is currently connected. Last connection: {config.lastConnected ? new Date(config.lastConnected).toLocaleString() : 'Unknown'}
+              Database is currently connected to <strong>{config.database}</strong> as user <strong>{config.user}</strong>. 
+              Last connection: {config.lastConnected ? new Date(config.lastConnected).toLocaleString() : 'Unknown'}
             </AlertDescription>
           </Alert>
         )}
@@ -209,7 +219,7 @@ const DatabaseConfig = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="user" className="flex items-center gap-2">
-              <User className="h-4 w-4" /> Username
+              <User className="h-4 w-4" /> Username <span className="text-red-500">*</span>
             </Label>
             <Input
               id="user"
@@ -217,12 +227,16 @@ const DatabaseConfig = () => {
               placeholder="database user"
               value={config.user}
               onChange={handleInputChange}
+              className={formErrors.user ? "border-red-500" : ""}
             />
+            {formErrors.user && (
+              <p className="text-red-500 text-xs mt-1">Username is required</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="password" className="flex items-center gap-2">
-              <Lock className="h-4 w-4" /> Password
+              <Lock className="h-4 w-4" /> Password <span className="text-red-500">*</span>
             </Label>
             <Input
               id="password"
@@ -231,6 +245,7 @@ const DatabaseConfig = () => {
               placeholder="••••••••"
               value={config.password}
               onChange={handleInputChange}
+              className={formErrors.password ? "border-red-500" : ""}
             />
           </div>
         </div>

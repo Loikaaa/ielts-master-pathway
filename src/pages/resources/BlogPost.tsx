@@ -4,18 +4,23 @@ import { useParams, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import BlogPostDetail from '@/components/blog/BlogPostDetail';
-import { getBlogPosts } from '@/utils/settingsStorage';
+import { getBlogPosts, isDatabaseConnected } from '@/utils/settingsStorage';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Database } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const BlogPost = () => {
   const { postId } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dbConnected, setDbConnected] = useState(false);
   
   useEffect(() => {
-    // Get the blog post from localStorage
+    // Check if database is connected
+    setDbConnected(isDatabaseConnected());
+    
+    // Get the blog post from storage
     const posts = getBlogPosts();
     console.log("Available blog posts:", posts);
     
@@ -71,6 +76,16 @@ const BlogPost = () => {
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
+          {!dbConnected && (
+            <Alert className="mb-4 bg-yellow-50 border-yellow-200">
+              <Database className="h-5 w-5 text-yellow-600" />
+              <AlertTitle>Database Not Connected</AlertTitle>
+              <AlertDescription>
+                This blog content is currently being served from local storage. Connect to a database in the admin panel for persistent storage.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Button 
             variant="outline" 
             onClick={() => navigate('/resources/blog')} 

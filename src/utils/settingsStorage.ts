@@ -1,4 +1,3 @@
-
 /**
  * Utility functions for storing and retrieving settings
  */
@@ -68,6 +67,7 @@ export const getDatabaseConfig = () => {
       host: '',
       port: '',
       user: '',
+      password: '',
       database: '',
       connected: false
     };
@@ -77,10 +77,46 @@ export const getDatabaseConfig = () => {
       host: '',
       port: '',
       user: '',
+      password: '',
       database: '',
       connected: false
     };
   }
+};
+
+// Check if database is configured and connected
+export const isDatabaseConnected = () => {
+  try {
+    const dbConfig = getDatabaseConfig();
+    return dbConfig.connected === true && 
+           dbConfig.host && 
+           dbConfig.database && 
+           dbConfig.user && 
+           (dbConfig.password || dbConfig.lastConnected);
+  } catch (error) {
+    console.error('Error checking database connection:', error);
+    return false;
+  }
+};
+
+// Save database configuration
+export const saveDatabaseConfig = (config: any) => {
+  // Validate required fields
+  if (!config.host || !config.database || !config.user) {
+    console.error('Cannot save database config: missing required fields');
+    return false;
+  }
+  
+  const settings = getSettings() || {};
+  
+  // If a connection test was performed successfully, record the data accessed
+  if (config.connected && config.lastConnected) {
+    console.info(`Database connection established: ${config.user}@${config.host}/${config.database}`);
+    // In a real application, this would log to the server and possibly record analytics
+  }
+  
+  settings.database = config;
+  return saveSettings(settings);
 };
 
 // Get analytics tracking IDs
@@ -125,13 +161,6 @@ export const getSecuritySettings = () => {
       blockUnknownIPs: false
     };
   }
-};
-
-// Save database configuration
-export const saveDatabaseConfig = (config: any) => {
-  const settings = getSettings() || {};
-  settings.database = config;
-  return saveSettings(settings);
 };
 
 // Save analytics configuration
