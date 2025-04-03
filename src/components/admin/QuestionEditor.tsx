@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +9,7 @@ import WritingQuestionForm from './WritingQuestionForm';
 import SpeakingQuestionForm from './SpeakingQuestionForm';
 import ListeningQuestionForm from './ListeningQuestionForm';
 import { useToast } from '@/components/ui/use-toast';
-import { mockQuestions } from '@/data/mockQuestions';
+import { useQuestions } from '@/contexts/QuestionsContext';
 import { Question } from '@/types/questions';
 
 interface QuestionEditorProps {
@@ -20,15 +19,15 @@ interface QuestionEditorProps {
 const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
   const [activeTab, setActiveTab] = useState<'list' | 'add' | 'edit'>('list');
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
-  const [questions, setQuestions] = useState<Question[]>([]);
   const { toast } = useToast();
+  const { questions, addQuestion, updateQuestion, deleteQuestion, getQuestionsByType } = useQuestions();
+  const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([]);
 
-  // Load questions on component mount
   useEffect(() => {
-    // Filter questions based on the selected question type
-    const filteredQuestions = mockQuestions.filter(q => q.skillType === questionType);
-    setQuestions(filteredQuestions);
-  }, [questionType]);
+    const questionsByType = getQuestionsByType(questionType);
+    setFilteredQuestions(questionsByType);
+    console.log(`Loaded ${questionsByType.length} ${questionType} questions:`, questionsByType);
+  }, [questionType, questions, getQuestionsByType]);
 
   const getQuestionTypeName = () => {
     switch (questionType) {
@@ -51,9 +50,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
   };
 
   const handleDelete = (id: string) => {
-    // Remove the question from the local state
-    const updatedQuestions = questions.filter(question => question.id !== id);
-    setQuestions(updatedQuestions);
+    deleteQuestion(id);
     
     toast({
       title: "Question Deleted",
@@ -64,28 +61,22 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
   const handleSave = (formData: any) => {
     console.log('Saving question data:', formData);
     
-    // Create a new question object with a unique ID
     const newQuestion: Question = {
       ...formData,
       id: activeTab === 'edit' && selectedQuestion ? selectedQuestion.id : `${questionType}-${Date.now()}`,
       skillType: questionType,
       points: formData.points || 10,
-      timeLimit: formData.timeLimit * 60 || 3600, // Convert minutes to seconds
+      timeLimit: formData.timeLimit * 60 || 3600,
     };
     
     if (activeTab === 'edit' && selectedQuestion) {
-      // Update existing question
-      const updatedQuestions = questions.map(q => 
-        q.id === selectedQuestion.id ? newQuestion : q
-      );
-      setQuestions(updatedQuestions);
+      updateQuestion(selectedQuestion.id, newQuestion);
       toast({
         title: "Question Updated",
         description: "The question has been successfully updated.",
       });
     } else {
-      // Add new question
-      setQuestions([...questions, newQuestion]);
+      addQuestion(newQuestion);
       toast({
         title: "Question Added",
         description: "The new question has been successfully added.",
@@ -120,7 +111,6 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
     }
   };
 
-  // Helper to format question details for display
   const getQuestionDetails = (question: Question) => {
     switch (questionType) {
       case 'reading':
@@ -181,7 +171,7 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
           </TabsList>
 
           <TabsContent value="list">
-            {questions.length > 0 ? (
+            {filteredQuestions.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -193,9 +183,9 @@ const QuestionEditor: React.FC<QuestionEditorProps> = ({ questionType }) => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {questions.map((question) => {
+                  {filteredQuestions.map((question) => {
                     const details = getQuestionDetails(question);
-                    const createdDate = new Date().toISOString().split('T')[0]; // Today's date as YYYY-MM-DD
+                    const createdDate = new Date().toISOString().split('T')[0];
                     
                     return (
                       <TableRow key={question.id}>

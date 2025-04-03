@@ -1,4 +1,3 @@
-
 import React from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -6,11 +5,19 @@ import BackendControl from '@/components/BackendControl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Calendar, Clock, Database, FileText, BarChart, BookOpen, Brain, CheckCircle, Mic } from 'lucide-react';
+import { Calendar, Clock, Database, FileText, BarChart, BookOpen, Brain, CheckCircle, Mic, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useQuestions } from '@/contexts/QuestionsContext';
 
 const Dashboard = () => {
+  const { questions, loading } = useQuestions();
+  
+  const readingCount = questions.filter(q => q.skillType === 'reading').length;
+  const writingCount = questions.filter(q => q.skillType === 'writing').length;
+  const listeningCount = questions.filter(q => q.skillType === 'listening').length;
+  const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -166,37 +173,63 @@ const Dashboard = () => {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Recommended Practice</CardTitle>
+                    <div className="flex justify-between items-center">
+                      <CardTitle className="text-lg">Available Practice</CardTitle>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/practice">
+                          View All <ArrowRight className="h-4 w-4 ml-1" />
+                        </Link>
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-writing/10 p-2 rounded-full">
-                          <FileText className="h-5 w-5 text-writing" />
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-reading/10">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-reading/20 p-2 rounded-full">
+                            <BookOpen className="h-5 w-5 text-reading" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Reading Tests</h3>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium">Writing Task 2 Practice</h3>
-                          <p className="text-sm text-muted-foreground mb-2">Focus on essay structure and coherence</p>
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to="/practice?skill=writing&task=2">
-                              Start Practice
-                            </Link>
-                          </Button>
-                        </div>
+                        <div className="text-sm font-medium">{readingCount} available</div>
                       </div>
-                      <div className="flex items-start gap-3">
-                        <div className="bg-speaking/10 p-2 rounded-full">
-                          <Mic className="h-5 w-5 text-speaking" />
+                      
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-writing/10">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-writing/20 p-2 rounded-full">
+                            <FileText className="h-5 w-5 text-writing" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Writing Tasks</h3>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="font-medium">Speaking Part 2 Training</h3>
-                          <p className="text-sm text-muted-foreground mb-2">Improve your long-turn responses</p>
-                          <Button variant="outline" size="sm" asChild>
-                            <Link to="/practice?skill=speaking&part=2">
-                              Start Practice
-                            </Link>
-                          </Button>
+                        <div className="text-sm font-medium">{writingCount} available</div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-speaking/10">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-speaking/20 p-2 rounded-full">
+                            <Mic className="h-5 w-5 text-speaking" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Speaking Sessions</h3>
+                          </div>
                         </div>
+                        <div className="text-sm font-medium">{speakingCount} available</div>
+                      </div>
+                      
+                      <div className="flex items-center justify-between p-2 rounded-lg bg-listening/10">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-listening/20 p-2 rounded-full">
+                            <Brain className="h-5 w-5 text-listening" />
+                          </div>
+                          <div>
+                            <h3 className="font-medium">Listening Tests</h3>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">{listeningCount} available</div>
                       </div>
                     </div>
                   </CardContent>

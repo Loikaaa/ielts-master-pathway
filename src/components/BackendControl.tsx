@@ -16,12 +16,27 @@ import {
   FileJson,
   Users,
   GanttChart,
-  BarChart4
+  BarChart4,
+  BookOpen,
+  FileText,
+  Mic,
+  Brain
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { useQuestions } from '@/contexts/QuestionsContext';
+import { Link } from 'react-router-dom';
 
 const BackendControl = () => {
+  const { questions, loading } = useQuestions();
+  
+  // Get question counts by type
+  const readingCount = questions.filter(q => q.skillType === 'reading').length;
+  const writingCount = questions.filter(q => q.skillType === 'writing').length;
+  const listeningCount = questions.filter(q => q.skillType === 'listening').length;
+  const speakingCount = questions.filter(q => q.skillType === 'speaking').length;
+  const totalCount = questions.length;
+
   return (
     <div className="space-y-6">
       <Card>
@@ -95,6 +110,52 @@ const BackendControl = () => {
             API Logs
           </Button>
         </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Question Statistics</CardTitle>
+          <CardDescription>
+            Overview of content in your IELTS preparation system
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-reading/10 p-4 rounded-lg flex flex-col items-center text-center">
+                <BookOpen className="h-8 w-8 text-reading mb-2" />
+                <div className="text-2xl font-bold">{readingCount}</div>
+                <div className="text-sm text-muted-foreground">Reading Tests</div>
+              </div>
+              
+              <div className="bg-writing/10 p-4 rounded-lg flex flex-col items-center text-center">
+                <FileText className="h-8 w-8 text-writing mb-2" />
+                <div className="text-2xl font-bold">{writingCount}</div>
+                <div className="text-sm text-muted-foreground">Writing Tasks</div>
+              </div>
+              
+              <div className="bg-speaking/10 p-4 rounded-lg flex flex-col items-center text-center">
+                <Mic className="h-8 w-8 text-speaking mb-2" />
+                <div className="text-2xl font-bold">{speakingCount}</div>
+                <div className="text-sm text-muted-foreground">Speaking Tests</div>
+              </div>
+              
+              <div className="bg-listening/10 p-4 rounded-lg flex flex-col items-center text-center">
+                <Brain className="h-8 w-8 text-listening mb-2" />
+                <div className="text-2xl font-bold">{listeningCount}</div>
+                <div className="text-sm text-muted-foreground">Listening Tests</div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <Button asChild>
+                <Link to="/admin-dashboard">
+                  Manage Content
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
       </Card>
 
       <Card>
