@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { mockQuestions } from '@/data/mockQuestions';
 import { Question, ReadingQuestion, WritingQuestion, SpeakingQuestion, ListeningQuestion } from '@/types/questions';
 import ReadingQuestionView from './ReadingQuestionView';
 import WritingQuestionView from './WritingQuestionView';
@@ -12,6 +11,7 @@ import ListeningQuestionView from './ListeningQuestionView';
 import ResultsView from './ResultsView';
 import { useToast } from '@/components/ui/use-toast';
 import { Clock, AlertTriangle, AlertCircle, Loader2 } from 'lucide-react';
+import { useQuestions } from '@/contexts/QuestionsContext';
 
 interface QuestionManagerProps {
   audioPermissionGranted?: boolean;
@@ -41,9 +41,14 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const { toast } = useToast();
+  const { questions: contextQuestions, loading: contextLoading } = useQuestions();
 
-  // Load questions on component mount
+  // Load questions from QuestionsContext
   useEffect(() => {
+    if (contextLoading) {
+      return; // Wait until context is loaded
+    }
+
     if (!skillType) {
       setLoadError("No skill type specified");
       setIsLoading(false);
@@ -51,10 +56,10 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     }
 
     console.log("QuestionManager: Loading questions for skillType:", skillType, "practiceId:", practiceId);
-    console.log("Available mockQuestions:", mockQuestions);
+    console.log("Available questions from context:", contextQuestions);
     
-    if (!mockQuestions || mockQuestions.length === 0) {
-      console.error("No mockQuestions available");
+    if (!contextQuestions || contextQuestions.length === 0) {
+      console.error("No questions available in context");
       setLoadError("Failed to load questions data");
       setIsLoading(false);
       return;
@@ -64,19 +69,19 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     
     if (practiceId) {
       // First try to find a specific question by ID
-      const specificQuestion = mockQuestions.find(q => q.id === practiceId);
+      const specificQuestion = contextQuestions.find(q => q.id === practiceId);
       if (specificQuestion) {
         console.log("Found specific question:", specificQuestion);
         filteredQuestions = [specificQuestion];
       } else {
         // If no specific question found, filter by skill type
         console.log("No specific question found, filtering by skill type");
-        filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+        filteredQuestions = contextQuestions.filter(q => q.skillType === skillType);
       }
     } else {
       // Fallback to filter by skill type only
       console.log("No practiceId provided, filtering by skill type only");
-      filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+      filteredQuestions = contextQuestions.filter(q => q.skillType === skillType);
     }
     
     console.log(`Loading questions for ${skillType} practice with id ${practiceId}`, filteredQuestions);
@@ -110,38 +115,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     }
     
     setIsLoading(false);
-  }, [skillType, practiceId]);
-
-  // Timer effect
-  useEffect(() => {
-    if (!timeRemaining) return;
-
-    const timer = setInterval(() => {
-      setTimeRemaining(prev => {
-        if (!prev) return null;
-        
-        // Show 5-minute warning
-        if (prev === 300 && !warningShown) {
-          toast({
-            title: "5 Minutes Remaining",
-            description: "You have 5 minutes left to complete this section.",
-            variant: "destructive",
-          });
-          setWarningShown(true);
-        }
-        
-        if (prev <= 1) {
-          clearInterval(timer);
-          // Auto-submit when time is up
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [timeRemaining, warningShown]);
+  }, [skillType, practiceId, contextQuestions, contextLoading]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -242,7 +216,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
   };
 
-  if (isLoading) {
+  if (isLoading || contextLoading) {
     return (
       <div className="container mx-auto p-4 mt-4">
         <Card>
@@ -271,7 +245,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
             </h2>
             <p className="text-muted-foreground mb-4">
               {skillType 
-                ? `We couldn't find any ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}.`
+                ? `We couldn't find any ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}. Try creating some in the admin panel.`
                 : 'No skill type specified. Please select a practice type.'}
             </p>
             <Button onClick={() => window.location.href = '/practice'}>

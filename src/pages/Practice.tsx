@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -21,10 +20,11 @@ import {
   Search, 
   Star, 
   Timer,
-  AlertCircle 
+  AlertCircle,
+  Loader2 
 } from 'lucide-react';
-import { mockQuestions } from '@/data/mockQuestions';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { useQuestions } from '@/contexts/QuestionsContext';
 
 const Practice = () => {
   const navigate = useNavigate();
@@ -39,80 +39,82 @@ const Practice = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { toast } = useToast();
+  const { questions, loading: questionsLoading } = useQuestions();
 
-  // Load practice items based on mockQuestions
   useEffect(() => {
-    console.log("Loading practice items from mockQuestions:", mockQuestions);
+    console.log("Loading practice items from QuestionsContext:", questions);
     setIsLoading(true);
     setError(null);
     
     try {
-      // Map the mockQuestions to our practice item format
-      const items = {
-        reading: [],
-        writing: [],
-        speaking: [],
-        listening: []
-      };
-      
-      if (!mockQuestions || mockQuestions.length === 0) {
-        console.error("No mockQuestions data available");
-        setError("Failed to load practice questions");
-        setIsLoading(false);
-        return;
-      }
-      
-      mockQuestions.forEach(question => {
-        if (!items[question.skillType]) {
-          console.warn(`Unknown skill type: ${question.skillType}`);
+      if (!questionsLoading) {
+        const items = {
+          reading: [],
+          writing: [],
+          speaking: [],
+          listening: []
+        };
+        
+        if (!questions || questions.length === 0) {
+          console.error("No questions data available");
+          setError("No practice questions found");
+          setIsLoading(false);
           return;
         }
         
-        let title = "";
-        let type = "";
-        let duration = "";
-        
-        if (question.skillType === 'reading') {
-          title = question.passageTitle || `Reading Practice ${question.id}`;
-          type = question.questions[0]?.questionType || 'Multiple Question Types';
-          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
-        } else if (question.skillType === 'writing') {
-          title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
-          type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
-          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
-        } else if (question.skillType === 'speaking') {
-          title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
-          type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
-          duration = `${Math.floor(((question.preparationTime || 0) + (question.responseTime || 0)) / 60)} min`;
-        } else if (question.skillType === 'listening') {
-          title = `Section ${question.sectionNumber}`;
-          type = question.questions[0]?.questionType || 'Multiple Question Types';
-          duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
-        }
-        
-        items[question.skillType].push({
-          id: question.id,
-          title: title,
-          type: type,
-          level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
-          duration: duration,
-          completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate
-          popular: Math.random() > 0.6 // Randomly mark some as popular
+        questions.forEach(question => {
+          if (!items[question.skillType]) {
+            console.warn(`Unknown skill type: ${question.skillType}`);
+            return;
+          }
+          
+          let title = "";
+          let type = "";
+          let duration = "";
+          
+          if (question.skillType === 'reading') {
+            title = question.passageTitle || `Reading Practice ${question.id}`;
+            type = question.questions && question.questions[0]?.questionType || 'Multiple Question Types';
+            duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+          } else if (question.skillType === 'writing') {
+            title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
+            type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
+            duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+          } else if (question.skillType === 'speaking') {
+            title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
+            type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
+            duration = `${Math.floor(((question.preparationTime || 0) + (question.responseTime || 0)) / 60)} min`;
+          } else if (question.skillType === 'listening') {
+            title = `Section ${question.sectionNumber}`;
+            type = question.questions && question.questions[0]?.questionType || 'Multiple Question Types';
+            duration = `${Math.floor((question.timeLimit || 0) / 60)} min`;
+          }
+          
+          items[question.skillType].push({
+            id: question.id,
+            title: title,
+            type: type,
+            level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
+            duration: duration,
+            completionRate: Math.floor(Math.random() * 40) + 40,
+            popular: Math.random() > 0.6
+          });
         });
-      });
-      
-      // Set the practice items
-      setPracticeItems(items);
-      console.log("Processed practice items:", items);
+        
+        setPracticeItems(items);
+        console.log("Processed practice items:", items);
+      }
     } catch (err) {
       console.error("Error processing practice items:", err);
       setError("Failed to load practice questions");
     } finally {
-      setIsLoading(false);
+      if (!questionsLoading) {
+        setIsLoading(false);
+      }
     }
-  }, []);
+  }, [questions, questionsLoading]);
 
-  // Handle tab change
   useEffect(() => {
     if (skillParam && skillParam !== activeTab) {
       setActiveTab(skillParam);
@@ -124,7 +126,6 @@ const Practice = () => {
     navigate(`/practice/session/${skillType}/${itemId}`);
   };
 
-  // Display a message if no practice items are found
   const renderEmptyState = (skillType: string) => (
     <div className="text-center py-12">
       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
@@ -135,13 +136,10 @@ const Practice = () => {
       </div>
       <h3 className="text-lg font-medium mb-2">No {skillType} practices available</h3>
       <p className="text-muted-foreground mb-4">
-        Check back later for new practice materials or contact support.
+        Create new {skillType} questions in the admin panel or check back later.
       </p>
-      <Button variant="outline" onClick={() => toast({
-        title: "Coming Soon",
-        description: `New ${skillType} practice materials will be added soon.`
-      })}>
-        Request Materials
+      <Button variant="outline" onClick={() => navigate('/admin-dashboard')}>
+        Go to Admin Panel
       </Button>
     </div>
   );
@@ -163,7 +161,9 @@ const Practice = () => {
 
   const renderLoading = () => (
     <div className="text-center py-12">
-      <div className="animate-spin inline-block w-8 h-8 border-4 border-current border-t-transparent text-primary rounded-full mb-4" role="status" aria-label="loading"></div>
+      <div className="flex justify-center mb-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
       <h3 className="text-lg font-medium">Loading practice materials...</h3>
     </div>
   );
@@ -234,7 +234,9 @@ const Practice = () => {
             </TabsList>
             
             <TabsContent value="reading">
-              {practiceItems.reading.length > 0 ? (
+              {isLoading ? renderLoading() : 
+               error ? renderError() : 
+               practiceItems.reading.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {practiceItems.reading.map((item) => (
                     <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
@@ -282,7 +284,9 @@ const Practice = () => {
             </TabsContent>
             
             <TabsContent value="writing">
-              {practiceItems.writing.length > 0 ? (
+              {isLoading ? renderLoading() : 
+               error ? renderError() : 
+               practiceItems.writing.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {practiceItems.writing.map((item) => (
                     <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
@@ -330,7 +334,9 @@ const Practice = () => {
             </TabsContent>
             
             <TabsContent value="speaking">
-              {practiceItems.speaking.length > 0 ? (
+              {isLoading ? renderLoading() : 
+               error ? renderError() : 
+               practiceItems.speaking.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {practiceItems.speaking.map((item) => (
                     <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
@@ -378,7 +384,9 @@ const Practice = () => {
             </TabsContent>
             
             <TabsContent value="listening">
-              {practiceItems.listening.length > 0 ? (
+              {isLoading ? renderLoading() : 
+               error ? renderError() : 
+               practiceItems.listening.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {practiceItems.listening.map((item) => (
                     <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
