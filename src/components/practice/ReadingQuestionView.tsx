@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronRight, ChevronLeft, BookOpen } from 'lucide-react';
 
 interface ReadingQuestionViewProps {
@@ -27,6 +28,156 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
     onAnswer(question.id, newAnswer);
   };
 
+  // Renders different question types
+  const renderQuestionInput = (subQuestion: any, index: number) => {
+    switch (subQuestion.questionType) {
+      case 'multiple-choice':
+        return (
+          <RadioGroup
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <div className="space-y-2 pl-7">
+              {subQuestion.options?.map((option: string, idx: number) => (
+                <div key={idx} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
+                  <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        );
+
+      case 'true-false-not-given':
+        return (
+          <RadioGroup
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <div className="space-y-2 pl-7">
+              {['True', 'False', 'Not Given'].map((option, idx) => (
+                <div key={idx} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
+                  <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        );
+
+      case 'yes-no-not-given':
+        return (
+          <RadioGroup
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <div className="space-y-2 pl-7">
+              {['Yes', 'No', 'Not Given'].map((option, idx) => (
+                <div key={idx} className="flex items-center space-x-2">
+                  <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
+                  <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
+                </div>
+              ))}
+            </div>
+          </RadioGroup>
+        );
+
+      case 'matching-headings':
+        return (
+          <Select
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select a heading" />
+            </SelectTrigger>
+            <SelectContent>
+              {subQuestion.options?.map((option: string, idx: number) => (
+                <SelectItem key={idx} value={option}>
+                  {idx + 1}. {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'matching-information':
+        return (
+          <Select
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select paragraph" />
+            </SelectTrigger>
+            <SelectContent>
+              {subQuestion.paragraphRefs?.map((paragraph: string, idx: number) => (
+                <SelectItem key={idx} value={paragraph}>
+                  Paragraph {paragraph}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'matching-features':
+        return (
+          <Select
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select a feature" />
+            </SelectTrigger>
+            <SelectContent>
+              {subQuestion.features?.map((feature: string, idx: number) => (
+                <SelectItem key={idx} value={feature}>
+                  {String.fromCharCode(65 + idx)}. {feature}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'matching-sentence-endings':
+        return (
+          <Select
+            value={answer[subQuestion.id] || ''}
+            onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
+          >
+            <SelectTrigger className="w-full max-w-md">
+              <SelectValue placeholder="Select ending" />
+            </SelectTrigger>
+            <SelectContent>
+              {subQuestion.sentenceEndings?.map((ending: string, idx: number) => (
+                <SelectItem key={idx} value={ending}>
+                  {String.fromCharCode(65 + idx)}. {ending}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+
+      case 'sentence-completion':
+        return (
+          <div className="pl-7">
+            <Input
+              placeholder="Enter your answer"
+              value={answer[subQuestion.id] || ''}
+              onChange={(e) => handleAnswerChange(subQuestion.id, e.target.value)}
+              className="max-w-md"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              Note: Spelling must be correct. Write exactly as in the passage.
+            </p>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 h-full">
       {/* Mobile Tabs (Only visible on small screens) */}
@@ -41,73 +192,23 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
               <h2 className="text-xl font-bold mb-4">{question.passageTitle}</h2>
               <div className="prose prose-sm max-w-none">
                 {question.passageText.split('\n\n').map((paragraph, idx) => (
-                  <p key={idx} className="mb-4">{paragraph}</p>
+                  <p key={idx} className="mb-4">
+                    <span className="font-bold text-primary">{String.fromCharCode(65 + idx)}. </span>
+                    {paragraph}
+                  </p>
                 ))}
               </div>
             </div>
           </TabsContent>
           <TabsContent value="questions">
             <div className="space-y-6 p-4">
-              {question.questions.map((subQuestion) => (
+              {question.questions.map((subQuestion, index) => (
                 <div key={subQuestion.id} className="border-b pb-4">
-                  <h3 className="font-medium mb-3">{subQuestion.questionText}</h3>
-      
-                  {subQuestion.questionType === 'multiple-choice' && subQuestion.options && (
-                    <RadioGroup
-                      value={answer[subQuestion.id] || ''}
-                      onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                    >
-                      <div className="space-y-2">
-                        {subQuestion.options.map((option, idx) => (
-                          <div key={idx} className="flex items-center space-x-2">
-                            <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                            <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </RadioGroup>
-                  )}
-      
-                  {subQuestion.questionType === 'true-false-not-given' && (
-                    <RadioGroup
-                      value={answer[subQuestion.id] || ''}
-                      onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                    >
-                      <div className="space-y-2">
-                        {['True', 'False', 'Not Given'].map((option, idx) => (
-                          <div key={idx} className="flex items-center space-x-2">
-                            <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                            <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </RadioGroup>
-                  )}
-      
-                  {subQuestion.questionType === 'matching-headings' && subQuestion.options && (
-                    <RadioGroup
-                      value={answer[subQuestion.id] || ''}
-                      onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                    >
-                      <div className="space-y-2">
-                        {subQuestion.options.map((option, idx) => (
-                          <div key={idx} className="flex items-center space-x-2">
-                            <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                            <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </RadioGroup>
-                  )}
-      
-                  {subQuestion.questionType === 'summary-completion' && (
-                    <Input
-                      placeholder="Enter your answer"
-                      value={answer[subQuestion.id] || ''}
-                      onChange={(e) => handleAnswerChange(subQuestion.id, e.target.value)}
-                      className="max-w-md"
-                    />
-                  )}
+                  <h3 className="font-medium mb-3">
+                    <span className="inline-block w-7 text-primary font-bold">{index + 1}.</span>
+                    {subQuestion.questionText}
+                  </h3>
+                  {renderQuestionInput(subQuestion, index)}
                 </div>
               ))}
             </div>
@@ -126,7 +227,10 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
         </div>
         <div className="prose prose-sm max-w-none">
           {question.passageText.split('\n\n').map((paragraph, idx) => (
-            <p key={idx} className="mb-4">{paragraph}</p>
+            <p key={idx} className="mb-4">
+              <span className="font-bold text-primary">{String.fromCharCode(65 + idx)}. </span>
+              {paragraph}
+            </p>
           ))}
         </div>
       </div>
@@ -146,68 +250,7 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
                 <span className="inline-block w-7 text-primary font-bold">{index + 1}.</span>
                 {subQuestion.questionText}
               </h3>
-
-              {subQuestion.questionType === 'multiple-choice' && subQuestion.options && (
-                <RadioGroup
-                  value={answer[subQuestion.id] || ''}
-                  onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                >
-                  <div className="space-y-2 pl-7">
-                    {subQuestion.options.map((option, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                        <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              )}
-
-              {subQuestion.questionType === 'true-false-not-given' && (
-                <RadioGroup
-                  value={answer[subQuestion.id] || ''}
-                  onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                >
-                  <div className="space-y-2 pl-7">
-                    {['True', 'False', 'Not Given'].map((option, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                        <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              )}
-
-              {subQuestion.questionType === 'matching-headings' && subQuestion.options && (
-                <RadioGroup
-                  value={answer[subQuestion.id] || ''}
-                  onValueChange={(value) => handleAnswerChange(subQuestion.id, value)}
-                >
-                  <div className="space-y-2 pl-7">
-                    {subQuestion.options.map((option, idx) => (
-                      <div key={idx} className="flex items-center space-x-2">
-                        <RadioGroupItem value={option} id={`${subQuestion.id}-option-${idx}`} />
-                        <Label htmlFor={`${subQuestion.id}-option-${idx}`}>{option}</Label>
-                      </div>
-                    ))}
-                  </div>
-                </RadioGroup>
-              )}
-
-              {subQuestion.questionType === 'summary-completion' && (
-                <div className="pl-7">
-                  <Input
-                    placeholder="Enter your answer"
-                    value={answer[subQuestion.id] || ''}
-                    onChange={(e) => handleAnswerChange(subQuestion.id, e.target.value)}
-                    className="max-w-md"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Note: Spelling must be correct. Write exactly as in the passage.
-                  </p>
-                </div>
-              )}
+              {renderQuestionInput(subQuestion, index)}
             </div>
           ))}
         </div>

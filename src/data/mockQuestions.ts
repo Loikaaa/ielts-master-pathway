@@ -1,4 +1,3 @@
-
 import { Question } from '@/types/questions';
 
 export const mockQuestions: Question[] = [
@@ -195,6 +194,145 @@ As urbanization continues globally, with over half the world's population now li
           'Medieval architectural styles'
         ],
         correctAnswer: 'Distinct zones and high-rise buildings in open spaces'
+      }
+    ]
+  },
+  
+  // New IELTS-style reading questions with different question types
+  {
+    id: 'reading-3',
+    skillType: 'reading',
+    difficulty: 'hard',
+    points: 10,
+    timeLimit: 3600, // 60 minutes for reading section
+    passageTitle: 'The Origins and Impacts of Social Media',
+    passageText: `The evolution of social media represents one of the most significant technological and social transformations of the early 21st century. What began as simple platforms for digital connection has evolved into complex ecosystems that profoundly influence nearly every aspect of human society, from personal relationships to global politics.
+
+The roots of social media can be traced to the late 1990s and early 2000s with platforms like Six Degrees and Friendster, which pioneered the concept of digital social networks based on real-world connections. However, it was the launch of Facebook in 2004, initially as a Harvard-exclusive network, that marked the beginning of social media's exponential growth. The platform's expansion to other universities and eventually to the general public established a template that countless other platforms would follow. By introducing features like the News Feed in 2006, Facebook fundamentally changed how people consumed information online, shifting from active searching to passive consumption of algorithmically curated content.
+
+During the same period, Twitter emerged with its distinctive format of short-form content, originally limited to 140 characters. This constraint, initially implemented due to SMS compatibility requirements, inadvertently created a new form of communication that valued brevity and immediacy. Twitter's simple but powerful mechanism of following others without requiring reciprocation differentiated it from Facebook's mutual friendship model and enabled it to become a powerful platform for real-time news dissemination and public discourse.
+
+The launch of the iPhone in 2007 and the subsequent smartphone revolution dramatically accelerated social media adoption by making these platforms constantly accessible. Mobile access transformed social media from occasional desktop activities to persistent, integrated aspects of daily life. This shift enabled entirely new platforms like Instagram (2010) and Snapchat (2011) to emerge with mobile-first experiences centered around visual communication rather than text.
+
+The business models underpinning major social media platforms have predominantly relied on advertising revenue, generated through the collection and analysis of user data. This has led to increasingly sophisticated algorithms designed to maximize engagement by personalizing content. While these algorithms have enabled more relevant content delivery, they have also contributed to what researchers call "filter bubbles" and "echo chambers," where users primarily encounter information that aligns with their existing beliefs and preferences.
+
+The psychological and social impacts of social media have been the subject of extensive research and debate. Studies have documented correlations between social media use and issues including anxiety, depression, and diminished attention spans, particularly among younger users. However, the same platforms have also been credited with reducing isolation for marginalized groups, enabling new forms of community building, and facilitating social movements from the Arab Spring to #MeToo.
+
+In education, social media has created both challenges and opportunities. While educators express concern about shortened attention spans and the distractions posed by constant connectivity, these platforms have also enabled collaborative learning, global classroom connections, and access to educational content for students in remote or underserved regions. Many educational institutions have embraced social media as communication and teaching tools, recognizing their potential to engage students through familiar interfaces.
+
+The political implications of social media have perhaps been the most significant and controversial. These platforms have democratized public discourse by removing traditional gatekeepers and enabling anyone with internet access to potentially reach global audiences. This democratization has amplified previously marginalized voices and facilitated rapid information sharing during crises. However, the same features have enabled the spread of misinformation and disinformation, with documented impacts on elections worldwide and public health responses to the COVID-19 pandemic.
+
+Regulatory approaches to social media have varied significantly across different countries and jurisdictions. The European Union has implemented some of the most comprehensive regulations through the General Data Protection Regulation (GDPR) and the Digital Services Act, focusing on data privacy, algorithmic transparency, and platform responsibility for content moderation. In contrast, the United States has relied primarily on Section 230 of the Communications Decency Act, which largely shields platforms from liability for user-generated content. Meanwhile, countries like China have implemented extensive restrictions and monitoring systems, demonstrating an entirely different approach to social media governance.
+
+As social media continues to evolve, emerging technologies like virtual reality, augmented reality, and artificial intelligence promise to further transform these platforms. The concept of the "metaverse" represents a potential future where social interactions occur in immersive digital environments, potentially deepening both the benefits and challenges of social media. Similarly, advances in AI-generated content raise new questions about authenticity and trust in digital spaces.
+
+Understanding the complex and multifaceted impacts of social media requires nuanced analysis beyond simplistic narratives of either utopian progress or dystopian decline. These platforms have simultaneously connected and divided, informed and misinformed, empowered and exploited. As society continues to adapt to these powerful technologies, the challenge lies in maximizing their benefits while developing effective safeguards against their most harmful effects.`,
+    questions: [
+      // Multiple Choice
+      {
+        id: 'reading-3-q1',
+        questionText: 'According to the passage, Facebook's introduction of the News Feed in 2006:',
+        questionType: 'multiple-choice',
+        options: [
+          'reduced the popularity of the platform',
+          'shifted users from passive consumption to active searching',
+          'changed how people consumed information online',
+          'was initially restricted to Harvard students only'
+        ],
+        correctAnswer: 'changed how people consumed information online'
+      },
+      // True/False/Not Given
+      {
+        id: 'reading-3-q2',
+        questionText: 'The passage states that Twitter's 140-character limit was originally implemented due to SMS compatibility requirements.',
+        questionType: 'true-false-not-given',
+        correctAnswer: 'True'
+      },
+      {
+        id: 'reading-3-q3',
+        questionText: 'According to the passage, social media has had a universally negative impact on education.',
+        questionType: 'true-false-not-given',
+        correctAnswer: 'False'
+      },
+      {
+        id: 'reading-3-q4',
+        questionText: 'The author believes that virtual reality will eventually replace traditional social media platforms.',
+        questionType: 'true-false-not-given',
+        correctAnswer: 'Not Given'
+      },
+      // Yes/No/Not Given
+      {
+        id: 'reading-3-q5',
+        questionText: 'The author supports stricter government regulation of social media platforms.',
+        questionType: 'yes-no-not-given',
+        correctAnswer: 'Not Given'
+      },
+      // Matching Information
+      {
+        id: 'reading-3-q6',
+        questionText: 'In which paragraph does the author discuss how social media has affected political discourse?',
+        questionType: 'matching-information',
+        paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
+        correctAnswer: 'H'
+      },
+      {
+        id: 'reading-3-q7',
+        questionText: 'Which paragraph mentions the psychological impacts of social media use?',
+        questionType: 'matching-information',
+        paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
+        correctAnswer: 'F'
+      },
+      // Matching Headings
+      {
+        id: 'reading-3-q8',
+        questionText: 'Choose the most suitable heading for paragraph E:',
+        questionType: 'matching-headings',
+        options: [
+          'Revenue Generation and Algorithmic Design',
+          'The Problem of Online Privacy',
+          'How Social Media Companies Make Money',
+          'Filter Bubbles: A Growing Concern'
+        ],
+        correctAnswer: 'Revenue Generation and Algorithmic Design'
+      },
+      // Matching Features
+      {
+        id: 'reading-3-q9',
+        questionText: 'Which of the following is a characteristic of Twitter mentioned in the passage?',
+        questionType: 'matching-features',
+        features: [
+          'Required mutual friendships',
+          'Initially designed for desktop use',
+          'Allowed following without reciprocation',
+          'Focused primarily on visual content'
+        ],
+        correctAnswer: 'Allowed following without reciprocation'
+      },
+      // Matching Sentence Endings
+      {
+        id: 'reading-3-q10',
+        questionText: 'Complete the sentence: "The smartphone revolution transformed social media by..."',
+        questionType: 'matching-sentence-endings',
+        sentenceEndings: [
+          'making these platforms constantly accessible.',
+          'reducing the time people spent online.',
+          'eliminating the need for text-based communication.',
+          'creating more privacy for users.'
+        ],
+        correctAnswer: 'making these platforms constantly accessible.'
+      },
+      // Sentence Completion
+      {
+        id: 'reading-3-q11',
+        questionText: 'According to the passage, social media platforms have simultaneously _____, _____, and _____.',
+        questionType: 'sentence-completion',
+        correctAnswer: 'connected and divided, informed and misinformed, empowered and exploited'
+      },
+      {
+        id: 'reading-3-q12',
+        questionText: 'The passage mentions that the concept of the _____ represents a potential future where social interactions occur in immersive digital environments.',
+        questionType: 'sentence-completion',
+        correctAnswer: 'metaverse'
       }
     ]
   },

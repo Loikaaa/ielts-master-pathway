@@ -14,8 +14,13 @@ export interface ReadingQuestion extends BaseQuestion {
   questions: {
     id: string;
     questionText: string;
-    questionType: 'multiple-choice' | 'true-false-not-given' | 'matching-headings' | 'summary-completion';
+    questionType: 'multiple-choice' | 'true-false-not-given' | 'yes-no-not-given' | 'matching-information' | 
+                  'matching-headings' | 'matching-features' | 'matching-sentence-endings' | 'sentence-completion';
     options?: string[];
+    matchingOptions?: string[];
+    features?: string[];
+    sentenceEndings?: string[];
+    paragraphRefs?: string[];
     correctAnswer: string | string[];
   }[];
 }
