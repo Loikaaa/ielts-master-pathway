@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -25,7 +26,7 @@ import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
 import BackendControl from "./components/BackendControl";
 import MaintenancePage from "./pages/MaintenancePage";
-import { isMaintenanceMode } from "./utils/settingsStorage";
+import { isMaintenanceMode, getSettings } from "./utils/settingsStorage";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -38,7 +39,13 @@ const App = () => {
     // Check for maintenance mode using our utility
     const checkMaintenanceMode = () => {
       try {
+        // Get all settings for inspection
+        const settings = getSettings();
+        console.log('Current settings:', settings);
+        
         const maintenanceEnabled = isMaintenanceMode();
+        console.log('Maintenance mode enabled:', maintenanceEnabled);
+        
         setIsInMaintenanceMode(maintenanceEnabled);
       } catch (error) {
         console.error('Error checking maintenance mode:', error);
@@ -56,6 +63,48 @@ const App = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Add Google Analytics script if configured
+  useEffect(() => {
+    const settings = getSettings();
+    const googleAnalyticsId = settings?.analytics?.googleAnalyticsId;
+    
+    if (googleAnalyticsId && settings?.analytics?.enabled) {
+      // Add Google Analytics
+      const script1 = document.createElement('script');
+      script1.async = true;
+      script1.src = `https://www.googletagmanager.com/gtag/js?id=${googleAnalyticsId}`;
+      document.head.appendChild(script1);
+
+      const script2 = document.createElement('script');
+      script2.innerHTML = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${googleAnalyticsId}');
+      `;
+      document.head.appendChild(script2);
+      
+      // Add Facebook Pixel if available
+      const facebookPixelId = settings?.analytics?.facebookPixelId;
+      if (facebookPixelId) {
+        const pixelScript = document.createElement('script');
+        pixelScript.innerHTML = `
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '${facebookPixelId}');
+          fbq('track', 'PageView');
+        `;
+        document.head.appendChild(pixelScript);
+      }
+    }
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -69,6 +118,7 @@ const App = () => {
   if (isInMaintenanceMode && 
       !window.location.pathname.includes('admin') && 
       !window.location.pathname.includes('backend')) {
+    console.log('Rendering maintenance page for path:', window.location.pathname);
     return <MaintenancePage />;
   }
 
