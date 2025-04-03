@@ -32,7 +32,7 @@ const isListeningQuestion = (question: Question): question is ListeningQuestion 
   question.skillType === 'listening';
 
 const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGranted }) => {
-  const { skillType } = useParams<{ skillType: string }>();
+  const { skillType, practiceId } = useParams<{ skillType: string; practiceId: string }>();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -45,8 +45,24 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   useEffect(() => {
     if (!skillType) return;
 
-    // Filter questions based on the skillType param
-    const filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+    let filteredQuestions: Question[] = [];
+    
+    if (practiceId) {
+      // First try to find a specific question by ID
+      const specificQuestion = mockQuestions.find(q => q.id === practiceId);
+      if (specificQuestion) {
+        filteredQuestions = [specificQuestion];
+      } else {
+        // If no specific question found, filter by skill type
+        filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+      }
+    } else {
+      // Fallback to filter by skill type only
+      filteredQuestions = mockQuestions.filter(q => q.skillType === skillType);
+    }
+    
+    console.log(`Loading questions for ${skillType} practice with id ${practiceId}`, filteredQuestions);
+    
     setQuestions(filteredQuestions);
     
     // Reset state when questions change
@@ -54,7 +70,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     setAnswers({});
     setShowResults(false);
     setTimeRemaining(filteredQuestions[0]?.timeLimit || null);
-  }, [skillType]);
+  }, [skillType, practiceId]);
 
   // Timer effect
   useEffect(() => {

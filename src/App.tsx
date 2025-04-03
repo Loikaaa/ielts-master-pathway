@@ -38,6 +38,7 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/practice" element={<Practice />} />
               <Route path="/practice/session/:skillType/:practiceId" element={<PracticeSession />} />
+              <Route path="/practice/session/:skillType" element={<PracticeSession />} />
               <Route path="/community" element={<Community />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/resources" element={<Resources />} />

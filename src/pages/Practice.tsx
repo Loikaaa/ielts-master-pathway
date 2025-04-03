@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -21,8 +22,65 @@ import {
   Star, 
   Timer 
 } from 'lucide-react';
+import { mockQuestions } from '@/data/mockQuestions';
 
 // Define practice items for each skill
+const getPracticeItems = () => {
+  const items = {
+    reading: [],
+    writing: [],
+    speaking: [],
+    listening: []
+  };
+  
+  // Use mockQuestions to populate the practice items
+  mockQuestions.forEach(question => {
+    if (!items[question.skillType]) return;
+    
+    let title = "";
+    let type = "";
+    let duration = "";
+    
+    if (question.skillType === 'reading') {
+      title = question.passageTitle;
+      type = question.questions[0]?.questionType || 'Multiple Question Types';
+      duration = `${Math.floor(question.timeLimit / 60)} min`;
+    } else if (question.skillType === 'writing') {
+      title = `Task ${question.taskType === 'task1' ? '1' : '2'}: ${question.prompt.substring(0, 40)}...`;
+      type = question.taskType === 'task1' ? 'Data Analysis' : 'Essay';
+      duration = `${Math.floor(question.timeLimit / 60)} min`;
+    } else if (question.skillType === 'speaking') {
+      title = `Part ${question.partNumber}: ${question.promptText.substring(0, 40)}...`;
+      type = question.partNumber === 1 ? 'Interview' : question.partNumber === 2 ? 'Monologue' : 'Discussion';
+      duration = `${Math.floor((question.preparationTime + question.responseTime) / 60)} min`;
+    } else if (question.skillType === 'listening') {
+      title = `Section ${question.sectionNumber}`;
+      type = question.questions[0]?.questionType || 'Multiple Question Types';
+      duration = `${Math.floor(question.timeLimit / 60)} min`;
+    }
+    
+    items[question.skillType].push({
+      id: question.id,
+      title: title,
+      type: type,
+      level: question.difficulty === 'easy' ? 'Easy' : question.difficulty === 'medium' ? 'Medium' : 'Hard',
+      duration: duration,
+      completionRate: Math.floor(Math.random() * 40) + 40, // Simulated completion rate between 40-80%
+      popular: Math.random() > 0.6 // Randomly mark some as popular
+    });
+  });
+  
+  // Fallback to original practice items if no questions found for a skill
+  Object.keys(items).forEach(key => {
+    if (items[key].length === 0) {
+      items[key] = practiceItems[key];
+    }
+  });
+  
+  return items;
+};
+
+// Original hardcoded practice items (kept as fallback)
 const practiceItems = {
   reading: [
     { 
@@ -180,6 +238,7 @@ const practiceItems = {
 
 const Practice = () => {
   const navigate = useNavigate();
+  const dynamicPracticeItems = getPracticeItems();
 
   const startPractice = (skillType: string, itemId: string) => {
     navigate(`/practice/session/${skillType}/${itemId}`);
@@ -252,7 +311,7 @@ const Practice = () => {
             
             <TabsContent value="reading">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {practiceItems.reading.map((item) => (
+                {dynamicPracticeItems.reading.map((item) => (
                   <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                     <div className="bg-reading/5 p-4 border-b border-reading/10">
                       <div className="flex justify-between items-start">
@@ -298,7 +357,7 @@ const Practice = () => {
             
             <TabsContent value="writing">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {practiceItems.writing.map((item) => (
+                {dynamicPracticeItems.writing.map((item) => (
                   <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                     <div className="bg-writing/5 p-4 border-b border-writing/10">
                       <div className="flex justify-between items-start">
@@ -344,7 +403,7 @@ const Practice = () => {
             
             <TabsContent value="speaking">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {practiceItems.speaking.map((item) => (
+                {dynamicPracticeItems.speaking.map((item) => (
                   <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                     <div className="bg-speaking/5 p-4 border-b border-speaking/10">
                       <div className="flex justify-between items-start">
@@ -390,7 +449,7 @@ const Practice = () => {
             
             <TabsContent value="listening">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {practiceItems.listening.map((item) => (
+                {dynamicPracticeItems.listening.map((item) => (
                   <div key={item.id} className="bg-card border rounded-xl overflow-hidden hover:shadow-md transition-shadow">
                     <div className="bg-listening/5 p-4 border-b border-listening/10">
                       <div className="flex justify-between items-start">
