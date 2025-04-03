@@ -48,7 +48,7 @@ const discussionPosts = [
       level: 'Band 7.5'
     },
     title: 'Tips for improving Speaking fluency in Part 2',
-    content: 'I've been struggling with the 2-minute long turn in Speaking Part 2. My mind goes blank even with preparation time. Any suggestions on how to improve fluency and organize thoughts quickly?',
+    content: 'I\'ve been struggling with the 2-minute long turn in Speaking Part 2. My mind goes blank even with preparation time. Any suggestions on how to improve fluency and organize thoughts quickly?',
     tags: ['Speaking', 'Fluency', 'Part 2'],
     likes: 24,
     comments: 12,
@@ -63,7 +63,7 @@ const discussionPosts = [
       level: 'Band 6.5'
     },
     title: 'Writing Task 2: How detailed should examples be?',
-    content: 'When writing Task 2 essays, I'm never sure how detailed my examples should be. Should I use personal experiences, hypothetical scenarios, or real-world events? What's the best approach?',
+    content: 'When writing Task 2 essays, I\'m never sure how detailed my examples should be. Should I use personal experiences, hypothetical scenarios, or real-world events? What\'s the best approach?',
     tags: ['Writing', 'Task 2', 'Examples'],
     likes: 18,
     comments: 9,
@@ -78,7 +78,7 @@ const discussionPosts = [
       level: 'Band 8.0'
     },
     title: 'Reading strategies for matching headings questions',
-    content: 'I've found a technique that worked well for me with matching headings questions in the Reading section. I first identify keywords in the headings, then skim each paragraph to find those keywords or synonyms. Has anyone else tried this?',
+    content: 'I\'ve found a technique that worked well for me with matching headings questions in the Reading section. I first identify keywords in the headings, then skim each paragraph to find those keywords or synonyms. Has anyone else tried this?',
     tags: ['Reading', 'Matching Headings', 'Strategy'],
     likes: 32,
     comments: 15,

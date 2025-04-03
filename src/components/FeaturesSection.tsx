@@ -33,7 +33,7 @@ const features = [
 
 const FeaturesSection = () => {
   return (
-    <section className="py-16 lg:py-24">
+    <div className="py-16 lg:py-24">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Neplia IELTS</h2>
@@ -73,7 +73,7 @@ const FeaturesSection = () => {
                   'Adaptive practice that focuses on your weak areas',
                   'Regular progress assessments to keep you on track',
                   'Expert-designed materials that match the real IELTS format',
-                  'Money-back guarantee if you don't improve by at least 0.5 bands'
+                  'Money-back guarantee if you don\'t improve by at least 0.5 bands'
                 ].map((item, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -85,7 +85,7 @@ const FeaturesSection = () => {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
