@@ -1,7 +1,7 @@
 
 import { useUserProgress } from '@/contexts/UserProgressContext';
 import { useCallback } from 'react';
-import { BookOpen, FileText, Brain, Mic } from 'lucide-react';
+import { BookOpen, FileText, Headphones, Mic } from 'lucide-react';
 
 // Interface for practice results
 export interface PracticeResult {
@@ -21,7 +21,7 @@ export const usePracticeResult = () => {
     switch (skillType) {
       case 'reading': return 'BookOpen';
       case 'writing': return 'FileText';
-      case 'listening': return 'Brain';
+      case 'listening': return 'Headphones';
       case 'speaking': return 'Mic';
       default: return 'BookOpen';
     }

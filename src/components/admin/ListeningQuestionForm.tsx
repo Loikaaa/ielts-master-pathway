@@ -1,13 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Upload, FileAudio } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from 'sonner';
 
 interface ListeningQuestionFormProps {
   onSave: (formData: any) => void;
@@ -31,6 +32,9 @@ const ListeningQuestionForm: React.FC<ListeningQuestionFormProps> = ({
   });
 
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -43,6 +47,48 @@ const ListeningQuestionForm: React.FC<ListeningQuestionFormProps> = ({
 
   const handleSectionChange = (value: string) => {
     setFormData({ ...formData, sectionNumber: parseInt(value) });
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Check if file is an audio file
+      if (!file.type.startsWith('audio/')) {
+        toast.error('Please upload an audio file');
+        return;
+      }
+      setAudioFile(file);
+      
+      // Create a temporary object URL for the audio file
+      const objectUrl = URL.createObjectURL(file);
+      setFormData({ ...formData, audioUrl: objectUrl });
+      
+      toast.success('Audio file selected successfully');
+    }
+  };
+
+  const handleFileUpload = () => {
+    // Trigger file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const simulateUpload = () => {
+    if (!audioFile) {
+      toast.error('Please select an audio file first');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    // Simulate upload process
+    setTimeout(() => {
+      // In a real implementation, this would upload to a server/storage
+      // and return a permanent URL instead of an object URL
+      toast.success(`File "${audioFile.name}" uploaded successfully`);
+      setIsUploading(false);
+    }, 1500);
   };
 
   const addQuestion = () => {
@@ -204,8 +250,62 @@ const ListeningQuestionForm: React.FC<ListeningQuestionFormProps> = ({
               value={formData.audioUrl}
               onChange={handleInputChange}
               placeholder="https://example.com/audio.mp3"
-              required
+              className="mb-2"
             />
+            
+            <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-3">
+                <input 
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="audio/*"
+                  className="hidden"
+                />
+                
+                <Card className="border-dashed cursor-pointer hover:bg-accent/10 transition-colors">
+                  <CardContent className="p-4 flex flex-col items-center justify-center" onClick={handleFileUpload}>
+                    <FileAudio className="h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-sm font-medium">Upload Audio File</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Click to browse or drag and drop
+                    </p>
+                    {audioFile && (
+                      <div className="mt-2 text-sm text-primary">
+                        Selected: {audioFile.name}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                
+                {audioFile && (
+                  <div className="flex justify-between items-center">
+                    <div className="text-sm text-muted-foreground">
+                      {(audioFile.size / (1024 * 1024)).toFixed(2)} MB
+                    </div>
+                    <Button 
+                      type="button" 
+                      size="sm" 
+                      onClick={simulateUpload} 
+                      disabled={isUploading}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      {isUploading ? 'Uploading...' : 'Upload'}
+                    </Button>
+                  </div>
+                )}
+                
+                {formData.audioUrl && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium mb-1">Audio Preview:</p>
+                    <audio controls className="w-full">
+                      <source src={formData.audioUrl} />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
         
