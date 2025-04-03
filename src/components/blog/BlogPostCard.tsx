@@ -27,9 +27,12 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
   const readTime = post.readTime || 
     (post.content ? `${Math.max(3, Math.ceil(post.content.length / 1000))} min read` : '5 min read');
 
+  // Ensure we have a valid post ID for linking
+  const postId = post.id || `post-${Date.now()}`;
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col group">
-      <Link to={`/resources/blog/${post.id}`} className="flex-grow flex flex-col">
+      <Link to={`/resources/blog/${postId}`} className="flex-grow flex flex-col">
         <div className="relative h-48 overflow-hidden">
           <img 
             src={post.coverImage || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} 

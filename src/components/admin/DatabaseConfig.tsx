@@ -22,6 +22,10 @@ const DatabaseConfig = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [formErrors, setFormErrors] = useState({
+    host: false,
+    database: false
+  });
 
   useEffect(() => {
     // Load existing database configuration
@@ -39,15 +43,39 @@ const DatabaseConfig = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error for this field if it was previously marked as error
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: false
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      host: !config.host,
+      database: !config.database
+    };
+    
+    setFormErrors(errors);
+    return !errors.host && !errors.database;
   };
 
   const handleSave = () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     setIsLoading(true);
     try {
       // Don't save the masked password - only save if changed
       const configToSave = {
         ...config,
-        password: config.password === '••••••••' ? undefined : config.password
+        password: config.password === '••••••••' ? undefined : config.password,
+        connected: false // Reset connection status when config changes
       };
       
       saveDatabaseConfig(configToSave);
@@ -61,11 +89,17 @@ const DatabaseConfig = () => {
   };
 
   const testConnection = () => {
+    if (!validateForm()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     setIsTesting(true);
     
-    // Simulate a connection test - in a real app this would connect to your backend
+    // Simulating a connection test with the database configuration
     setTimeout(() => {
-      const success = Math.random() > 0.3; // Simulate 70% success rate for demo
+      // For demo, we're simulating that a connection is only successful when proper values are provided
+      const success = config.host && config.database && config.port;
       
       if (success) {
         const now = new Date().toISOString();
@@ -84,6 +118,7 @@ const DatabaseConfig = () => {
         });
         
         toast.success('Database connection successful!');
+        console.log('Connected to database:', config.database);
       } else {
         toast.error('Database connection failed. Please check your credentials.');
       }
@@ -127,7 +162,7 @@ const DatabaseConfig = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="host" className="flex items-center gap-2">
-              <Server className="h-4 w-4" /> Host
+              <Server className="h-4 w-4" /> Host <span className="text-red-500">*</span>
             </Label>
             <Input
               id="host"
@@ -135,7 +170,11 @@ const DatabaseConfig = () => {
               placeholder="localhost or database URL"
               value={config.host}
               onChange={handleInputChange}
+              className={formErrors.host ? "border-red-500" : ""}
             />
+            {formErrors.host && (
+              <p className="text-red-500 text-xs mt-1">Host is required</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -152,7 +191,7 @@ const DatabaseConfig = () => {
 
         <div className="space-y-2">
           <Label htmlFor="database" className="flex items-center gap-2">
-            <Database className="h-4 w-4" /> Database Name
+            <Database className="h-4 w-4" /> Database Name <span className="text-red-500">*</span>
           </Label>
           <Input
             id="database"
@@ -160,7 +199,11 @@ const DatabaseConfig = () => {
             placeholder="myDatabase"
             value={config.database}
             onChange={handleInputChange}
+            className={formErrors.database ? "border-red-500" : ""}
           />
+          {formErrors.database && (
+            <p className="text-red-500 text-xs mt-1">Database name is required</p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,13 +247,13 @@ const DatabaseConfig = () => {
         <Button 
           variant="outline" 
           onClick={testConnection} 
-          disabled={isTesting || !config.host || !config.database}
+          disabled={isTesting}
         >
           {isTesting ? 'Testing...' : 'Test Connection'}
         </Button>
         <Button 
           onClick={handleSave} 
-          disabled={isLoading || !config.host || !config.database}
+          disabled={isLoading}
         >
           {isLoading ? 'Saving...' : 'Save Configuration'}
         </Button>

@@ -17,13 +17,19 @@ const BlogPost = () => {
   useEffect(() => {
     // Get the blog post from localStorage
     const posts = getBlogPosts();
-    const foundPost = posts.find(p => p.id === postId);
+    console.log("Available blog posts:", posts);
     
-    if (foundPost) {
-      console.log("Found blog post:", foundPost);
-      setPost(foundPost);
+    if (posts && posts.length > 0) {
+      const foundPost = posts.find(p => p.id === postId);
+      
+      if (foundPost) {
+        console.log("Found blog post:", foundPost);
+        setPost(foundPost);
+      } else {
+        console.warn("Blog post not found for ID:", postId);
+      }
     } else {
-      console.warn("Blog post not found:", postId);
+      console.warn("No blog posts found in storage");
     }
     
     setLoading(false);
@@ -65,6 +71,14 @@ const BlogPost = () => {
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/resources/blog')} 
+            className="mb-6"
+          >
+            <ChevronLeft className="h-4 w-4 mr-2" />
+            Back to Blog
+          </Button>
           <BlogPostDetail post={post} />
         </div>
       </main>
