@@ -231,7 +231,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
       // Multiple Choice
       {
         id: 'reading-3-q1',
-        questionText: 'According to the passage, Facebook's introduction of the News Feed in 2006:',
+        questionText: "According to the passage, Facebook's introduction of the News Feed in 2006:",
         questionType: 'multiple-choice',
         options: [
           'reduced the popularity of the platform',
@@ -244,40 +244,40 @@ Understanding the complex and multifaceted impacts of social media requires nuan
       // True/False/Not Given
       {
         id: 'reading-3-q2',
-        questionText: 'The passage states that Twitter's 140-character limit was originally implemented due to SMS compatibility requirements.',
+        questionText: "The passage states that Twitter's 140-character limit was originally implemented due to SMS compatibility requirements.",
         questionType: 'true-false-not-given',
         correctAnswer: 'True'
       },
       {
         id: 'reading-3-q3',
-        questionText: 'According to the passage, social media has had a universally negative impact on education.',
+        questionText: "According to the passage, social media has had a universally negative impact on education.",
         questionType: 'true-false-not-given',
         correctAnswer: 'False'
       },
       {
         id: 'reading-3-q4',
-        questionText: 'The author believes that virtual reality will eventually replace traditional social media platforms.',
+        questionText: "The author believes that virtual reality will eventually replace traditional social media platforms.",
         questionType: 'true-false-not-given',
         correctAnswer: 'Not Given'
       },
       // Yes/No/Not Given
       {
         id: 'reading-3-q5',
-        questionText: 'The author supports stricter government regulation of social media platforms.',
+        questionText: "The author supports stricter government regulation of social media platforms.",
         questionType: 'yes-no-not-given',
         correctAnswer: 'Not Given'
       },
       // Matching Information
       {
         id: 'reading-3-q6',
-        questionText: 'In which paragraph does the author discuss how social media has affected political discourse?',
+        questionText: "In which paragraph does the author discuss how social media has affected political discourse?",
         questionType: 'matching-information',
         paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
         correctAnswer: 'H'
       },
       {
         id: 'reading-3-q7',
-        questionText: 'Which paragraph mentions the psychological impacts of social media use?',
+        questionText: "Which paragraph mentions the psychological impacts of social media use?",
         questionType: 'matching-information',
         paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
         correctAnswer: 'F'
@@ -285,7 +285,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
       // Matching Headings
       {
         id: 'reading-3-q8',
-        questionText: 'Choose the most suitable heading for paragraph E:',
+        questionText: "Choose the most suitable heading for paragraph E:",
         questionType: 'matching-headings',
         options: [
           'Revenue Generation and Algorithmic Design',
@@ -298,7 +298,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
       // Matching Features
       {
         id: 'reading-3-q9',
-        questionText: 'Which of the following is a characteristic of Twitter mentioned in the passage?',
+        questionText: "Which of the following is a characteristic of Twitter mentioned in the passage?",
         questionType: 'matching-features',
         features: [
           'Required mutual friendships',
@@ -324,13 +324,13 @@ Understanding the complex and multifaceted impacts of social media requires nuan
       // Sentence Completion
       {
         id: 'reading-3-q11',
-        questionText: 'According to the passage, social media platforms have simultaneously _____, _____, and _____.',
+        questionText: "According to the passage, social media platforms have simultaneously _____, _____, and _____.",
         questionType: 'sentence-completion',
         correctAnswer: 'connected and divided, informed and misinformed, empowered and exploited'
       },
       {
         id: 'reading-3-q12',
-        questionText: 'The passage mentions that the concept of the _____ represents a potential future where social interactions occur in immersive digital environments.',
+        questionText: "The passage mentions that the concept of the _____ represents a potential future where social interactions occur in immersive digital environments.",
         questionType: 'sentence-completion',
         correctAnswer: 'metaverse'
       }
@@ -367,7 +367,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
     difficulty: 'medium',
     points: 10,
     partNumber: 1,
-    promptText: 'Let\'s talk about your home town or city. Where is it located and what is it known for?',
+    promptText: "Let's talk about your home town or city. Where is it located and what is it known for?",
     followUpQuestions: [
       'How long have you lived there?',
       'What do you like most about living there?',
@@ -383,7 +383,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
     difficulty: 'medium',
     points: 15,
     partNumber: 2,
-    promptText: 'Describe a skill you would like to learn. You should say:\n- what this skill is\n- how you would learn it\n- how difficult it would be to learn\n- and explain why you want to learn this skill.',
+    promptText: "Describe a skill you would like to learn. You should say:\n- what this skill is\n- how you would learn it\n- how difficult it would be to learn\n- and explain why you want to learn this skill.",
     preparationTime: 60, // 1 minute prep
     responseTime: 120 // 2 minutes speaking
   },
@@ -393,9 +393,9 @@ Understanding the complex and multifaceted impacts of social media requires nuan
     difficulty: 'hard',
     points: 15,
     partNumber: 3,
-    promptText: 'Let\'s consider skills and learning more generally.',
+    promptText: "Let's consider skills and learning more generally.",
     followUpQuestions: [
-      'Do you think certain skills are more important than others in today\'s society?',
+      "Do you think certain skills are more important than others in today's society?",
       'How has technology changed the way people learn new skills?',
       'Do you think schools should focus more on practical skills or academic knowledge?',
       'How important is it for people to continue learning new skills throughout their lives?'
@@ -413,7 +413,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
     timeLimit: 2400, // 40 minutes total (30 listening + 10 transfer)
     sectionNumber: 1,
     audioUrl: 'https://example.com/listening-section1.mp3', // This would be a real audio file in a production app
-    transcript: 'Woman: Good morning. Welcome to Greenfield Community Center. How can I help you?\n\nMan: Hi, I\'d like to book a room for a community meeting next week.\n\nWoman: Sure. We have several rooms available. What size room do you need?\n\nMan: We\'ll have about 20 people, so nothing too large.\n\nWoman: The Cedar Room would be perfect then. It fits up to 25 people comfortably. When would you like to book it?\n\nMan: We\'re looking at next Thursday evening, from 7 to 9 PM.\n\nWoman: Let me check availability... Yes, that\'s available. Can I take your details?\n\nMan: Of course. My name is Robert Chen. That\'s C-H-E-N.\n\nWoman: And do you have a phone number where we can reach you?\n\nMan: Yes, it\'s 0845 789 6240.\n\nWoman: Great. And what type of meeting will you be holding?\n\nMan: It\'s for a neighborhood watch group. We meet monthly to discuss local safety issues.\n\nWoman: I see. The standard rate for the Cedar Room is £45 for two hours, but we offer a 20% discount for community safety groups, so that would be £36 in total.\n\nMan: That sounds reasonable. How do I pay?\n\nWoman: You can pay now by card or cash, or you can pay on the day. We do ask for a £10 deposit if you\'re paying later.\n\nMan: I\'ll pay the full amount now by card if that\'s okay.\n\nWoman: Perfect. And just to let you know, we have a projector and screen available if you need it, at no extra charge. Would you like to reserve that as well?\n\nMan: Yes, that would be very useful, thank you.',
+    transcript: "Woman: Good morning. Welcome to Greenfield Community Center. How can I help you?\n\nMan: Hi, I'd like to book a room for a community meeting next week.\n\nWoman: Sure. We have several rooms available. What size room do you need?\n\nMan: We'll have about 20 people, so nothing too large.\n\nWoman: The Cedar Room would be perfect then. It fits up to 25 people comfortably. When would you like to book it?\n\nMan: We're looking at next Thursday evening, from 7 to 9 PM.\n\nWoman: Let me check availability... Yes, that's available. Can I take your details?\n\nMan: Of course. My name is Robert Chen. That's C-H-E-N.\n\nWoman: And do you have a phone number where we can reach you?\n\nMan: Yes, it's 0845 789 6240.\n\nWoman: Great. And what type of meeting will you be holding?\n\nMan: It's for a neighborhood watch group. We meet monthly to discuss local safety issues.\n\nWoman: I see. The standard rate for the Cedar Room is £45 for two hours, but we offer a 20% discount for community safety groups, so that would be £36 in total.\n\nMan: That sounds reasonable. How do I pay?\n\nWoman: You can pay now by card or cash, or you can pay on the day. We do ask for a £10 deposit if you're paying later.\n\nMan: I'll pay the full amount now by card if that's okay.\n\nWoman: Perfect. And just to let you know, we have a projector and screen available if you need it, at no extra charge. Would you like to reserve that as well?\n\nMan: Yes, that would be very useful, thank you.",
     questions: [
       {
         id: 'listening-1-q1',
@@ -488,7 +488,7 @@ Understanding the complex and multifaceted impacts of social media requires nuan
     timeLimit: 2400, // 40 minutes total (30 listening + 10 transfer)
     sectionNumber: 2,
     audioUrl: 'https://example.com/listening-section2.mp3',
-    transcript: 'Good morning everyone. Today I\'ll be giving you an overview of our company\'s new office recycling program. As you know, sustainability is one of our core values, and this initiative will help us significantly reduce our environmental footprint.\n\nStarting from next Monday, that\'s May 15th, you\'ll notice some changes around the office. First, we\'re removing individual waste bins from desks. Instead, we\'re installing central recycling stations on each floor. Each station will have four clearly labeled bins: one for paper, one for plastics, one for glass and metal, and one for general waste.\n\nThe paper bin is for office paper, newspapers, magazines, and cardboard. Please remove any plastic windows from envelopes before placing them in this bin. The plastics bin is for clean plastic containers, bottles, and packaging. Please make sure to rinse any food containers before recycling them. The glass and metal bin is for glass bottles, jars, and metal cans. Again, these should be rinsed. Finally, the general waste bin is for anything that cannot be recycled, such as food waste and certain types of packaging.\n\nWe\'re also making changes to our kitchen areas. We\'re replacing disposable cups with ceramic mugs, and plastic cutlery with metal alternatives. Each employee will receive a reusable water bottle next week as part of our campaign to eliminate single-use plastics.\n\nTo help everyone adjust to these changes, we\'ll be holding information sessions this Thursday and Friday in Conference Room B. The sessions will run at 10 AM and 2 PM on both days, and will last approximately 30 minutes. We\'ll go through the recycling program in more detail and answer any questions you might have.\n\nWe\'re also looking for volunteers to act as "Green Champions" for each department. These individuals will help promote the program and assist colleagues with any recycling questions. If you\'re interested in becoming a Green Champion, please email Sarah in HR by this Wednesday.\n\nFinally, we\'ll be tracking our progress with monthly reports on waste reduction. Our initial goal is to reduce our general waste by 40% in the first three months, and to increase our recycling rate to 75% of all waste generated. Long-term, we aim to become a zero-waste office by 2025.\n\nThank you for your attention, and for your support in making our workplace more environmentally friendly.',
+    transcript: "Good morning everyone. Today I'll be giving you an overview of our company's new office recycling program. As you know, sustainability is one of our core values, and this initiative will help us significantly reduce our environmental footprint.\n\nStarting from next Monday, that's May 15th, you'll notice some changes around the office. First, we're removing individual waste bins from desks. Instead, we're installing central recycling stations on each floor. Each station will have four clearly labeled bins: one for paper, one for plastics, one for glass and metal, and one for general waste.\n\nThe paper bin is for office paper, newspapers, magazines, and cardboard. Please remove any plastic windows from envelopes before placing them in this bin. The plastics bin is for clean plastic containers, bottles, and packaging. Please make sure to rinse any food containers before recycling them. The glass and metal bin is for glass bottles, jars, and metal cans. Again, these should be rinsed. Finally, the general waste bin is for anything that cannot be recycled, such as food waste and certain types of packaging.\n\nWe're also making changes to our kitchen areas. We're replacing disposable cups with ceramic mugs, and plastic cutlery with metal alternatives. Each employee will receive a reusable water bottle next week as part of our campaign to eliminate single-use plastics.\n\nTo help everyone adjust to these changes, we'll be holding information sessions this Thursday and Friday in Conference Room B. The sessions will run at 10 AM and 2 PM on both days, and will last approximately 30 minutes. We'll go through the recycling program in more detail and answer any questions you might have.\n\nWe're also looking for volunteers to act as \"Green Champions\" for each department. These individuals will help promote the program and assist colleagues with any recycling questions. If you're interested in becoming a Green Champion, please email Sarah in HR by this Wednesday.\n\nFinally, we'll be tracking our progress with monthly reports on waste reduction. Our initial goal is to reduce our general waste by 40% in the first three months, and to increase our recycling rate to 75% of all waste generated. Long-term, we aim to become a zero-waste office by 2025.\n\nThank you for your attention, and for your support in making our workplace more environmentally friendly.",
     questions: [
       {
         id: 'listening-2-q1',

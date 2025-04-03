@@ -159,6 +159,7 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
         );
 
       case 'sentence-completion':
+      case 'summary-completion':
         return (
           <div className="pl-7">
             <Input
