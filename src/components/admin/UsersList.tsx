@@ -12,13 +12,13 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, ShieldCheck, Shield } from 'lucide-react';
 import { useUser, User } from '@/contexts/UserContext';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 
 const UsersList = () => {
-  const { users } = useUser();
+  const { users, setUserAsAdmin } = useUser();
   const { toast } = useToast();
 
   const handleEditUser = (userId: string) => {
@@ -33,6 +33,14 @@ const UsersList = () => {
       title: "Delete User",
       description: `Delete functionality for user ${userId} is coming soon.`,
       variant: "destructive"
+    });
+  };
+
+  const handleSetAdmin = (userId: string, firstName: string, lastName: string) => {
+    setUserAsAdmin(userId);
+    toast({
+      title: "Admin Rights Granted",
+      description: `${firstName} ${lastName} has been made an administrator.`
     });
   };
 
@@ -51,6 +59,7 @@ const UsersList = () => {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
               <TableHead>Test Type</TableHead>
               <TableHead>Target Score</TableHead>
               <TableHead>Exam Date</TableHead>
@@ -61,13 +70,25 @@ const UsersList = () => {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">No users registered yet</TableCell>
+                <TableCell colSpan={8} className="text-center">No users registered yet</TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.firstName} {user.lastName}</TableCell>
                   <TableCell>{user.email}</TableCell>
+                  <TableCell>
+                    {user.isAdmin ? (
+                      <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                        <ShieldCheck className="h-3 w-3 mr-1" />
+                        Admin
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-100 text-gray-800 hover:bg-gray-100">
+                        User
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={
                       user.testType === 'academic' 
@@ -90,6 +111,12 @@ const UsersList = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
+                      {!user.isAdmin && (
+                        <Button variant="outline" size="sm" onClick={() => handleSetAdmin(user.id, user.firstName, user.lastName)}>
+                          <Shield className="h-4 w-4 mr-1" />
+                          Make Admin
+                        </Button>
+                      )}
                       <Button variant="outline" size="sm" onClick={() => handleEditUser(user.id)}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit

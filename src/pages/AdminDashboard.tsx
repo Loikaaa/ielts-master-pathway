@@ -11,9 +11,11 @@ import {
   MessageCircle, 
   Gauge, 
   Shield, 
-  LogOut
+  LogOut,
+  AlertTriangle
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/components/ui/use-toast';
 import AdminOverviewTab from '@/components/admin/AdminOverviewTab';
 import AdminCommunityTab from '@/components/admin/AdminCommunityTab';
 import AdminUsersTab from '@/components/admin/AdminUsersTab';
@@ -22,26 +24,38 @@ import AdminContentTab from '@/components/admin/AdminContentTab';
 const AdminDashboard = () => {
   const { currentUser, logout, isAdmin } = useUser();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Check if user is logged in and is admin
+    // Check if user is logged in
     if (!currentUser) {
       console.log('AdminDashboard: No current user, redirecting to signin');
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to access the admin dashboard",
+        variant: "destructive"
+      });
       navigate('/signin');
       return;
     }
     
+    // Check if user is admin
     if (!isAdmin) {
       console.log('AdminDashboard: User is not admin, redirecting to dashboard');
+      toast({
+        title: "Access denied",
+        description: "You do not have administrative privileges",
+        variant: "destructive"
+      });
       navigate('/dashboard');
       return;
     }
     
     console.log('AdminDashboard: User is admin, showing admin dashboard');
     setIsLoading(false);
-  }, [currentUser, isAdmin, navigate]);
+  }, [currentUser, isAdmin, navigate, toast]);
 
   const handleLogout = () => {
     logout();

@@ -10,15 +10,17 @@ export interface User {
   targetScore: string;
   examDate: string;
   created: Date;
+  isAdmin?: boolean; // Added isAdmin property to User interface
 }
 
 interface UserContextType {
   currentUser: User | null;
   users: User[];
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
+  signup: (userData: Omit<User, 'id' | 'created' | 'isAdmin'> & { password: string }) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
+  setUserAsAdmin: (userId: string) => void; // Add method to set a user as admin
 }
 
 const UserContext = createContext<UserContextType>({
@@ -28,6 +30,7 @@ const UserContext = createContext<UserContextType>({
   signup: async () => false,
   logout: () => {},
   isAdmin: false,
+  setUserAsAdmin: () => {},
 });
 
 export const useUser = () => useContext(UserContext);
@@ -35,6 +38,9 @@ export const useUser = () => useContext(UserContext);
 interface UserProviderProps {
   children: ReactNode;
 }
+
+// List of admin emails for initial setup
+const ADMIN_EMAILS = ['admin@neplia.com', 'hhjkad@gmail.com'];
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -54,8 +60,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const parsedUser = JSON.parse(storedCurrentUser);
         setCurrentUser(parsedUser);
         
-        // Check if user is admin (email contains admin)
-        const isUserAdmin = parsedUser?.email?.includes('admin') || false;
+        // Check if user is admin either by isAdmin flag or by email inclusion in ADMIN_EMAILS
+        const isUserAdmin = parsedUser?.isAdmin === true || ADMIN_EMAILS.includes(parsedUser?.email);
         console.log('User admin status:', isUserAdmin, 'Email:', parsedUser?.email);
         setIsAdmin(isUserAdmin);
       }
@@ -93,8 +99,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const { password, ...userWithoutPassword } = user;
         setCurrentUser(userWithoutPassword);
         
-        // Check if the user is an admin based on email
-        const isUserAdmin = email.includes('admin');
+        // Check if the user is an admin based on isAdmin flag or email
+        const isUserAdmin = user.isAdmin === true || ADMIN_EMAILS.includes(email);
         console.log('Login successful, admin status:', isUserAdmin, 'Email:', email);
         setIsAdmin(isUserAdmin);
         
@@ -107,7 +113,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (userData: Omit<User, 'id' | 'created'> & { password: string }): Promise<boolean> => {
+  const signup = async (userData: Omit<User, 'id' | 'created' | 'isAdmin'> & { password: string }): Promise<boolean> => {
     try {
       // Check if email already exists
       const existingUser = users.find(u => u.email === userData.email);
@@ -116,11 +122,15 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return false;
       }
 
+      // Check if this email should be an admin
+      const isUserAdmin = ADMIN_EMAILS.includes(userData.email);
+
       // Create new user with id and creation date
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         created: new Date(),
+        isAdmin: isUserAdmin
       };
 
       // Add to users list
@@ -131,8 +141,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const { password, ...userWithoutPassword } = newUser;
       setCurrentUser(userWithoutPassword);
       
-      // Check if the user is an admin based on email
-      const isUserAdmin = userData.email.includes('admin');
       console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email);
       setIsAdmin(isUserAdmin);
       
@@ -149,8 +157,34 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     localStorage.removeItem('neplia_current_user');
   };
 
+  // Function to set a user as admin
+  const setUserAsAdmin = (userId: string) => {
+    const updatedUsers = users.map(user => {
+      if (user.id === userId) {
+        return { ...user, isAdmin: true };
+      }
+      return user;
+    });
+    
+    setUsers(updatedUsers);
+    
+    // If the current user is being set as admin, update their status
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser({ ...currentUser, isAdmin: true });
+      setIsAdmin(true);
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ currentUser, users, login, signup, logout, isAdmin }}>
+    <UserContext.Provider value={{ 
+      currentUser, 
+      users, 
+      login, 
+      signup, 
+      logout, 
+      isAdmin,
+      setUserAsAdmin 
+    }}>
       {children}
     </UserContext.Provider>
   );
