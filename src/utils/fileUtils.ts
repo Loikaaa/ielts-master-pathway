@@ -79,16 +79,20 @@ export const processUploadedSourceCode = async (file: File) => {
     // Process file contents
     const files: {name: string, path: string, size: number}[] = [];
     
+    // Use Promise.all to gather all file information
     await Promise.all(
       Object.keys(zipData.files).map(async (filename) => {
         const zipEntry = zipData.files[filename];
         
         // Skip directories
         if (!zipEntry.dir) {
+          // Get the file content as a blob to determine size
+          const content = await zipEntry.async('blob');
+          
           files.push({
             name: zipEntry.name.split('/').pop() || '',
             path: zipEntry.name,
-            size: zipEntry._data.uncompressedSize
+            size: content.size
           });
         }
       })
