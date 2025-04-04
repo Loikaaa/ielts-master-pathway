@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
@@ -25,7 +24,8 @@ import {
   Lock,
   CreditCard,
   Mail,
-  UploadCloud
+  UploadCloud,
+  Download
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import AdminOverviewTab from '@/components/admin/AdminOverviewTab';
@@ -42,6 +42,7 @@ import PaymentGatewaySettings from '@/components/admin/PaymentGatewaySettings';
 import EmailTemplatesSettings from '@/components/admin/EmailTemplatesSettings';
 import BackupRestoreSettings from '@/components/admin/BackupRestoreSettings';
 import SystemSettings from '@/components/admin/SystemSettings';
+import SourceCodeManager from '@/components/admin/SourceCodeManager';
 import {
   Sidebar,
   SidebarContent,
@@ -66,7 +67,6 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Check if user is logged in
     if (!currentUser) {
       console.log('AdminDashboard: No current user, redirecting to signin');
       toast({
@@ -78,7 +78,6 @@ const AdminDashboard = () => {
       return;
     }
     
-    // Check if user is admin
     if (!isAdmin) {
       console.log('AdminDashboard: User is not admin, redirecting to dashboard');
       toast({
@@ -107,7 +106,6 @@ const AdminDashboard = () => {
     );
   }
 
-  // Enhanced menu items for the sidebar
   const mainNavigationItems = [
     { id: 'overview', title: 'Dashboard Overview', icon: Gauge },
     { id: 'community', title: 'Community Management', icon: MessageCircle },
@@ -135,10 +133,10 @@ const AdminDashboard = () => {
     { id: 'payment-gateway', title: 'Payment Gateway', icon: CreditCard },
     { id: 'email-templates', title: 'Email Templates', icon: Mail },
     { id: 'backup-restore', title: 'Backup & Restore', icon: UploadCloud },
+    { id: 'source-code', title: 'Source Code', icon: Download },
     { id: 'settings', title: 'System Settings', icon: Settings },
   ];
 
-  // Render the content based on the active tab
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
@@ -157,6 +155,8 @@ const AdminDashboard = () => {
         return <UIComponentsManager />;
       case 'analytics':
         return <AnalyticsDashboard />;
+      case 'source-code':
+        return <SourceCodeManager />;
       case 'themes':
         return (
           <div className="space-y-4">
@@ -194,7 +194,6 @@ const AdminDashboard = () => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-muted/10">
-        {/* Sidebar - Now on the left */}
         <Sidebar side="left" variant="floating" collapsible="icon">
           <SidebarHeader className="flex h-16 items-center border-b px-6">
             <div className="flex items-center gap-2 font-semibold">
@@ -294,9 +293,7 @@ const AdminDashboard = () => {
           </SidebarFooter>
         </Sidebar>
 
-        {/* Main content */}
         <div className="flex flex-1 flex-col">
-          {/* Header */}
           <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <div className="flex items-center gap-2">
               <LayoutDashboard className="h-6 w-6 text-primary" />
@@ -310,7 +307,6 @@ const AdminDashboard = () => {
             </div>
           </header>
           
-          {/* Main dashboard content */}
           <main className="flex flex-1">
             <SidebarInset className="p-4 md:p-6 pt-0">
               <div className="rounded-lg border bg-card p-6 shadow-sm">
