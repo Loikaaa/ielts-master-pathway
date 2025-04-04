@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -63,6 +64,13 @@ const SignIn = () => {
         // Otherwise, go to dashboard
         if (isAdmin && from.includes('/admin')) {
           navigate('/admin');
+        } else if (isAdmin) {
+          // If they're admin but not coming from admin page, ask if they want to go to admin
+          toast({
+            title: "Admin account detected",
+            description: "You can access the admin dashboard from the navigation menu.",
+          });
+          navigate('/dashboard');
         } else {
           navigate('/dashboard');
         }

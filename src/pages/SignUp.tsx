@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, UserPlus, Calendar, Book as BookIcon, Pencil, Headphones, Mic, GraduationCap, Loader2 } from 'lucide-react';
+import { Book, UserPlus, Calendar, Book as BookIcon, Pencil, Headphones, Mic, GraduationCap, Loader2, Globe } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
@@ -31,6 +31,7 @@ const signupSchema = z.object({
   testType: z.string().min(1, 'Please select a test type'),
   targetScore: z.string().min(1, 'Please select a target score'),
   examDate: z.string().min(1, 'Please select an exam date'),
+  country: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -38,11 +39,20 @@ const signupSchema = z.object({
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
+// List of countries for the dropdown
+interface Country {
+  code: string;
+  name: string;
+}
+
 const SignUp = () => {
   const { signup } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [userCountry, setUserCountry] = useState<string>('');
+  const [isLoadingCountry, setIsLoadingCountry] = useState(true);
 
   // Initialize form
   const form = useForm<SignupFormValues>({
@@ -56,12 +66,67 @@ const SignUp = () => {
       testType: '',
       targetScore: '',
       examDate: '',
+      country: '',
     },
   });
+
+  // Load countries and detect user country
+  useEffect(() => {
+    const fetchCountries = async () => {
+      try {
+        // Fetch list of countries
+        const response = await fetch('https://restcountries.com/v3.1/all');
+        const data = await response.json();
+        
+        // Map and sort countries
+        const formattedCountries = data
+          .map((country: any) => ({
+            code: country.cca2,
+            name: country.name.common
+          }))
+          .sort((a: Country, b: Country) => a.name.localeCompare(b.name));
+        
+        setCountries(formattedCountries);
+        
+        // Try to detect user's country
+        try {
+          const ipResponse = await fetch('https://ipapi.co/json/');
+          const ipData = await ipResponse.json();
+          
+          if (ipData && ipData.country_code) {
+            setUserCountry(ipData.country_code);
+            form.setValue('country', ipData.country_code);
+          }
+        } catch (error) {
+          console.error('Error detecting country:', error);
+        }
+      } catch (error) {
+        console.error('Error fetching countries:', error);
+        // Fallback to a smaller list of common countries
+        setCountries([
+          { code: 'US', name: 'United States' },
+          { code: 'GB', name: 'United Kingdom' },
+          { code: 'CA', name: 'Canada' },
+          { code: 'AU', name: 'Australia' },
+          { code: 'IN', name: 'India' },
+          { code: 'NP', name: 'Nepal' },
+          { code: 'PK', name: 'Pakistan' },
+          { code: 'CN', name: 'China' }
+        ]);
+      } finally {
+        setIsLoadingCountry(false);
+      }
+    };
+    
+    fetchCountries();
+  }, [form]);
 
   const onSubmit = async (values: SignupFormValues) => {
     setIsSubmitting(true);
     try {
+      // Find country name from code
+      const selectedCountry = countries.find(c => c.code === values.country);
+      
       // Call signup function from UserContext
       const success = await signup({
         firstName: values.firstName,
@@ -71,6 +136,8 @@ const SignUp = () => {
         testType: values.testType,
         targetScore: values.targetScore,
         examDate: values.examDate,
+        country: selectedCountry?.name || '',
+        countryCode: values.country || '',
       });
 
       if (success) {
@@ -216,29 +283,66 @@ const SignUp = () => {
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                          <Input type="password" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
                 
                 <FormField
                   control={form.control}
-                  name="confirmPassword"
+                  name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
+                      <FormLabel className="flex items-center">
+                        <Globe className="mr-2 h-4 w-4 text-muted-foreground" />
+                        Country
+                      </FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder={isLoadingCountry ? "Detecting your country..." : "Select your country"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="max-h-[200px]">
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {isLoadingCountry && (
+                        <p className="text-xs text-muted-foreground">Detecting your location...</p>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}

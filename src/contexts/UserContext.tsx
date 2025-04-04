@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface User {
@@ -11,6 +12,8 @@ export interface User {
   created: Date;
   isAdmin?: boolean; 
   ipAddress?: string;
+  country?: string;
+  countryCode?: string;
   lastLogin?: Date;
 }
 
@@ -22,6 +25,7 @@ interface UserContextType {
   logout: () => void;
   isAdmin: boolean;
   setUserAsAdmin: (userId: string) => void;
+  createUser: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
 }
 
 const UserContext = createContext<UserContextType>({
@@ -32,6 +36,7 @@ const UserContext = createContext<UserContextType>({
   logout: () => {},
   isAdmin: false,
   setUserAsAdmin: () => {},
+  createUser: async () => false,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -91,17 +96,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const user = users.find(u => u.email === email && u.password === password);
       
       if (user) {
-        const ipAddress = await fetchUserIP();
+        const ipInfo = await fetchUserIPInfo();
         
         const updatedUser = {
           ...user,
-          ipAddress,
+          ipAddress: ipInfo.ip,
+          country: ipInfo.country,
+          countryCode: ipInfo.countryCode,
           lastLogin: new Date()
         };
         
         const updatedUsers = users.map(u => 
           u.id === updatedUser.id 
-            ? { ...u, ipAddress, lastLogin: new Date() } 
+            ? { ...u, ipAddress: ipInfo.ip, country: ipInfo.country, countryCode: ipInfo.countryCode, lastLogin: new Date() } 
             : u
         );
         setUsers(updatedUsers);
@@ -111,7 +118,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setCurrentUser(userWithoutPassword);
         
         const isUserAdmin = user.isAdmin === true || ADMIN_EMAILS.includes(email);
-        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email, 'IP:', ipAddress);
+        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email, 'IP:', ipInfo.ip, 'Country:', ipInfo.country);
         setIsAdmin(isUserAdmin);
         
         return true;
@@ -131,8 +138,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return false;
       }
 
-      const ipAddress = await fetchUserIP();
-
+      const ipInfo = await fetchUserIPInfo();
       const isUserAdmin = userData.isAdmin === true || ADMIN_EMAILS.includes(userData.email);
 
       const newUser: User & { password: string } = {
@@ -140,7 +146,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         created: new Date(),
         lastLogin: new Date(),
-        ipAddress,
+        ipAddress: ipInfo.ip,
+        country: ipInfo.country || userData.country,
+        countryCode: ipInfo.countryCode || userData.countryCode,
         isAdmin: isUserAdmin
       };
 
@@ -150,7 +158,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const { password, ...userWithoutPassword } = newUser;
       setCurrentUser(userWithoutPassword);
       
-      console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email, 'IP:', ipAddress);
+      console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email, 'IP:', ipInfo.ip);
       setIsAdmin(isUserAdmin);
       
       return true;
@@ -160,14 +168,36 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const fetchUserIP = async (): Promise<string> => {
+  const fetchUserIPInfo = async (): Promise<{ ip: string, country: string, countryCode: string }> => {
     try {
-      const response = await fetch('https://api.ipify.org?format=json');
+      // First try to get detailed info
+      const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
-      return data.ip;
+      
+      if (data && data.ip) {
+        return {
+          ip: data.ip,
+          country: data.country_name || 'Unknown',
+          countryCode: data.country_code || 'UN'
+        };
+      }
+      
+      // Fallback to just getting the IP
+      const ipOnlyResponse = await fetch('https://api.ipify.org?format=json');
+      const ipData = await ipOnlyResponse.json();
+      
+      return {
+        ip: ipData.ip || 'Unknown',
+        country: 'Unknown',
+        countryCode: 'UN'
+      };
     } catch (error) {
-      console.error('Error fetching IP address:', error);
-      return 'Unknown';
+      console.error('Error fetching IP information:', error);
+      return {
+        ip: 'Unknown',
+        country: 'Unknown',
+        countryCode: 'UN'
+      };
     }
   };
 
@@ -193,6 +223,45 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const createUser = async (userData: Omit<User, 'id' | 'created'> & { password: string }): Promise<boolean> => {
+    try {
+      const existingUser = users.find(u => u.email === userData.email);
+      if (existingUser) {
+        console.error('User with this email already exists');
+        return false;
+      }
+
+      const ipInfo = { 
+        ip: 'Admin created', 
+        country: userData.country || 'Unknown', 
+        countryCode: userData.countryCode || 'UN' 
+      };
+
+      const isUserAdmin = userData.isAdmin === true || ADMIN_EMAILS.includes(userData.email);
+
+      const newUser: User & { password: string } = {
+        ...userData,
+        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        created: new Date(),
+        lastLogin: null,
+        ipAddress: ipInfo.ip,
+        country: ipInfo.country,
+        countryCode: ipInfo.countryCode,
+        isAdmin: isUserAdmin
+      };
+
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+      
+      console.log('Admin created user, admin status:', isUserAdmin, 'Email:', userData.email);
+      
+      return true;
+    } catch (error) {
+      console.error('Create user error:', error);
+      return false;
+    }
+  };
+
   return (
     <UserContext.Provider value={{ 
       currentUser, 
@@ -201,7 +270,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       signup, 
       logout, 
       isAdmin,
-      setUserAsAdmin 
+      setUserAsAdmin,
+      createUser
     }}>
       {children}
     </UserContext.Provider>

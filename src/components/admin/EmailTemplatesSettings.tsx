@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -189,7 +188,6 @@ const EmailTemplatesSettings = () => {
     },
   ]);
   
-  // Load saved configuration on component mount
   useEffect(() => {
     try {
       const savedConfig = localStorage.getItem('neplia_email_config');
@@ -206,7 +204,6 @@ const EmailTemplatesSettings = () => {
     }
   }, []);
   
-  // Save configuration when it changes
   useEffect(() => {
     localStorage.setItem('neplia_email_config', JSON.stringify(emailConfig));
   }, [emailConfig]);
@@ -243,7 +240,6 @@ const EmailTemplatesSettings = () => {
       return false;
     }
     
-    // Validate port is a number and within range
     const portNum = Number(emailConfig.port);
     if (isNaN(portNum) || portNum < 1 || portNum > 65535) {
       toast({
@@ -299,9 +295,7 @@ const EmailTemplatesSettings = () => {
     setIsTesting(true);
     setTestStatus('idle');
     
-    // Simulate SMTP test
     try {
-      // In a real implementation, this would call an API endpoint to send a test email
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       setTestStatus('success');

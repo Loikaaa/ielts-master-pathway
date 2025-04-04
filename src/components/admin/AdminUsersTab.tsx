@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Users, Wifi, AlertTriangle } from 'lucide-react';
@@ -7,6 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import CreateUserForm from './CreateUserForm';
 
 const AdminUsersTab = () => {
   const { toast } = useToast();
@@ -130,6 +130,10 @@ const AdminUsersTab = () => {
       )}
       
       <UsersList />
+      
+      <div className="mt-8">
+        <CreateUserForm />
+      </div>
     </section>
   );
 };
