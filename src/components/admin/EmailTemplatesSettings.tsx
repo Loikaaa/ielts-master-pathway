@@ -357,7 +357,7 @@ const EmailTemplatesSettings = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Label htmlFor="email-enabled">Enable Email Service</Label>
-                  <Badge variant={emailConfig.enabled ? "success" : "secondary"}>
+                  <Badge variant={emailConfig.enabled ? "outline" : "secondary"} className={emailConfig.enabled ? "bg-green-100 text-green-800" : ""}>
                     {emailConfig.enabled ? "Active" : "Inactive"}
                   </Badge>
                 </div>
