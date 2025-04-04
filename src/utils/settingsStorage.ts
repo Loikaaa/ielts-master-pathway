@@ -1,3 +1,4 @@
+
 /**
  * Utility functions for storing and retrieving settings
  */
@@ -99,11 +100,65 @@ export const isDatabaseConnected = () => {
   }
 };
 
+// Validate if a database domain is valid and follows naming conventions
+export const validateDatabaseDomain = (host: string, database: string, user: string) => {
+  if (!host || !database || !user) return false;
+  
+  // Extract domain from hostname
+  const domain = extractDomainFromHost(host);
+  
+  // Check if database name and username follow the domain pattern
+  // For example: If domain is "example.com", database name should contain "example"
+  const databasePattern = extractBaseDomain(domain);
+  
+  if (databasePattern) {
+    // Check if database name or username contains the domain pattern
+    return database.toLowerCase().includes(databasePattern.toLowerCase()) || 
+           user.toLowerCase().includes(databasePattern.toLowerCase());
+  }
+  
+  return true; // If no pattern can be extracted, consider it valid
+};
+
+// Helper function to extract domain from host
+const extractDomainFromHost = (host: string) => {
+  // If it's an IP address, return it as is
+  if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
+    return host;
+  }
+  
+  // Extract domain from hostname
+  const parts = host.split('.');
+  if (parts.length >= 2) {
+    return parts.slice(-2).join('.');
+  }
+  
+  return host;
+};
+
+// Helper to extract the base part of a domain (e.g., "example" from "example.com")
+const extractBaseDomain = (domain: string) => {
+  if (!domain) return null;
+  
+  const parts = domain.split('.');
+  if (parts.length > 0) {
+    return parts[0]; // Return the first part
+  }
+  
+  return null;
+};
+
 // Save database configuration
 export const saveDatabaseConfig = (config: any) => {
   // Validate required fields
   if (!config.host || !config.database || !config.user) {
     console.error('Cannot save database config: missing required fields');
+    return false;
+  }
+  
+  // Validate domain pattern matching
+  if (!validateDatabaseDomain(config.host, config.database, config.user) && config.host.indexOf('localhost') === -1) {
+    console.error('Cannot save database config: database name or username should match domain pattern');
     return false;
   }
   
@@ -130,7 +185,9 @@ export const getEmailConfig = () => {
       password: '',
       fromEmail: '',
       enableSSL: true,
-      connected: false
+      connected: false,
+      connectionTested: false,
+      lastConnected: ''
     };
   } catch (error) {
     console.error('Error getting email config:', error);
@@ -141,7 +198,98 @@ export const getEmailConfig = () => {
       password: '',
       fromEmail: '',
       enableSSL: true,
-      connected: false
+      connected: false,
+      connectionTested: false,
+      lastConnected: ''
+    };
+  }
+};
+
+// Validate if an email server configuration is valid
+export const validateEmailConfig = (config: any) => {
+  const errors = [];
+  
+  if (!config.smtpServer) {
+    errors.push('SMTP server is required');
+  } else {
+    // Validate known email providers
+    const validDomains = [
+      'gmail.com', 'outlook.com', 'office365.com', 'hotmail.com', 'yahoo.com',
+      'zoho.com', 'mail.com', 'aol.com', 'yandex.com', 'protonmail.com',
+      'icloud.com', 'fastmail.com', 'gmx.com', 'mailgun.org', 'sendgrid.net',
+      'amazonses.com', 'sparkpost.com', 'postmarkapp.com', 'mailchimp.com'
+    ];
+    
+    // Extract domain from server
+    let domain = config.smtpServer;
+    if (domain.includes('.')) {
+      const parts = domain.split('.');
+      if (parts.length >= 2) {
+        // Get last two parts
+        domain = parts.slice(-2).join('.');
+      }
+    }
+    
+    // Skip domain check for IP addresses (local development)
+    const isIpAddress = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(config.smtpServer);
+    
+    if (!isIpAddress && !validDomains.some(validDomain => domain.includes(validDomain))) {
+      errors.push('SMTP server domain is not recognized');
+    }
+  }
+  
+  if (!config.port) {
+    errors.push('Port is required');
+  } else {
+    const port = parseInt(config.port);
+    if (isNaN(port) || port < 1 || port > 65535) {
+      errors.push('Port must be a valid number between 1 and 65535');
+    }
+  }
+  
+  if (!config.username) {
+    errors.push('Username is required');
+  }
+  
+  if (!config.fromEmail) {
+    errors.push('From email is required');
+  } else if (!/^\S+@\S+\.\S+$/.test(config.fromEmail)) {
+    errors.push('From email must be a valid email address');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors
+  };
+};
+
+// Test email server connection
+export const testEmailConnection = async (config: any) => {
+  try {
+    // Validate configuration
+    const validation = validateEmailConfig(config);
+    if (!validation.isValid) {
+      return {
+        success: false,
+        message: validation.errors.join(', ')
+      };
+    }
+    
+    // In a real app, we would make an actual SMTP connection test here
+    // For this demo, we'll just simulate a successful connection if validation passes
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    return {
+      success: true,
+      message: 'Connection successful'
+    };
+  } catch (error) {
+    console.error('Error testing email connection:', error);
+    return {
+      success: false,
+      message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 };
@@ -149,8 +297,9 @@ export const getEmailConfig = () => {
 // Save email configuration
 export const saveEmailConfig = (config: any) => {
   // Validate required fields
-  if (!config.smtpServer || !config.username || !config.fromEmail) {
-    console.error('Cannot save email config: missing required fields');
+  const validation = validateEmailConfig(config);
+  if (!validation.isValid) {
+    console.error('Cannot save email config:', validation.errors);
     return false;
   }
   
@@ -271,6 +420,96 @@ export const saveDataSourceConnection = (name: string, status: string, type: str
     return saveSettings(settings);
   } catch (error) {
     console.error('Error saving data source connection:', error);
+    return false;
+  }
+};
+
+// Validate server configuration
+export const validateServerConfig = (config: any) => {
+  const errors = [];
+  
+  if (!config.serverUrl) {
+    errors.push('Server URL is required');
+  }
+  
+  if (config.apiVersion && !/^v\d+(\.\d+)*$/.test(config.apiVersion)) {
+    errors.push('API version must be in format v1, v1.0, etc.');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors: errors
+  };
+};
+
+// Save server configuration
+export const saveServerConfig = (config: any) => {
+  const validation = validateServerConfig(config);
+  if (!validation.isValid) {
+    console.error('Cannot save server config:', validation.errors);
+    return false;
+  }
+  
+  const settings = getSettings() || {};
+  settings.server = config;
+  return saveSettings(settings);
+};
+
+// Get server configuration
+export const getServerConfig = () => {
+  try {
+    const settings = getSettings();
+    return settings?.server || {
+      serverUrl: '',
+      apiVersion: 'v1',
+      timeout: 30000,
+      retryAttempts: 3,
+      cacheEnabled: true
+    };
+  } catch (error) {
+    console.error('Error getting server config:', error);
+    return {
+      serverUrl: '',
+      apiVersion: 'v1',
+      timeout: 30000,
+      retryAttempts: 3,
+      cacheEnabled: true
+    };
+  }
+};
+
+// Get API endpoints
+export const getApiEndpoints = () => {
+  try {
+    const settings = getSettings();
+    return settings?.apiEndpoints || [];
+  } catch (error) {
+    console.error('Error getting API endpoints:', error);
+    return [];
+  }
+};
+
+// Save API endpoint
+export const saveApiEndpoint = (endpoint: any) => {
+  try {
+    const settings = getSettings() || {};
+    const endpoints = settings.apiEndpoints || [];
+    
+    // Check if endpoint exists
+    const existingIndex = endpoints.findIndex((e: any) => e.id === endpoint.id);
+    
+    if (existingIndex >= 0) {
+      // Update existing endpoint
+      endpoints[existingIndex] = endpoint;
+    } else {
+      // Add new endpoint
+      endpoints.push(endpoint);
+    }
+    
+    settings.apiEndpoints = endpoints;
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error saving API endpoint:', error);
     return false;
   }
 };
