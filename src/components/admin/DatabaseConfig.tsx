@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -33,22 +32,59 @@ const DatabaseConfig = () => {
     password: false
   });
 
-  // Approved domains for database connections
-  const approvedDomains = [
-    'mysql.com', 
-    'amazonaws.com', 
-    'digitalocean.com', 
-    'mongodb.com', 
-    'postgres.com', 
-    'postgresql.org', 
-    'mlab.com', 
-    'azure.com', 
-    'sqlserver.com', 
-    'oracle.com', 
-    'localhost',
-    'database.com',
-    '127.0.0.1'
-  ];
+  const databaseProviders = {
+    mysql: ['mysql.com', 'planetscale.com', 'cleardb.com', 'aws.rds.amazonaws.com', 'localhost', '127.0.0.1'],
+    postgres: ['postgres.com', 'postgresql.org', 'heroku.com', 'aws.rds.amazonaws.com', 'supabase.co', 'cockroachlabs.com', 'localhost', '127.0.0.1'],
+    mariadb: ['mariadb.com', 'mariadb.org', 'aws.rds.amazonaws.com', 'localhost', '127.0.0.1'],
+    sqlite: ['localhost', '127.0.0.1', 'file://'],
+    mssql: ['sqlserver.com', 'azure.com', 'aws.rds.amazonaws.com', 'localhost', '127.0.0.1']
+  };
+
+  const extractDomainInfo = (host: string): { domain: string, pattern: string | null } => {
+    let domain = host.replace(/^https?:\/\//, '');
+    domain = domain.split(':')[0];
+    domain = domain.split('/')[0];
+    const parts = domain.split('.');
+    const pattern = parts.length > 2 ? parts[0] : null;
+    return { domain, pattern };
+  };
+
+  const validateDatabaseCredentials = (
+    domain: string, 
+    dbName: string, 
+    username: string, 
+    dbType: string
+  ): { valid: boolean, message: string } => {
+    const { pattern } = extractDomainInfo(domain);
+    const matchingProvider = Object.entries(databaseProviders).find(([provider, domains]) => {
+      return domains.some(d => domain.includes(d));
+    });
+
+    if (!matchingProvider) {
+      return { 
+        valid: false, 
+        message: `The domain "${domain}" is not recognized as a valid database provider.` 
+      };
+    }
+
+    if (pattern) {
+      if (!dbName.includes(pattern) && !username.includes(pattern)) {
+        return { 
+          valid: false, 
+          message: `For ${matchingProvider[0]} databases on ${domain}, the database name or username should typically include "${pattern}".` 
+        };
+      }
+    }
+
+    if (dbType !== matchingProvider[0] && matchingProvider[0] !== 'localhost' && matchingProvider[0] !== '127.0.0.1') {
+      return { 
+        valid: false, 
+        message: `You selected ${dbType} but the domain suggests you're using a ${matchingProvider[0]} database.` 
+      };
+    }
+
+    return { valid: true, message: 'Database credentials validation passed.' };
+  };
 
   useEffect(() => {
     const savedConfig = getDatabaseConfig();
@@ -59,7 +95,6 @@ const DatabaseConfig = () => {
       dbType: savedConfig.dbType || 'mysql'
     }));
     
-    // Load data sources
     const sources = getDataSourceConnections();
     setDataSources(sources);
   }, []);
@@ -102,11 +137,10 @@ const DatabaseConfig = () => {
     return !errors.host && !errors.database && !errors.user && !errors.password;
   };
 
-  const isDomainApproved = (domain: string): boolean => {
-    // Check if the domain is in the approved list or is a subdomain of an approved domain
-    return approvedDomains.some(approvedDomain => 
+  const isDomainApproved = (domain: string, dbType: string): boolean => {
+    return databaseProviders[dbType as keyof typeof databaseProviders]?.some(approvedDomain => 
       domain === approvedDomain || domain.endsWith('.' + approvedDomain)
-    );
+    ) || false;
   };
 
   const handleSave = () => {
@@ -134,19 +168,6 @@ const DatabaseConfig = () => {
     }
   };
 
-  const extractDomainFromHost = (host: string): string => {
-    // Remove protocol if present
-    let domain = host.replace(/^https?:\/\//, '');
-    
-    // Remove port if present
-    domain = domain.split(':')[0];
-    
-    // Remove path if present
-    domain = domain.split('/')[0];
-    
-    return domain;
-  };
-
   const testConnection = () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields. Database name and credentials are required.');
@@ -155,25 +176,35 @@ const DatabaseConfig = () => {
     
     setIsTesting(true);
     
-    // Extract domain for validation
-    const domain = extractDomainFromHost(config.host);
+    const { domain, pattern } = extractDomainInfo(config.host);
     
-    // Validate the domain against approved list
-    const isValidDomain = isDomainApproved(domain);
+    const isValidDomain = isDomainApproved(domain, config.dbType);
     
     if (!isValidDomain) {
-      toast.error(`Domain "${domain}" is not approved for database connections. Please use a legitimate database service.`);
+      toast.error(`Domain "${domain}" is not approved for ${config.dbType} database connections. Please use a legitimate database service.`);
+      setIsTesting(false);
+      return;
+    }
+
+    const credentialsValidation = validateDatabaseCredentials(
+      domain, 
+      config.database, 
+      config.user, 
+      config.dbType
+    );
+
+    if (!credentialsValidation.valid) {
+      toast.error(credentialsValidation.message);
       setIsTesting(false);
       return;
     }
     
-    // Simulate database connection test with strict domain validation
     setTimeout(() => {
-      // Simple validation - in a real app this would be an actual DB connection test
       const success = config.database && 
                     config.user && 
                     (config.password || getDatabaseConfig().password) &&
-                    isValidDomain;
+                    isValidDomain && 
+                    credentialsValidation.valid;
       
       if (success) {
         const now = new Date().toISOString();
@@ -192,11 +223,9 @@ const DatabaseConfig = () => {
         
         saveDatabaseConfig(updatedConfig);
         
-        // Also update the data source status
-        saveDataSourceConnection('Main Database', 'connected', config.dbType);
         const updatedSources = dataSources.map(source => 
           source.name === 'Main Database' 
-            ? { ...source, status: 'connected', lastSynced: new Date().toLocaleString(), domains: [domain] } 
+            ? { ...source, status: 'connected', lastSynced: new Date().toLocaleString(), domains: [domain], dbName: config.database } 
             : source
         );
         setDataSources(updatedSources);
@@ -293,6 +322,11 @@ const DatabaseConfig = () => {
             {formErrors.host && (
               <p className="text-red-500 text-xs mt-1">{domainBased ? "Domain" : "Host/Server"} is required</p>
             )}
+            <p className="text-xs text-muted-foreground">
+              {config.dbType === 'mysql' ? 'Example: myapp.mysql.com' : 
+               config.dbType === 'postgres' ? 'Example: myapp.postgres.supabase.co' : 
+               'Example: yourapp.database.com'}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -314,7 +348,7 @@ const DatabaseConfig = () => {
           <Input
             id="database"
             name="database"
-            placeholder={domainBased ? "yourdomain_db" : "myDatabase"}
+            placeholder="mydatabase_name"
             value={config.database}
             onChange={handleInputChange}
             className={formErrors.database ? "border-red-500" : ""}
@@ -322,6 +356,9 @@ const DatabaseConfig = () => {
           {formErrors.database && (
             <p className="text-red-500 text-xs mt-1">Database name is required</p>
           )}
+          <p className="text-xs text-muted-foreground">
+            For hosted solutions, the database name often includes your domain or app name prefix
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -332,7 +369,7 @@ const DatabaseConfig = () => {
             <Input
               id="user"
               name="user"
-              placeholder={domainBased ? "yourdomain_user" : "database user"}
+              placeholder="database_user"
               value={config.user}
               onChange={handleInputChange}
               className={formErrors.user ? "border-red-500" : ""}
@@ -340,6 +377,9 @@ const DatabaseConfig = () => {
             {formErrors.user && (
               <p className="text-red-500 text-xs mt-1">Username is required</p>
             )}
+            <p className="text-xs text-muted-foreground">
+              For hosted solutions, username often matches the domain/app prefix
+            </p>
           </div>
 
           <div className="space-y-2">
