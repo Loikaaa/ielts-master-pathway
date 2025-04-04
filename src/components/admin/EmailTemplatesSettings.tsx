@@ -200,7 +200,8 @@ const EmailTemplatesSettings = () => {
       return;
     }
     
-    if (!/^\d+$/.test(emailConfig.port) || emailConfig.port < 1 || emailConfig.port > 65535) {
+    const portNumber = parseInt(emailConfig.port, 10);
+    if (isNaN(portNumber) || portNumber < 1 || portNumber > 65535) {
       setConnectionError('Invalid port number. Please enter a valid port (1-65535).');
       toast.error('Invalid port number');
       return;
