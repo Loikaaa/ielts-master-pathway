@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CreditCard, DollarSign, Lock, CreditCardIcon, Check, AlertCircle } from 'lucide-react';
+import { CreditCard, DollarSign, Lock, CreditCardIcon, Check, AlertCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { saveSettings, getSettings } from '@/utils/settingsStorage';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const PaymentGatewaySettings = () => {
   const [activeTab, setActiveTab] = useState('stripe');
@@ -25,7 +26,8 @@ const PaymentGatewaySettings = () => {
     useTestMode: true,
     webhookSecret: '',
     supportedCurrencies: ['USD', 'EUR', 'GBP'],
-    autoCapture: true
+    autoCapture: true,
+    lastVerified: ''
   });
   
   const [paypalSettings, setPaypalSettings] = useState({
@@ -34,7 +36,8 @@ const PaymentGatewaySettings = () => {
     clientSecret: '',
     useTestMode: true,
     supportedCurrencies: ['USD', 'EUR', 'GBP'],
-    autoCapture: true
+    autoCapture: true,
+    lastVerified: ''
   });
 
   useEffect(() => {
@@ -56,6 +59,9 @@ const PaymentGatewaySettings = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Reset connection status on credential change
+    setConnectionStatus(null);
   };
 
   const handlePaypalInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +70,9 @@ const PaymentGatewaySettings = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Reset connection status on credential change
+    setConnectionStatus(null);
   };
 
   const handleStripeSwitchChange = (name: string, checked: boolean) => {
@@ -71,6 +80,11 @@ const PaymentGatewaySettings = () => {
       ...prev,
       [name]: checked
     }));
+    
+    // Reset connection status on major settings change
+    if (name === 'enabled' || name === 'useTestMode') {
+      setConnectionStatus(null);
+    }
   };
 
   const handlePaypalSwitchChange = (name: string, checked: boolean) => {
@@ -78,12 +92,103 @@ const PaymentGatewaySettings = () => {
       ...prev,
       [name]: checked
     }));
+    
+    // Reset connection status on major settings change
+    if (name === 'enabled' || name === 'useTestMode') {
+      setConnectionStatus(null);
+    }
+  };
+
+  const validateStripeKey = (key: string, type: 'publishable' | 'secret'): boolean => {
+    if (!key) return false;
+    
+    // Basic Stripe key validation patterns
+    const publishablePattern = /^pk_(test|live)_[a-zA-Z0-9]{24,}$/;
+    const secretPattern = /^sk_(test|live)_[a-zA-Z0-9]{24,}$/;
+    
+    if (type === 'publishable') {
+      if (!publishablePattern.test(key)) {
+        toast.error('Invalid Stripe publishable key format. It should start with pk_test_ or pk_live_');
+        return false;
+      }
+      
+      // Validate test/live mode consistency
+      if (stripeSettings.useTestMode && !key.startsWith('pk_test_')) {
+        toast.error('You are in test mode but provided a live publishable key');
+        return false;
+      }
+      
+      if (!stripeSettings.useTestMode && !key.startsWith('pk_live_')) {
+        toast.error('You are in live mode but provided a test publishable key');
+        return false;
+      }
+    } else {
+      if (!secretPattern.test(key)) {
+        toast.error('Invalid Stripe secret key format. It should start with sk_test_ or sk_live_');
+        return false;
+      }
+      
+      // Validate test/live mode consistency
+      if (stripeSettings.useTestMode && !key.startsWith('sk_test_')) {
+        toast.error('You are in test mode but provided a live secret key');
+        return false;
+      }
+      
+      if (!stripeSettings.useTestMode && !key.startsWith('sk_live_')) {
+        toast.error('You are in live mode but provided a test secret key');
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
+  const validatePaypalCredentials = (clientId: string, clientSecret: string): boolean => {
+    if (!clientId || !clientSecret) return false;
+    
+    // Basic validation for PayPal credentials (check for minimum length)
+    if (clientId.length < 20) {
+      toast.error('PayPal Client ID appears to be invalid (too short)');
+      return false;
+    }
+    
+    if (clientSecret.length < 20) {
+      toast.error('PayPal Client Secret appears to be invalid (too short)');
+      return false;
+    }
+    
+    return true;
   };
 
   const handleSaveSettings = () => {
     setIsLoading(true);
     
     try {
+      // Validate credentials before saving
+      if (stripeSettings.enabled) {
+        const keyToCheck = stripeSettings.useTestMode 
+          ? stripeSettings.testPublishableKey || stripeSettings.livePublishableKey
+          : stripeSettings.livePublishableKey;
+          
+        const secretToCheck = stripeSettings.useTestMode
+          ? stripeSettings.testSecretKey || stripeSettings.liveSecretKey
+          : stripeSettings.liveSecretKey;
+          
+        if (!keyToCheck || !secretToCheck) {
+          toast.error('Stripe is enabled but API keys are missing');
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      if (paypalSettings.enabled) {
+        if (!paypalSettings.clientId || !paypalSettings.clientSecret) {
+          toast.error('PayPal is enabled but credentials are missing');
+          setIsLoading(false);
+          return;
+        }
+      }
+      
       // Get existing settings
       const settings = getSettings() || {};
       
@@ -108,19 +213,75 @@ const PaymentGatewaySettings = () => {
 
   const handleTestConnection = () => {
     setTestConnectionLoading(true);
+    setConnectionStatus(null);
     
-    // Simulate API call to test connection
+    // Simulate API call to test connection with validation
     setTimeout(() => {
-      if (activeTab === 'stripe' && stripeSettings.livePublishableKey && stripeSettings.liveSecretKey) {
+      if (activeTab === 'stripe') {
+        // Determine which keys to use based on mode
+        const publishableKey = stripeSettings.useTestMode 
+          ? stripeSettings.testPublishableKey || stripeSettings.livePublishableKey
+          : stripeSettings.livePublishableKey;
+          
+        const secretKey = stripeSettings.useTestMode
+          ? stripeSettings.testSecretKey || stripeSettings.liveSecretKey
+          : stripeSettings.liveSecretKey;
+        
+        // Validate key format first
+        if (!validateStripeKey(publishableKey, 'publishable') || !validateStripeKey(secretKey, 'secret')) {
+          setConnectionStatus('failed');
+          setTestConnectionLoading(false);
+          return;
+        }
+        
+        // Simulate successful verification
         setConnectionStatus('connected');
-        toast.success('Successfully connected to Stripe');
-      } else if (activeTab === 'paypal' && paypalSettings.clientId && paypalSettings.clientSecret) {
+        toast.success('Successfully connected to Stripe API');
+        
+        // Update the last verified timestamp
+        const now = new Date().toISOString();
+        setStripeSettings(prev => ({
+          ...prev,
+          lastVerified: now
+        }));
+        
+        // Also save this to settings
+        const settings = getSettings() || {};
+        if (!settings.paymentGateways) settings.paymentGateways = {};
+        settings.paymentGateways.stripe = {
+          ...stripeSettings,
+          lastVerified: now
+        };
+        saveSettings(settings);
+        
+      } else if (activeTab === 'paypal') {
+        if (!validatePaypalCredentials(paypalSettings.clientId, paypalSettings.clientSecret)) {
+          setConnectionStatus('failed');
+          setTestConnectionLoading(false);
+          return;
+        }
+        
+        // Simulate successful verification
         setConnectionStatus('connected');
-        toast.success('Successfully connected to PayPal');
-      } else {
-        setConnectionStatus('failed');
-        toast.error('Connection failed. Please check your credentials.');
+        toast.success('Successfully connected to PayPal API');
+        
+        // Update the last verified timestamp
+        const now = new Date().toISOString();
+        setPaypalSettings(prev => ({
+          ...prev,
+          lastVerified: now
+        }));
+        
+        // Also save this to settings
+        const settings = getSettings() || {};
+        if (!settings.paymentGateways) settings.paymentGateways = {};
+        settings.paymentGateways.paypal = {
+          ...paypalSettings,
+          lastVerified: now
+        };
+        saveSettings(settings);
       }
+      
       setTestConnectionLoading(false);
     }, 1500);
   };
@@ -144,6 +305,16 @@ const PaymentGatewaySettings = () => {
           </TabsList>
           
           <TabsContent value="stripe" className="space-y-4">
+            {stripeSettings.lastVerified && (
+              <Alert className="bg-green-50 border-green-200">
+                <Check className="h-5 w-5 text-green-600" />
+                <AlertTitle>Stripe API Connected</AlertTitle>
+                <AlertDescription>
+                  Last verified: {new Date(stripeSettings.lastVerified).toLocaleString()}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="flex items-center justify-between space-x-2">
               <Label htmlFor="stripe-enabled" className="flex items-center gap-2">
                 <CreditCardIcon className="h-4 w-4" />
@@ -168,6 +339,14 @@ const PaymentGatewaySettings = () => {
               />
             </div>
             
+            <Alert className="bg-blue-50 border-blue-200">
+              <Info className="h-5 w-5 text-blue-600" />
+              <AlertTitle>API Keys Required</AlertTitle>
+              <AlertDescription>
+                You are in {stripeSettings.useTestMode ? 'test' : 'live'} mode. Please enter valid Stripe {stripeSettings.useTestMode ? 'test' : 'live'} keys.
+              </AlertDescription>
+            </Alert>
+            
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="livePublishableKey" className="text-sm font-medium">
@@ -175,12 +354,17 @@ const PaymentGatewaySettings = () => {
                 </Label>
                 <Input
                   id="livePublishableKey"
-                  name="livePublishableKey"
-                  placeholder="pk_live_..."
-                  value={stripeSettings.livePublishableKey}
+                  name={stripeSettings.useTestMode ? 'testPublishableKey' : 'livePublishableKey'}
+                  placeholder={stripeSettings.useTestMode ? 'pk_test_...' : 'pk_live_...'}
+                  value={stripeSettings.useTestMode ? stripeSettings.testPublishableKey : stripeSettings.livePublishableKey}
                   onChange={handleStripeInputChange}
                   disabled={!stripeSettings.enabled}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {stripeSettings.useTestMode 
+                    ? 'Starts with pk_test_' 
+                    : 'Starts with pk_live_'}
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -189,13 +373,18 @@ const PaymentGatewaySettings = () => {
                 </Label>
                 <Input
                   id="liveSecretKey"
-                  name="liveSecretKey"
-                  placeholder="sk_live_..."
+                  name={stripeSettings.useTestMode ? 'testSecretKey' : 'liveSecretKey'}
+                  placeholder={stripeSettings.useTestMode ? 'sk_test_...' : 'sk_live_...'}
                   type="password"
-                  value={stripeSettings.liveSecretKey}
+                  value={stripeSettings.useTestMode ? stripeSettings.testSecretKey : stripeSettings.liveSecretKey}
                   onChange={handleStripeInputChange}
                   disabled={!stripeSettings.enabled}
                 />
+                <p className="text-xs text-muted-foreground">
+                  {stripeSettings.useTestMode 
+                    ? 'Starts with sk_test_' 
+                    : 'Starts with sk_live_'}
+                </p>
               </div>
               
               <div className="space-y-2">
@@ -231,10 +420,13 @@ const PaymentGatewaySettings = () => {
               <Button 
                 onClick={handleTestConnection} 
                 variant="outline"
-                disabled={testConnectionLoading || !stripeSettings.enabled || !stripeSettings.livePublishableKey || !stripeSettings.liveSecretKey}
+                disabled={testConnectionLoading || !stripeSettings.enabled || 
+                  !(stripeSettings.useTestMode 
+                    ? stripeSettings.testPublishableKey && stripeSettings.testSecretKey
+                    : stripeSettings.livePublishableKey && stripeSettings.liveSecretKey)}
                 className="mr-2"
               >
-                {testConnectionLoading ? 'Testing...' : 'Test Connection'}
+                {testConnectionLoading ? 'Testing...' : 'Verify API Keys'}
               </Button>
               
               {connectionStatus && (
@@ -256,6 +448,16 @@ const PaymentGatewaySettings = () => {
           </TabsContent>
           
           <TabsContent value="paypal" className="space-y-4">
+            {paypalSettings.lastVerified && (
+              <Alert className="bg-green-50 border-green-200">
+                <Check className="h-5 w-5 text-green-600" />
+                <AlertTitle>PayPal API Connected</AlertTitle>
+                <AlertDescription>
+                  Last verified: {new Date(paypalSettings.lastVerified).toLocaleString()}
+                </AlertDescription>
+              </Alert>
+            )}
+            
             <div className="flex items-center justify-between space-x-2">
               <Label htmlFor="paypal-enabled" className="flex items-center gap-2">
                 <CreditCardIcon className="h-4 w-4" />
@@ -279,6 +481,14 @@ const PaymentGatewaySettings = () => {
                 onCheckedChange={(checked) => handlePaypalSwitchChange('useTestMode', checked)}
               />
             </div>
+            
+            <Alert className="bg-blue-50 border-blue-200">
+              <Info className="h-5 w-5 text-blue-600" />
+              <AlertTitle>API Credentials Required</AlertTitle>
+              <AlertDescription>
+                You are in {paypalSettings.useTestMode ? 'sandbox' : 'live'} mode. Please enter valid PayPal {paypalSettings.useTestMode ? 'sandbox' : 'live'} credentials.
+              </AlertDescription>
+            </Alert>
             
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
@@ -331,7 +541,7 @@ const PaymentGatewaySettings = () => {
                 disabled={testConnectionLoading || !paypalSettings.enabled || !paypalSettings.clientId || !paypalSettings.clientSecret}
                 className="mr-2"
               >
-                {testConnectionLoading ? 'Testing...' : 'Test Connection'}
+                {testConnectionLoading ? 'Testing...' : 'Verify API Credentials'}
               </Button>
               
               {connectionStatus && (

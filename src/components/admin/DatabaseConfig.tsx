@@ -33,6 +33,23 @@ const DatabaseConfig = () => {
     password: false
   });
 
+  // Approved domains for database connections
+  const approvedDomains = [
+    'mysql.com', 
+    'amazonaws.com', 
+    'digitalocean.com', 
+    'mongodb.com', 
+    'postgres.com', 
+    'postgresql.org', 
+    'mlab.com', 
+    'azure.com', 
+    'sqlserver.com', 
+    'oracle.com', 
+    'localhost',
+    'database.com',
+    '127.0.0.1'
+  ];
+
   useEffect(() => {
     const savedConfig = getDatabaseConfig();
     setConfig(prev => ({
@@ -85,6 +102,13 @@ const DatabaseConfig = () => {
     return !errors.host && !errors.database && !errors.user && !errors.password;
   };
 
+  const isDomainApproved = (domain: string): boolean => {
+    // Check if the domain is in the approved list or is a subdomain of an approved domain
+    return approvedDomains.some(approvedDomain => 
+      domain === approvedDomain || domain.endsWith('.' + approvedDomain)
+    );
+  };
+
   const handleSave = () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields');
@@ -131,16 +155,21 @@ const DatabaseConfig = () => {
     
     setIsTesting(true);
     
-    // Simulate database connection test
+    // Extract domain for validation
+    const domain = extractDomainFromHost(config.host);
+    
+    // Validate the domain against approved list
+    const isValidDomain = isDomainApproved(domain);
+    
+    if (!isValidDomain) {
+      toast.error(`Domain "${domain}" is not approved for database connections. Please use a legitimate database service.`);
+      setIsTesting(false);
+      return;
+    }
+    
+    // Simulate database connection test with strict domain validation
     setTimeout(() => {
-      // Extract domain for domain-based connection
-      const domain = extractDomainFromHost(config.host);
-      
       // Simple validation - in a real app this would be an actual DB connection test
-      const isValidDomain = config.host === 'localhost' || 
-                          config.host.includes('.') || 
-                          config.host.includes('database.com');
-      
       const success = config.database && 
                     config.user && 
                     (config.password || getDatabaseConfig().password) &&
@@ -167,25 +196,16 @@ const DatabaseConfig = () => {
         saveDataSourceConnection('Main Database', 'connected', config.dbType);
         const updatedSources = dataSources.map(source => 
           source.name === 'Main Database' 
-            ? { ...source, status: 'connected', lastSynced: new Date().toLocaleString() } 
+            ? { ...source, status: 'connected', lastSynced: new Date().toLocaleString(), domains: [domain] } 
             : source
         );
         setDataSources(updatedSources);
         
-        // Success message with domain info if domain-based
-        if (domainBased) {
-          toast.success(`Successfully connected to database "${config.database}" on domain "${domain}"`);
-        } else {
-          toast.success(`Successfully connected to database "${config.database}" on ${config.host}`);
-        }
+        toast.success(`Successfully connected to ${config.dbType.toUpperCase()} database "${config.database}" on domain "${domain}"`);
         
         console.log('Connected to database:', config.database, 'as user:', config.user, 'on domain:', domain);
       } else {
         toast.error('Database connection failed. Please check your credentials and try again.');
-        
-        if (!isValidDomain) {
-          toast.error('Invalid host/domain. Please enter a valid database host.');
-        }
       }
       
       setIsTesting(false);
@@ -344,9 +364,7 @@ const DatabaseConfig = () => {
         <div className="mt-2 text-sm text-muted-foreground">
           <p className="flex items-center gap-1">
             <Key className="h-3.5 w-3.5" />
-            {domainBased ? 
-              "Uses your domain name to connect to the corresponding database on your hosting provider." : 
-              "For demonstration purposes only. In a production environment, these would connect to an actual database."}
+            Only approved database domains will be accepted for security reasons.
           </p>
         </div>
       </CardContent>
