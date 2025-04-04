@@ -885,4 +885,52 @@ const Community = () => {
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex
+          <div className="flex flex-col md:flex-row gap-6 mb-8">
+            <div className="md:w-3/4">
+              <Tabs defaultValue="discussions" className="w-full">
+                <TabsList className="w-full mb-6">
+                  <TabsTrigger value="discussions" className="flex-1">Discussions</TabsTrigger>
+                  <TabsTrigger value="study-partners" className="flex-1">Study Partners</TabsTrigger>
+                  <TabsTrigger value="events" className="flex-1">Events</TabsTrigger>
+                  <TabsTrigger value="mentors" className="flex-1">Mentors</TabsTrigger>
+                </TabsList>
+                
+                {/* Discussions Tab */}
+                <TabsContent value="discussions" className="space-y-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-2xl font-bold">IELTS Discussions</h2>
+                    <Button onClick={() => setIsNewPostDialogOpen(true)}>Start Discussion</Button>
+                  </div>
+                  
+                  <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <Input 
+                      placeholder="Search discussions..." 
+                      className="pl-10"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  {filteredPosts.length > 0 ? (
+                    <div className="space-y-4">
+                      {filteredPosts.map((post) => (
+                        <Card key={post.id} className="hover:shadow-md transition-shadow">
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-10 w-10">
+                                  <AvatarImage src={post.author.avatar} alt={post.author.name} />
+                                  <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <div className="font-medium">{post.author.name}</div>
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                    <Globe size={12} />
+                                    {post.author.country} • {post.author.level}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-sm text-muted-foreground">{post.time}</div>
+                            </div>
+                            <CardTitle className="mt-2 text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => handleOpenPost
