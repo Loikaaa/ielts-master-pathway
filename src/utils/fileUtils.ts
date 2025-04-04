@@ -59,6 +59,61 @@ export const downloadSourceCode = async (fileName: string = 'ielts-master-pathwa
 };
 
 /**
+ * Process an uploaded source code file
+ * @param file The uploaded file (zip)
+ * @returns Object with processing results
+ */
+export const processUploadedSourceCode = async (file: File) => {
+  try {
+    // Check if it's a zip file
+    if (!file.name.endsWith('.zip')) {
+      return {
+        success: false,
+        message: 'Uploaded file must be a ZIP archive'
+      };
+    }
+    
+    // Read the zip file
+    const zipData = await JSZip.loadAsync(file);
+    
+    // Process file contents
+    const files: {name: string, path: string, size: number}[] = [];
+    
+    await Promise.all(
+      Object.keys(zipData.files).map(async (filename) => {
+        const zipEntry = zipData.files[filename];
+        
+        // Skip directories
+        if (!zipEntry.dir) {
+          files.push({
+            name: zipEntry.name.split('/').pop() || '',
+            path: zipEntry.name,
+            size: zipEntry._data.uncompressedSize
+          });
+        }
+      })
+    );
+    
+    // In a real implementation, this is where you would:
+    // 1. Extract the files to the server
+    // 2. Update your application with the new files
+    // 3. Potentially rebuild the application
+    
+    return {
+      success: true,
+      message: `Processed ${files.length} files successfully`,
+      files
+    };
+  } catch (error) {
+    console.error('Error processing uploaded source code:', error);
+    return {
+      success: false,
+      message: 'Failed to process the uploaded file. Error: ' + (error instanceof Error ? error.message : String(error))
+    };
+  }
+};
+
+/**
  * Format file size to human-readable format
  * @param bytes File size in bytes
  * @returns Formatted file size (e.g., "1.5 MB")
