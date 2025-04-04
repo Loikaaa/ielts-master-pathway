@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -36,12 +35,12 @@ import {
   Users,
   Clock,
   Globe,
-  Device
+  Smartphone,
+  Laptop
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-// Sample data for charts
 const userActivityData = [
   { name: 'Jan', visitors: 1200, pageViews: 4500, sessions: 2300 },
   { name: 'Feb', visitors: 1900, pageViews: 5700, sessions: 3100 },
@@ -107,7 +106,6 @@ const AnalyticsDashboard = () => {
         </div>
       </div>
 
-      {/* Key metrics cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="shadow-sm transition-all hover:shadow-md">
           <CardContent className="pt-6">
@@ -162,7 +160,6 @@ const AnalyticsDashboard = () => {
         </Card>
       </div>
 
-      {/* Charts */}
       <Card>
         <CardHeader>
           <CardTitle>User Engagement Analytics</CardTitle>
@@ -338,7 +335,7 @@ const AnalyticsDashboard = () => {
                     <div className="rounded-lg border p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <Device className="h-5 w-5 text-blue-600" />
+                          <Smartphone className="h-5 w-5 text-blue-600" />
                           <span className="font-medium">Device Type</span>
                         </div>
                       </div>
