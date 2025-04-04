@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -11,11 +11,94 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, UserPlus, Calendar, Book as BookIcon, Pencil, Headphones, Mic, GraduationCap } from 'lucide-react';
+import { Book, UserPlus, Calendar, Book as BookIcon, Pencil, Headphones, Mic, GraduationCap, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useToast } from '@/components/ui/use-toast';
+import { useUser } from '@/contexts/UserContext';
+
+// Define form validation schema
+const signupSchema = z.object({
+  firstName: z.string().min(2, 'First name must be at least 2 characters'),
+  lastName: z.string().min(2, 'Last name must be at least 2 characters'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string(),
+  testType: z.string().min(1, 'Please select a test type'),
+  targetScore: z.string().min(1, 'Please select a target score'),
+  examDate: z.string().min(1, 'Please select an exam date'),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
+
+type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignUp = () => {
+  const { signup } = useUser();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Initialize form
+  const form = useForm<SignupFormValues>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      testType: '',
+      targetScore: '',
+      examDate: '',
+    },
+  });
+
+  const onSubmit = async (values: SignupFormValues) => {
+    setIsSubmitting(true);
+    try {
+      // Call signup function from UserContext
+      const success = await signup({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
+        testType: values.testType,
+        targetScore: values.targetScore,
+        examDate: values.examDate,
+      });
+
+      if (success) {
+        toast({
+          title: "Account created successfully!",
+          description: "Welcome to Neplia IELTS. You are now logged in.",
+        });
+        // Redirect to dashboard or onboarding
+        navigate('/dashboard');
+      } else {
+        toast({
+          title: "Signup failed",
+          description: "An account with this email may already exist.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-accent/40 to-background py-12 px-4">
       <Link to="/" className="flex items-center space-x-2 mb-8 justify-center">
@@ -85,77 +168,170 @@ const SignUp = () => {
               Start your IELTS preparation journey today
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label htmlFor="firstName" className="text-sm font-medium">First Name</label>
-                <Input id="firstName" placeholder="John" />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="lastName" className="text-sm font-medium">Last Name</label>
-                <Input id="lastName" placeholder="Doe" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">Email</label>
-              <Input id="email" type="email" placeholder="your.email@example.com" />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">Password</label>
-              <Input id="password" type="password" />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</label>
-              <Input id="confirmPassword" type="password" />
-            </div>
-            
-            <Separator className="my-6" />
-            
-            <div className="space-y-2">
-              <label htmlFor="testType" className="text-sm font-medium">IELTS Test Type</label>
-              <Select>
-                <SelectTrigger id="testType">
-                  <SelectValue placeholder="Select test type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="academic">Academic</SelectItem>
-                  <SelectItem value="general">General Training</SelectItem>
-                  <SelectItem value="undecided">Not Sure Yet</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="targetScore" className="text-sm font-medium">Target Band Score</label>
-              <Select>
-                <SelectTrigger id="targetScore">
-                  <SelectValue placeholder="Select target score" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="6">Band 6</SelectItem>
-                  <SelectItem value="6.5">Band 6.5</SelectItem>
-                  <SelectItem value="7">Band 7</SelectItem>
-                  <SelectItem value="7.5">Band 7.5</SelectItem>
-                  <SelectItem value="8+">Band 8+</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="examDate" className="text-sm font-medium">Planned Exam Date</label>
-              <Input id="examDate" type="date" />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col">
-            <Button className="w-full mb-4">
-              <UserPlus className="mr-2 h-4 w-4" />
-              Create Account
-            </Button>
-            <div className="text-center text-sm">
-              Already have an account?{' '}
-              <Link to="/signin" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </div>
-          </CardFooter>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="John" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Doe" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="your.email@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <Separator className="my-6" />
+                
+                <FormField
+                  control={form.control}
+                  name="testType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>IELTS Test Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select test type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="academic">Academic</SelectItem>
+                          <SelectItem value="general">General Training</SelectItem>
+                          <SelectItem value="undecided">Not Sure Yet</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="targetScore"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Target Band Score</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select target score" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="6">Band 6</SelectItem>
+                          <SelectItem value="6.5">Band 6.5</SelectItem>
+                          <SelectItem value="7">Band 7</SelectItem>
+                          <SelectItem value="7.5">Band 7.5</SelectItem>
+                          <SelectItem value="8+">Band 8+</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="examDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Planned Exam Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+              
+              <CardFooter className="flex flex-col">
+                <Button className="w-full mb-4" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Create Account
+                    </>
+                  )}
+                </Button>
+                <div className="text-center text-sm">
+                  Already have an account?{' '}
+                  <Link to="/signin" className="text-primary hover:underline">
+                    Sign in
+                  </Link>
+                </div>
+              </CardFooter>
+            </form>
+          </Form>
         </Card>
       </div>
     </div>

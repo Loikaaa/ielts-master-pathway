@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -24,6 +25,7 @@ import SuccessStories from "./pages/resources/SuccessStories";
 import IeltsTips from "./pages/resources/IeltsTips";
 import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
+import { UserProvider } from "./contexts/UserContext";
 import MaintenancePage from "./pages/MaintenancePage";
 import { isMaintenanceMode, getSettings, getAnalyticsConfig } from "./utils/settingsStorage";
 
@@ -152,39 +154,41 @@ const App = () => {
   return (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
-        <QuestionsProvider>
-          <UserProgressProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <MaintenanceChecker>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/practice" element={<Practice />} />
-                    <Route path="/practice/session/:skillType/:practiceId" element={<PracticeSession />} />
-                    <Route path="/practice/session/:skillType" element={<PracticeSession />} />
-                    <Route path="/community" element={<Community />} />
-                    <Route path="/onboarding" element={<Onboarding />} />
-                    <Route path="/resources" element={<Resources />} />
-                    <Route path="/resources/blog" element={<Blog />} />
-                    <Route path="/resources/blog/:postId" element={<BlogPost />} />
-                    <Route path="/resources/faq" element={<FAQ />} />
-                    <Route path="/resources/success-stories" element={<SuccessStories />} />
-                    <Route path="/resources/ielts-tips" element={<IeltsTips />} />
-                    <Route path="/signin" element={<SignIn />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/exam-content" element={<ExamContent />} />
-                    <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </MaintenanceChecker>
-              </BrowserRouter>
-            </TooltipProvider>
-          </UserProgressProvider>
-        </QuestionsProvider>
+        <UserProvider>
+          <QuestionsProvider>
+            <UserProgressProvider>
+              <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <MaintenanceChecker>
+                    <Routes>
+                      <Route path="/" element={<Index />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/practice" element={<Practice />} />
+                      <Route path="/practice/session/:skillType/:practiceId" element={<PracticeSession />} />
+                      <Route path="/practice/session/:skillType" element={<PracticeSession />} />
+                      <Route path="/community" element={<Community />} />
+                      <Route path="/onboarding" element={<Onboarding />} />
+                      <Route path="/resources" element={<Resources />} />
+                      <Route path="/resources/blog" element={<Blog />} />
+                      <Route path="/resources/blog/:postId" element={<BlogPost />} />
+                      <Route path="/resources/faq" element={<FAQ />} />
+                      <Route path="/resources/success-stories" element={<SuccessStories />} />
+                      <Route path="/resources/ielts-tips" element={<IeltsTips />} />
+                      <Route path="/signin" element={<SignIn />} />
+                      <Route path="/signup" element={<SignUp />} />
+                      <Route path="/exam-content" element={<ExamContent />} />
+                      <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                      <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </MaintenanceChecker>
+                </BrowserRouter>
+              </TooltipProvider>
+            </UserProgressProvider>
+          </QuestionsProvider>
+        </UserProvider>
       </QueryClientProvider>
     </React.StrictMode>
   );
