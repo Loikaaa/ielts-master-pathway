@@ -67,10 +67,13 @@ const AdminDashboard = () => {
   const [events, setEvents] = useState<IEvent[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   
+  // Check for admin status and redirect if not admin
   if (!isAdmin) {
+    console.log("User is not an admin, redirecting to dashboard");
     return <Navigate to="/dashboard" replace />;
   }
 
+  // Load community data from localStorage
   useEffect(() => {
     try {
       const storedPosts = localStorage.getItem('neplia_community_posts');
