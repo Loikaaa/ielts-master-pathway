@@ -36,6 +36,12 @@ import DatabaseConfig from '@/components/admin/DatabaseConfig';
 import DatabaseManager from '@/components/admin/DatabaseManager';
 import UIComponentsManager from '@/components/admin/UIComponentsManager';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+import SecuritySettings from '@/components/admin/SecuritySettings';
+import IntegrationsSettings from '@/components/admin/IntegrationsSettings';
+import PaymentGatewaySettings from '@/components/admin/PaymentGatewaySettings';
+import EmailTemplatesSettings from '@/components/admin/EmailTemplatesSettings';
+import BackupRestoreSettings from '@/components/admin/BackupRestoreSettings';
+import SystemSettings from '@/components/admin/SystemSettings';
 import {
   Sidebar,
   SidebarContent,
@@ -159,21 +165,21 @@ const AdminDashboard = () => {
             <UIComponentsManager />
           </div>
         );
+      case 'security':
+        return <SecuritySettings />;
+      case 'integrations':
+        return <IntegrationsSettings />;
+      case 'payment-gateway':
+        return <PaymentGatewaySettings />;
+      case 'email-templates':
+        return <EmailTemplatesSettings />;
+      case 'backup-restore':
+        return <BackupRestoreSettings />;
       case 'settings':
-        return (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-semibold">System Settings</h2>
-            <p className="text-muted-foreground">Configure system-wide settings and preferences.</p>
-          </div>
-        );
+        return <SystemSettings />;
       case 'api-endpoints':
       case 'server-settings':
       case 'cloud-services':
-      case 'security':
-      case 'integrations':
-      case 'payment-gateway':
-      case 'email-templates':
-      case 'backup-restore':
         return (
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold">{activeTab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</h2>
