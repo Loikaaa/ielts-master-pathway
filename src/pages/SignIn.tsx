@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -11,7 +10,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { Book, LogIn, Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,10 +28,14 @@ const signinSchema = z.object({
 type SigninFormValues = z.infer<typeof signinSchema>;
 
 const SignIn = () => {
-  const { login } = useUser();
+  const { login, isAdmin } = useUser();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Extract the destination from location state (if present)
+  const from = location.state?.from?.pathname || '/dashboard';
 
   // Initialize form
   const form = useForm<SigninFormValues>({
@@ -50,12 +53,19 @@ const SignIn = () => {
       const success = await login(values.email, values.password);
 
       if (success) {
+        // Success! Show message
         toast({
           title: "Login successful!",
           description: "Welcome back to Neplia IELTS.",
         });
-        // Redirect to dashboard
-        navigate('/dashboard');
+        
+        // If the user is an admin and being redirected from an admin page, send them there
+        // Otherwise, go to dashboard
+        if (isAdmin && from.includes('/admin')) {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         toast({
           title: "Login failed",
@@ -144,6 +154,19 @@ const SignIn = () => {
                     Sign In with Email
                   </>
                 )}
+              </Button>
+              
+              {/* Admin login shortcut */}
+              <Button variant="outline" 
+                className="w-full border-primary/30 bg-primary/5" 
+                type="button" 
+                onClick={() => {
+                  form.setValue('email', 'admin@neplia.com');
+                  form.setValue('password', 'admin123');
+                }}
+              >
+                <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
+                Fill Admin Credentials
               </Button>
               
               <div className="relative">

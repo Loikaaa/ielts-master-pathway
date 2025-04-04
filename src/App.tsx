@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -126,12 +127,16 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/exam-content" element={<ExamContent />} />
       
-      {/* Admin routes with protection */}
-      <Route path="/admin-dashboard" element={
+      {/* Admin routes with protection - renamed route from admin-dashboard to admin */}
+      <Route path="/admin" element={
         <AdminRoute>
           <AdminDashboard />
         </AdminRoute>
       } />
+      
+      {/* Add redirect for the old admin-dashboard path */}
+      <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
+      
       <Route path="/admin-blog-manager" element={
         <AdminRoute>
           <AdminBlogManager />

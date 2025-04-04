@@ -89,7 +89,7 @@ const NavBar = () => {
           <div className="flex space-x-2">
             {isAdmin && (
               <Button variant="outline" size="sm" className="mr-2" asChild>
-                <Link to="/admin-dashboard">
+                <Link to="/admin">
                   <Shield className="h-4 w-4 mr-2" />
                   Admin
                 </Link>
@@ -179,7 +179,7 @@ const NavBar = () => {
             </Link>
             {isAdmin && (
               <Link 
-                to="/admin-dashboard" 
+                to="/admin" 
                 className="px-4 py-2 hover:bg-accent rounded-md transition-colors flex items-center"
                 onClick={() => setIsMenuOpen(false)}
               >
