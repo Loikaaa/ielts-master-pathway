@@ -132,11 +132,6 @@ const AppRoutes = () => {
           <AdminDashboard />
         </AdminRoute>
       } />
-      <Route path="/admin/*" element={
-        <AdminRoute>
-          <AdminDashboard />
-        </AdminRoute>
-      } />
       <Route path="/admin-blog-manager" element={
         <AdminRoute>
           <AdminBlogManager />

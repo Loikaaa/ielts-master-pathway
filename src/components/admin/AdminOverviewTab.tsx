@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,11 +15,14 @@ import {
 import { Question } from '@/types/questions';
 
 const AdminOverviewTab = () => {
-  const navigate = useNavigate();
   const { questions } = useQuestions();
   
   const handleCreateNewTest = () => {
-    navigate('/admin/create-test');
+    // Trigger the content tab by finding the TabsTrigger and clicking it
+    const contentTabTrigger = document.querySelector('[data-value="content"]');
+    if (contentTabTrigger) {
+      (contentTabTrigger as HTMLElement).click();
+    }
   };
 
   const recentQuestions = questions?.slice(0, 5) || [];
@@ -96,10 +98,8 @@ const AdminOverviewTab = () => {
             </p>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full" asChild>
-              <Link to="/admin/settings">
-                <Settings className="h-4 w-4 mr-2" /> System Settings
-              </Link>
+            <Button variant="outline" className="w-full" onClick={() => document.querySelector('[data-value="content"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))}>
+              <Settings className="h-4 w-4 mr-2" /> System Settings
             </Button>
           </CardFooter>
         </Card>
@@ -117,9 +117,9 @@ const AdminOverviewTab = () => {
               <ul className="space-y-2">
                 {recentQuestions.map((question) => (
                   <li key={question.id} className="border-b pb-2 last:border-0">
-                    <Link 
-                      to={`/admin/edit-question/${question.id}`}
-                      className="flex items-start p-2 hover:bg-muted rounded-md transition-colors"
+                    <button 
+                      onClick={handleCreateNewTest}
+                      className="w-full flex items-start p-2 hover:bg-muted rounded-md transition-colors text-left"
                     >
                       <FileText className="h-5 w-5 mr-2 mt-0.5 text-muted-foreground" />
                       <div>
@@ -130,7 +130,7 @@ const AdminOverviewTab = () => {
                           Difficulty: {question.difficulty} | Created: {new Date().toLocaleDateString()}
                         </p>
                       </div>
-                    </Link>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -139,10 +139,8 @@ const AdminOverviewTab = () => {
             )}
           </CardContent>
           <CardFooter>
-            <Button variant="outline" className="w-full" asChild>
-              <Link to="/admin/questions">
-                View All Questions
-              </Link>
+            <Button variant="outline" className="w-full" onClick={handleCreateNewTest}>
+              View All Questions
             </Button>
           </CardFooter>
         </Card>
