@@ -1,16 +1,20 @@
 
 /**
  * Utility functions for storing and retrieving settings
+ * Enhanced for CMS portability across domains
  */
 
-// Save settings to localStorage
+// Global settings prefix - can be customized during installation
+const STORAGE_PREFIX = 'cms_settings';
+
+// Save settings to localStorage with domain isolation
 export const saveSettings = (settings: any) => {
   try {
     // Merge with existing settings instead of replacing them
     const existingSettings = getSettings() || {};
     const mergedSettings = { ...existingSettings, ...settings };
     
-    localStorage.setItem('settings', JSON.stringify(mergedSettings));
+    localStorage.setItem(`${STORAGE_PREFIX}`, JSON.stringify(mergedSettings));
     console.info('Saving settings:', mergedSettings);
     return true;
   } catch (error) {
@@ -22,7 +26,7 @@ export const saveSettings = (settings: any) => {
 // Get settings from localStorage
 export const getSettings = () => {
   try {
-    const settings = localStorage.getItem('settings');
+    const settings = localStorage.getItem(`${STORAGE_PREFIX}`);
     return settings ? JSON.parse(settings) : null;
   } catch (error) {
     console.error('Error retrieving settings:', error);
@@ -40,7 +44,6 @@ export const getSetting = (key: string) => {
 export const isMaintenanceMode = () => {
   try {
     const settings = getSettings();
-    console.info('Checking maintenance mode with settings:', settings);
     // Ensure we check for exact true value
     return settings?.maintenance?.scheduledMaintenance === true;
   } catch (error) {
@@ -156,8 +159,10 @@ export const saveDatabaseConfig = (config: any) => {
     return false;
   }
   
-  // Validate domain pattern matching
-  if (!validateDatabaseDomain(config.host, config.database, config.user) && config.host.indexOf('localhost') === -1) {
+  // Validate domain pattern matching for non-localhost environments
+  const isLocalhost = config.host.indexOf('localhost') >= 0 || config.host.indexOf('127.0.0.1') >= 0;
+  
+  if (!isLocalhost && !validateDatabaseDomain(config.host, config.database, config.user)) {
     console.error('Cannot save database config: database name or username should match domain pattern');
     return false;
   }
@@ -424,169 +429,142 @@ export const saveDataSourceConnection = (name: string, status: string, type: str
   }
 };
 
-// Validate server configuration
-export const validateServerConfig = (config: any) => {
-  const errors = [];
-  
-  if (!config.serverUrl) {
-    errors.push('Server URL is required');
+// Get site settings
+export const getSiteSettings = () => {
+  try {
+    const settings = getSettings();
+    return settings?.site || {
+      title: 'CMS Website',
+      description: 'A customizable content management system',
+      keywords: '',
+      favicon: '',
+      logo: '',
+      theme: 'light',
+      language: 'en'
+    };
+  } catch (error) {
+    console.error('Error getting site settings:', error);
+    return {
+      title: 'CMS Website',
+      description: 'A customizable content management system',
+      keywords: '',
+      favicon: '',
+      logo: '',
+      theme: 'light',
+      language: 'en'
+    };
   }
-  
-  if (config.apiVersion && !/^v\d+(\.\d+)*$/.test(config.apiVersion)) {
-    errors.push('API version must be in format v1, v1.0, etc.');
-  }
-  
-  return {
-    isValid: errors.length === 0,
-    errors: errors
-  };
 };
 
-// Save server configuration
-export const saveServerConfig = (config: any) => {
-  const validation = validateServerConfig(config);
-  if (!validation.isValid) {
-    console.error('Cannot save server config:', validation.errors);
-    return false;
-  }
-  
+// Save site settings
+export const saveSiteSettings = (site: any) => {
   const settings = getSettings() || {};
-  settings.server = config;
+  settings.site = site;
   return saveSettings(settings);
 };
 
-// Get server configuration
-export const getServerConfig = () => {
+// Get installation settings
+export const getInstallationSettings = () => {
   try {
     const settings = getSettings();
-    return settings?.server || {
-      serverUrl: '',
-      apiVersion: 'v1',
-      timeout: 30000,
-      retryAttempts: 3,
-      cacheEnabled: true
+    return settings?.installation || {
+      domain: window.location.hostname,
+      installDate: null,
+      version: '1.0.0',
+      isInstalled: false,
+      license: '',
+      adminEmail: ''
     };
   } catch (error) {
-    console.error('Error getting server config:', error);
+    console.error('Error getting installation settings:', error);
     return {
-      serverUrl: '',
-      apiVersion: 'v1',
-      timeout: 30000,
-      retryAttempts: 3,
-      cacheEnabled: true
+      domain: window.location.hostname,
+      installDate: null,
+      version: '1.0.0',
+      isInstalled: false,
+      license: '',
+      adminEmail: ''
     };
   }
 };
 
-// Get API endpoints
-export const getApiEndpoints = () => {
+// Save installation settings
+export const saveInstallationSettings = (installation: any) => {
+  const settings = getSettings() || {};
+  settings.installation = installation;
+  return saveSettings(settings);
+};
+
+// Export all settings (for backup)
+export const exportAllSettings = () => {
   try {
     const settings = getSettings();
-    return settings?.apiEndpoints || [];
-  } catch (error) {
-    console.error('Error getting API endpoints:', error);
-    return [];
-  }
-};
-
-// Save API endpoint
-export const saveApiEndpoint = (endpoint: any) => {
-  try {
-    const settings = getSettings() || {};
-    const endpoints = settings.apiEndpoints || [];
-    
-    // Check if endpoint exists
-    const existingIndex = endpoints.findIndex((e: any) => e.id === endpoint.id);
-    
-    if (existingIndex >= 0) {
-      // Update existing endpoint
-      endpoints[existingIndex] = endpoint;
-    } else {
-      // Add new endpoint
-      endpoints.push(endpoint);
+    if (!settings) {
+      return { success: false, message: 'No settings found to export' };
     }
     
-    settings.apiEndpoints = endpoints;
-    return saveSettings(settings);
+    // Create a JSON string with all settings
+    const settingsJSON = JSON.stringify(settings, null, 2);
+    
+    // Create a Blob from the JSON
+    const blob = new Blob([settingsJSON], { type: 'application/json' });
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cms-settings-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    return { success: true, message: 'Settings exported successfully' };
   } catch (error) {
-    console.error('Error saving API endpoint:', error);
-    return false;
+    console.error('Error exporting settings:', error);
+    return { 
+      success: false, 
+      message: 'Failed to export settings: ' + (error instanceof Error ? error.message : 'Unknown error')
+    };
   }
 };
 
-// Blog post functions
-export const getBlogPosts = () => {
+// Import settings (from backup)
+export const importSettings = async (file: File) => {
   try {
-    const settings = getSettings();
-    return settings?.blogPosts || [
-      {
-        id: 'blog1',
-        title: 'Top Strategies to Improve Your IELTS Reading Score',
-        excerpt: 'Master the reading section with these proven techniques that have helped thousands of students achieve band 7+.',
-        coverImage: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        author: 'Dr. Sarah Johnson',
-        date: 'March 28, 2025',
-        readTime: '8 min read',
-        category: 'Reading',
-        tags: ['reading', 'strategy', 'time management'],
-        featured: true,
-        content: 'This is a sample blog post about IELTS reading strategies. In this post, we explore various techniques to improve your reading score.\n\nTime management is crucial in the IELTS reading section. Many test-takers struggle to complete all questions within the given time frame.\n\nHere are some key strategies:\n\n1. Skim the passage before reading in detail\n2. Look for keywords in questions\n3. Don\'t spend too much time on difficult questions\n4. Practice reading academic texts regularly',
-        status: 'published'
-      },
-      {
-        id: 'blog2',
-        title: 'Common Grammar Mistakes to Avoid in IELTS Writing',
-        excerpt: 'Eliminate these frequent errors that cost test-takers valuable points in the writing section.',
-        coverImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-        author: 'James Wilson',
-        date: 'March 20, 2025',
-        readTime: '6 min read',
-        category: 'Writing',
-        tags: ['writing', 'grammar', 'mistakes'],
-        featured: false,
-        content: 'Grammar mistakes can significantly impact your IELTS writing score. This post covers the most common errors and how to avoid them.\n\nSubject-verb agreement is a frequent issue among test-takers. Remember that a singular subject requires a singular verb, and a plural subject requires a plural verb.\n\nArticle usage (a, an, the) is another challenging area, especially for speakers of languages that don\'t have articles.\n\nHere are some commonly confused words:\n\n- Effect vs. Affect\n- Their vs. There vs. They\'re\n- Its vs. It\'s',
-        status: 'published'
-      }
-    ];
-  } catch (error) {
-    console.error('Error getting blog posts:', error);
-    return [];
-  }
-};
-
-export const saveBlogPost = (post: any) => {
-  try {
-    const settings = getSettings() || {};
-    const blogPosts = settings.blogPosts || [];
+    // Read the JSON file
+    const text = await file.text();
+    const importedSettings = JSON.parse(text);
     
-    // Check if post exists already (for updates)
-    const existingPostIndex = blogPosts.findIndex(p => p.id === post.id);
-    
-    if (existingPostIndex >= 0) {
-      // Update existing post
-      blogPosts[existingPostIndex] = post;
-    } else {
-      // Add new post
-      blogPosts.push(post);
+    if (!importedSettings) {
+      return { success: false, message: 'Invalid settings file' };
     }
     
-    settings.blogPosts = blogPosts;
-    return saveSettings(settings);
+    // Merge with existing settings or replace completely
+    if (saveSettings(importedSettings)) {
+      return { success: true, message: 'Settings imported successfully' };
+    } else {
+      throw new Error('Failed to save imported settings');
+    }
   } catch (error) {
-    console.error('Error saving blog post:', error);
-    return false;
+    console.error('Error importing settings:', error);
+    return { 
+      success: false, 
+      message: 'Failed to import settings: ' + (error instanceof Error ? error.message : 'Unknown error')
+    };
   }
 };
 
-export const deleteBlogPost = (postId: string) => {
+// Clear all settings (useful for uninstallation)
+export const clearAllSettings = () => {
   try {
-    const settings = getSettings() || {};
-    const blogPosts = settings.blogPosts || [];
-    
-    settings.blogPosts = blogPosts.filter(post => post.id !== postId);
-    return saveSettings(settings);
+    localStorage.removeItem(`${STORAGE_PREFIX}`);
+    return { success: true, message: 'All settings cleared successfully' };
   } catch (error) {
-    console.error('Error deleting blog post:', error);
-    return false;
+    console.error('Error clearing settings:', error);
+    return { 
+      success: false, 
+      message: 'Failed to clear settings: ' + (error instanceof Error ? error.message : 'Unknown error')
+    };
   }
 };
