@@ -933,4 +933,4 @@ const Community = () => {
                               </div>
                               <div className="text-sm text-muted-foreground">{post.time}</div>
                             </div>
-                            <CardTitle className="mt-2 text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => handleOpenPost
+                            <CardTitle className="mt-2 text-lg cursor-pointer hover:text-primary transition-colors" onClick={() => handleOpenPostDetail(post
