@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useUser } from '@/contexts/UserContext';
 import { 
-  Book, 
+  Sparkles, 
   Menu, 
   X, 
   LogIn, 
@@ -18,10 +19,8 @@ const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { currentUser, isAdmin } = useUser();
   
-  // For demo purposes, this would typically come from an auth context
-  const isAdmin = true; // Set to true to show admin functionality
-
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -53,8 +52,10 @@ const NavBar = () => {
           </div>
           
           <Link to="/" className="flex items-center space-x-2">
-            <Book className="h-6 w-6 text-primary" />
-            <span className="font-bold text-xl">Neplia IELTS</span>
+            <div className="flex items-center justify-center h-8 w-8 rounded-md bg-gradient-to-br from-purple-500 via-blue-400 to-emerald-400 text-white">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <span className="font-bold text-xl bg-gradient-to-r from-purple-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">Neplia IELTS</span>
           </Link>
         </div>
         
@@ -62,9 +63,6 @@ const NavBar = () => {
         <div className="hidden md:flex items-center space-x-6">
           <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors">
             Home
-          </Link>
-          <Link to="/dashboard" className="text-foreground/80 hover:text-foreground transition-colors">
-            Dashboard
           </Link>
           <Link to="/practice" className="text-foreground/80 hover:text-foreground transition-colors">
             Practice
@@ -84,18 +82,29 @@ const NavBar = () => {
                 </Link>
               </Button>
             )}
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/signin">
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link to="/signup">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Sign Up
-              </Link>
-            </Button>
+            {currentUser ? (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/dashboard">
+                  <User className="h-4 w-4 mr-2" />
+                  My Dashboard
+                </Link>
+              </Button>
+            ) : (
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/signin">
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
+                  </Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link to="/signup">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Up
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
         
@@ -119,13 +128,15 @@ const NavBar = () => {
             >
               Home
             </Link>
-            <Link 
-              to="/dashboard" 
-              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
+            {currentUser && (
+              <Link 
+                to="/dashboard" 
+                className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Dashboard
+              </Link>
+            )}
             <Link 
               to="/practice" 
               className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
@@ -158,18 +169,29 @@ const NavBar = () => {
               </Link>
             )}
             <div className="flex flex-col space-y-2">
-              <Button variant="outline" className="w-full" asChild>
-                <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Link>
-              </Button>
-              <Button className="w-full" asChild>
-                <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Sign Up
-                </Link>
-              </Button>
+              {currentUser ? (
+                <Button variant="outline" className="w-full" asChild>
+                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
+                    <User className="h-4 w-4 mr-2" />
+                    My Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Link>
+                  </Button>
+                  <Button className="w-full" asChild>
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

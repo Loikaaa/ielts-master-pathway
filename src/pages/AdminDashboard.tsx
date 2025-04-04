@@ -7,7 +7,7 @@ import UsersList from '@/components/admin/UsersList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PlusCircle, FileText, Users, Settings } from 'lucide-react';
+import { PlusCircle, FileText, Users, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Question } from '@/types/questions';
 
 const AdminDashboard = () => {
@@ -22,6 +22,14 @@ const AdminDashboard = () => {
 
   const handleCreateNewTest = () => {
     navigate('/admin/create-test');
+  };
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleGoForward = () => {
+    navigate(1);
   };
 
   const recentQuestions = questions?.slice(0, 5) || [];
@@ -39,14 +47,23 @@ const AdminDashboard = () => {
       return `Listening Section ${question.sectionNumber}`;
     }
     
-    // At this point, TypeScript might not know which specific question type we have
-    // So we need to handle this case safely by using type assertion
+    // Use type assertion for safety as a fallback
     return `Question ${(question as any).id || 'Unknown'}`;
   };
 
   return (
     <div className="container mx-auto p-4 space-y-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="flex items-center mb-4">
+        <div className="flex items-center mr-4">
+          <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-1">
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={handleGoForward}>
+            <ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      </div>
       
       {/* Quick Actions */}
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -170,6 +187,69 @@ const AdminDashboard = () => {
           <CardFooter>
             <Button asChild>
               <Link to="/admin-blog-manager">Go to Blog Manager</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+      
+      {/* Community Management Section */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-semibold">Community Management</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Community Overview</CardTitle>
+            <CardDescription>Monitor and manage community discussions and activities</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {/* Community Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="bg-background rounded-lg border p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Discussions</h3>
+                  <p className="text-2xl font-bold">3,245</p>
+                </div>
+                <div className="bg-background rounded-lg border p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Active Study Partners</h3>
+                  <p className="text-2xl font-bold">842</p>
+                </div>
+                <div className="bg-background rounded-lg border p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Upcoming Events</h3>
+                  <p className="text-2xl font-bold">42</p>
+                </div>
+                <div className="bg-background rounded-lg border p-4">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Reported Content</h3>
+                  <p className="text-2xl font-bold text-red-500">7</p>
+                </div>
+              </div>
+              
+              {/* Recent Activity */}
+              <div>
+                <h3 className="text-lg font-medium mb-2">Recent Community Activity</h3>
+                <ul className="space-y-2">
+                  {[
+                    { type: 'post', user: 'Elena Kim', content: 'Posted a new discussion about Speaking fluency', time: '2 hours ago' },
+                    { type: 'comment', user: 'Ahmed Hassan', content: 'Commented on Writing Task 2 discussion', time: '5 hours ago' },
+                    { type: 'event', user: 'Dr. Emily Chen', content: 'Created a new workshop event: Writing Task 2', time: '1 day ago' },
+                    { type: 'report', user: 'James Wilson', content: 'Reported a comment as inappropriate', time: '1 day ago' },
+                    { type: 'partner', user: 'Maria Rodriguez', content: 'Joined as a study partner', time: '2 days ago' }
+                  ].map((activity, index) => (
+                    <li key={index} className="border-b last:border-0 pb-2">
+                      <div className="flex justify-between">
+                        <div>
+                          <span className="font-medium">{activity.user}</span>
+                          <span className="text-muted-foreground"> {activity.content}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{activity.time}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <Button asChild className="w-full">
+              <Link to="/admin/community-management">Manage Community</Link>
             </Button>
           </CardFooter>
         </Card>
