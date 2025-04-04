@@ -87,14 +87,6 @@ const NavBar = () => {
             Resources
           </Link>
           <div className="flex space-x-2">
-            {isAdmin && (
-              <Button variant="outline" size="sm" className="mr-2" asChild>
-                <Link to="/admin">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin
-                </Link>
-              </Button>
-            )}
             {currentUser ? (
               <>
                 <Button variant="outline" size="sm" asChild>
