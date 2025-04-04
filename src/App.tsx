@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -36,18 +35,25 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAdmin, currentUser } = useUser();
   const location = useLocation();
 
+  useEffect(() => {
+    console.log('AdminRoute: Current user:', currentUser);
+    console.log('AdminRoute: Is admin:', isAdmin);
+  }, [currentUser, isAdmin]);
+
   if (!currentUser) {
     // If not logged in, redirect to sign in
+    console.log('AdminRoute: Not logged in, redirecting to signin');
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   if (!isAdmin) {
-    console.log("User is not an admin, redirecting to dashboard");
+    console.log('AdminRoute: User is not an admin, redirecting to dashboard');
     // If logged in but not admin, redirect to dashboard
     return <Navigate to="/dashboard" replace />;
   }
 
   // User is admin, render the children
+  console.log('AdminRoute: User is admin, rendering children');
   return <>{children}</>;
 };
 

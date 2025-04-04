@@ -56,7 +56,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         
         // Check if user is admin (email contains admin)
         const isUserAdmin = parsedUser?.email?.includes('admin') || false;
-        console.log('User admin status:', isUserAdmin);
+        console.log('User admin status:', isUserAdmin, 'Email:', parsedUser?.email);
         setIsAdmin(isUserAdmin);
       }
     } catch (error) {
@@ -95,7 +95,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         
         // Check if the user is an admin based on email
         const isUserAdmin = email.includes('admin');
-        console.log('Login successful, admin status:', isUserAdmin);
+        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email);
         setIsAdmin(isUserAdmin);
         
         return true;
@@ -133,7 +133,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // Check if the user is an admin based on email
       const isUserAdmin = userData.email.includes('admin');
-      console.log('Signup successful, admin status:', isUserAdmin);
+      console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email);
       setIsAdmin(isUserAdmin);
       
       return true;

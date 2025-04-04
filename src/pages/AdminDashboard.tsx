@@ -3,25 +3,16 @@ import React, { useState, useEffect } from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 import { 
-  PlusCircle, 
   FileText, 
   Users, 
   Settings, 
   MessageCircle, 
-  Calendar, 
-  UserCheck, 
-  ThumbsUp, 
-  Shield, 
-  Database, 
-  BarChart4, 
   Gauge, 
-  Server 
+  Shield, 
+  LogOut
 } from 'lucide-react';
-import { Question } from '@/types/questions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AdminOverviewTab from '@/components/admin/AdminOverviewTab';
 import AdminCommunityTab from '@/components/admin/AdminCommunityTab';
@@ -29,15 +20,33 @@ import AdminUsersTab from '@/components/admin/AdminUsersTab';
 import AdminContentTab from '@/components/admin/AdminContentTab';
 
 const AdminDashboard = () => {
-  const { currentUser } = useUser();
+  const { currentUser, logout, isAdmin } = useUser();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Only loading state is needed here, admin check is done by the wrapper
+    // Check if user is logged in and is admin
+    if (!currentUser) {
+      console.log('AdminDashboard: No current user, redirecting to signin');
+      navigate('/signin');
+      return;
+    }
+    
+    if (!isAdmin) {
+      console.log('AdminDashboard: User is not admin, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+    
+    console.log('AdminDashboard: User is admin, showing admin dashboard');
     setIsLoading(false);
-  }, [currentUser]);
+  }, [currentUser, isAdmin, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/signin');
+  };
 
   if (isLoading) {
     return (
@@ -50,9 +59,15 @@ const AdminDashboard = () => {
   return (
     <div className="container mx-auto p-4 space-y-8">
       <div className="rounded-lg bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 p-6 mb-6 border border-indigo-200 dark:border-indigo-800/30">
-        <div className="flex items-center">
-          <Shield className="h-8 w-8 text-primary mr-4" />
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Shield className="h-8 w-8 text-primary mr-4" />
+            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          </div>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
         <p className="text-muted-foreground mt-2">
           Manage content, users, and system settings from this central administrative hub.

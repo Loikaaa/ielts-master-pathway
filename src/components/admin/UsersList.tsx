@@ -11,11 +11,30 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2 } from 'lucide-react';
 import { useUser, User } from '@/contexts/UserContext';
 import { format } from 'date-fns';
+import { useToast } from '@/components/ui/use-toast';
 
 const UsersList = () => {
   const { users } = useUser();
+  const { toast } = useToast();
+
+  const handleEditUser = (userId: string) => {
+    toast({
+      title: "Edit User",
+      description: `Edit functionality for user ${userId} is coming soon.`
+    });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    toast({
+      title: "Delete User",
+      description: `Delete functionality for user ${userId} is coming soon.`,
+      variant: "destructive"
+    });
+  };
 
   return (
     <Card className="w-full">
@@ -36,12 +55,13 @@ const UsersList = () => {
               <TableHead>Target Score</TableHead>
               <TableHead>Exam Date</TableHead>
               <TableHead>Registration Date</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center">No users registered yet</TableCell>
+                <TableCell colSpan={7} className="text-center">No users registered yet</TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
@@ -67,6 +87,18 @@ const UsersList = () => {
                     {user.created instanceof Date 
                       ? format(user.created, 'PPP') 
                       : format(new Date(user.created), 'PPP')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => handleEditUser(user.id)}>
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user.id)}>
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))
