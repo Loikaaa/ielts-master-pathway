@@ -11,14 +11,33 @@ import {
   MessageCircle, 
   Gauge, 
   Shield, 
-  LogOut
+  LogOut,
+  Database,
+  ServerCog,
+  LayoutDashboard,
+  Bell
 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/components/ui/use-toast';
 import AdminOverviewTab from '@/components/admin/AdminOverviewTab';
 import AdminCommunityTab from '@/components/admin/AdminCommunityTab';
 import AdminUsersTab from '@/components/admin/AdminUsersTab';
 import AdminContentTab from '@/components/admin/AdminContentTab';
+import DatabaseConfig from '@/components/admin/DatabaseConfig';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset
+} from '@/components/ui/sidebar';
 
 const AdminDashboard = () => {
   const { currentUser, logout, isAdmin } = useUser();
@@ -69,61 +88,131 @@ const AdminDashboard = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto p-4 space-y-8">
-      <div className="rounded-lg bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 p-6 mb-6 border border-indigo-200 dark:border-indigo-800/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Shield className="h-8 w-8 text-primary mr-4" />
-            <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+  // Menu items for the sidebar
+  const sidebarItems = [
+    { id: 'overview', title: 'Overview', icon: Gauge },
+    { id: 'community', title: 'Community', icon: MessageCircle },
+    { id: 'users', title: 'User Management', icon: Users },
+    { id: 'content', title: 'Content Management', icon: FileText },
+    { id: 'database', title: 'Database Config', icon: Database },
+    { id: 'settings', title: 'Settings', icon: Settings },
+  ];
+
+  // Render the content based on the active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return <AdminOverviewTab />;
+      case 'community':
+        return <AdminCommunityTab />;
+      case 'users':
+        return <AdminUsersTab />;
+      case 'content':
+        return <AdminContentTab />;
+      case 'database':
+        return <DatabaseConfig />;
+      case 'settings':
+        return (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">System Settings</h2>
+            <p className="text-muted-foreground">Configure system-wide settings and preferences.</p>
           </div>
-          <Button variant="outline" onClick={handleLogout} className="flex items-center">
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+        );
+      default:
+        return <AdminOverviewTab />;
+    }
+  };
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-muted/10">
+        {/* Main content */}
+        <div className="flex flex-1 flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+            <div className="flex items-center gap-2">
+              <Shield className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+            </div>
+            <div className="ml-auto flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
+          </header>
+          
+          {/* Main dashboard content */}
+          <main className="flex flex-1">
+            <SidebarInset className="p-4 md:p-6 pt-0">
+              <div className="rounded-lg border bg-card p-6 shadow-sm">
+                {renderTabContent()}
+              </div>
+            </SidebarInset>
+          </main>
         </div>
-        <p className="text-muted-foreground mt-2">
-          Manage content, users, and system settings from this central administrative hub.
-        </p>
+
+        {/* Sidebar */}
+        <Sidebar side="right" variant="floating" collapsible="icon">
+          <SidebarHeader className="flex h-16 items-center border-b px-6">
+            <div className="flex items-center gap-2 font-semibold">
+              <LayoutDashboard className="h-5 w-5" />
+              Admin Controls
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {sidebarItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeTab === item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        tooltip={item.title}
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>System</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton tooltip="Maintenance">
+                      <ServerCog className="mr-2 h-4 w-4" />
+                      <span>Maintenance</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton tooltip="Notifications">
+                      <Bell className="mr-2 h-4 w-4" />
+                      <span>Notifications</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter className="border-t p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <span className="text-xs text-muted-foreground">Admin Panel v1.0</span>
+              </div>
+              <SidebarTrigger />
+            </div>
+          </SidebarFooter>
+        </Sidebar>
       </div>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="overview">
-            <Gauge className="h-4 w-4 mr-2" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="community">
-            <MessageCircle className="h-4 w-4 mr-2" />
-            Community Manager
-          </TabsTrigger>
-          <TabsTrigger value="users">
-            <Users className="h-4 w-4 mr-2" />
-            User Management
-          </TabsTrigger>
-          <TabsTrigger value="content">
-            <FileText className="h-4 w-4 mr-2" />
-            Content Management
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="overview">
-          <AdminOverviewTab />
-        </TabsContent>
-        
-        <TabsContent value="community">
-          <AdminCommunityTab />
-        </TabsContent>
-        
-        <TabsContent value="users">
-          <AdminUsersTab />
-        </TabsContent>
-        
-        <TabsContent value="content">
-          <AdminContentTab />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </SidebarProvider>
   );
 };
 
