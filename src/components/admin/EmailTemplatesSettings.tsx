@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +12,7 @@ import { saveSettings, getSettings, saveEmailConfig, getEmailConfig, testEmailCo
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 
 interface EmailTemplate {
   id: string;
@@ -87,7 +87,6 @@ const EmailTemplatesSettings = () => {
   const [connectionError, setConnectionError] = useState('');
 
   useEffect(() => {
-    // Load existing email templates or use defaults
     const settings = getSettings() || {};
     const savedTemplates = settings.emailTemplates || DEFAULT_TEMPLATES;
     setTemplates(savedTemplates);
@@ -96,7 +95,6 @@ const EmailTemplatesSettings = () => {
       setSelectedTemplate(savedTemplates[0]);
     }
 
-    // Load email configuration
     const email = getEmailConfig();
     setEmailConfig(email);
   }, []);
@@ -120,7 +118,6 @@ const EmailTemplatesSettings = () => {
       setSelectedTemplate({ ...selectedTemplate, enabled });
     }
     
-    // Save to storage
     const settings = getSettings() || {};
     settings.emailTemplates = updatedTemplates;
     saveSettings(settings);
@@ -147,12 +144,10 @@ const EmailTemplatesSettings = () => {
     setEmailConfig(prev => ({
       ...prev,
       [name]: value,
-      // Reset connection status when config changes
       connected: name !== 'fromEmail' ? false : prev.connected,
       connectionTested: name !== 'fromEmail' ? false : prev.connectionTested
     }));
     
-    // Clear connection error when user makes changes
     if (connectionError) {
       setConnectionError('');
     }
@@ -170,7 +165,6 @@ const EmailTemplatesSettings = () => {
   const validateHostDomain = (host: string) => {
     if (!host) return false;
     
-    // Valid email providers domains
     const validDomains = [
       'gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'aol.com',
       'zoho.com', 'protonmail.com', 'mail.com', 'icloud.com', 'yandex.com',
@@ -178,50 +172,40 @@ const EmailTemplatesSettings = () => {
       'office365.com', 'fastmail.com', 'gmx.com'
     ];
     
-    // Extract domain from hostname
     let domain = host;
     
-    // If it's an IP address, we need to validate differently
     if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
-      return true; // Allow IP addresses for local development
+      return true;
     }
     
-    // Extract domain from full hostname
     if (host.includes('.')) {
       const parts = host.split('.');
       if (parts.length >= 2) {
-        // Get the last two parts as the domain (e.g., "gmail.com" from "smtp.gmail.com")
         domain = parts.slice(-2).join('.');
       }
     }
 
-    // Check if the domain is valid
     return validDomains.some(validDomain => domain.includes(validDomain));
   };
 
   const handleEmailConnectionTest = async () => {
-    // Validate inputs
     if (!emailConfig.smtpServer || !emailConfig.port || !emailConfig.username || !emailConfig.fromEmail) {
       toast.error('Please fill in all required SMTP server fields');
       return;
     }
     
-    // Validate domain
     if (!validateHostDomain(emailConfig.smtpServer)) {
       setConnectionError('Invalid SMTP server domain. Please use a valid email provider domain.');
       toast.error('Invalid SMTP server domain');
       return;
     }
     
-    // Validate port
-    const port = parseInt(emailConfig.port);
-    if (isNaN(port) || port < 1 || port > 65535) {
+    if (!/^\d+$/.test(emailConfig.port) || emailConfig.port < 1 || emailConfig.port > 65535) {
       setConnectionError('Invalid port number. Please enter a valid port (1-65535).');
       toast.error('Invalid port number');
       return;
     }
 
-    // Validate email format
     if (!/^\S+@\S+\.\S+$/.test(emailConfig.fromEmail)) {
       setConnectionError('Invalid email format for From Email address.');
       toast.error('Invalid From Email format');
@@ -232,14 +216,10 @@ const EmailTemplatesSettings = () => {
     setConnectionError('');
     
     try {
-      // In a real app, we would actually test the connection here
-      // For this demo, we'll simulate a successful connection
       const emailHostname = emailConfig.smtpServer.toLowerCase();
       
-      // Simulate testing connection
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      // Update connection status
       const updatedConfig = {
         ...emailConfig,
         connected: true,
@@ -272,7 +252,6 @@ const EmailTemplatesSettings = () => {
       
       setTemplates(updatedTemplates);
       
-      // Save to storage
       const settings = getSettings() || {};
       settings.emailTemplates = updatedTemplates;
       saveSettings(settings);
@@ -308,7 +287,6 @@ const EmailTemplatesSettings = () => {
     
     setIsSending(true);
     
-    // Simulate sending test email through configured SMTP server
     setTimeout(() => {
       toast.success(`Test email sent to ${testEmailAddress}`);
       setIsSending(false);
@@ -318,7 +296,6 @@ const EmailTemplatesSettings = () => {
   const copyTemplate = () => {
     if (!selectedTemplate) return;
     
-    // Create a deep copy with new ID
     const newTemplate: EmailTemplate = {
       ...selectedTemplate,
       id: `${selectedTemplate.id}-copy-${Date.now()}`,
@@ -328,12 +305,10 @@ const EmailTemplatesSettings = () => {
     const updatedTemplates = [...templates, newTemplate];
     setTemplates(updatedTemplates);
     
-    // Save to storage
     const settings = getSettings() || {};
     settings.emailTemplates = updatedTemplates;
     saveSettings(settings);
     
-    // Select the new template
     setSelectedTemplate(newTemplate);
     setIsEditing(true);
     
@@ -341,7 +316,6 @@ const EmailTemplatesSettings = () => {
   };
 
   const handleSaveEmailConfig = () => {
-    // Validate first
     if (!emailConfig.smtpServer || !emailConfig.port || !emailConfig.username || !emailConfig.fromEmail) {
       toast.error('Please fill in all required SMTP server fields');
       return;
@@ -350,7 +324,6 @@ const EmailTemplatesSettings = () => {
     setIsSaving(true);
     
     try {
-      // Save to storage
       saveEmailConfig(emailConfig);
       toast.success('Email configuration saved successfully');
     } catch (error) {
@@ -381,7 +354,6 @@ const EmailTemplatesSettings = () => {
           
           <TabsContent value="templates" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Template List */}
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Email Templates</h3>
                 <div className="space-y-2">
@@ -407,7 +379,6 @@ const EmailTemplatesSettings = () => {
                 </div>
               </div>
               
-              {/* Template Editor */}
               <div className="md:col-span-2 space-y-4">
                 {selectedTemplate ? (
                   <>
@@ -434,7 +405,6 @@ const EmailTemplatesSettings = () => {
                     </div>
                     
                     {isEditing ? (
-                      /* Edit Mode */
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="subject">Email Subject</Label>
@@ -476,7 +446,6 @@ const EmailTemplatesSettings = () => {
                         </div>
                       </div>
                     ) : (
-                      /* Preview Mode */
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
