@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { PlusCircle, FileText, Users, Settings } from 'lucide-react';
+import { Question } from '@/types/questions';
 
 const AdminDashboard = () => {
   const { isAdmin } = useUser();
@@ -24,6 +25,20 @@ const AdminDashboard = () => {
   };
 
   const recentQuestions = questions?.slice(0, 5) || [];
+
+  // Helper function to get a display title for any question type
+  const getQuestionTitle = (question: Question): string => {
+    if (question.skillType === 'reading' && 'passageTitle' in question) {
+      return question.passageTitle;
+    } else if (question.skillType === 'writing' && 'prompt' in question) {
+      return question.prompt.substring(0, 30) + '...';
+    } else if (question.skillType === 'speaking' && 'promptText' in question) {
+      return question.promptText.substring(0, 30) + '...';
+    } else if (question.skillType === 'listening' && 'transcript' in question) {
+      return `Listening Section ${question.sectionNumber}`;
+    }
+    return `Question ${question.id}`;
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-8">
@@ -107,11 +122,10 @@ const AdminDashboard = () => {
                       <FileText className="h-5 w-5 mr-2 mt-0.5 text-muted-foreground" />
                       <div>
                         <p className="font-medium">
-                          {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)}: 
-                          {question.passageTitle || question.prompt || `Question ${question.id}`}
+                          {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)}: {getQuestionTitle(question)}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          Difficulty: {question.difficulty} | Created: {new Date(question.created).toLocaleDateString()}
+                          Difficulty: {question.difficulty} | Created: {new Date().toLocaleDateString()}
                         </p>
                       </div>
                     </Link>
