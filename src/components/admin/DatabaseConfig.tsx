@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -67,11 +68,28 @@ const DatabaseConfig = () => {
       };
     }
 
-    if (pattern) {
+    // For cloud/hosted database providers, the database name and username should match the pattern
+    if (pattern && domain !== 'localhost' && domain !== '127.0.0.1') {
+      // For cloud databases, either database name or username MUST include the pattern
       if (!dbName.includes(pattern) && !username.includes(pattern)) {
         return { 
           valid: false, 
-          message: `For ${matchingProvider[0]} databases on ${domain}, the database name or username should typically include "${pattern}".` 
+          message: `For ${matchingProvider[0]} databases on ${domain}, the database name or username should include "${pattern}".` 
+        };
+      }
+      
+      // Additionally, if only one contains the pattern, suggest the other should match
+      if (dbName.includes(pattern) && !username.includes(pattern)) {
+        return {
+          valid: false,
+          message: `Database name contains "${pattern}" but username doesn't. For ${domain} databases, both should match the same pattern.`
+        };
+      }
+      
+      if (!dbName.includes(pattern) && username.includes(pattern)) {
+        return {
+          valid: false,
+          message: `Username contains "${pattern}" but database name doesn't. For ${domain} databases, both should match the same pattern.`
         };
       }
     }
@@ -181,7 +199,7 @@ const DatabaseConfig = () => {
     const isValidDomain = isDomainApproved(domain, config.dbType);
     
     if (!isValidDomain) {
-      toast.error(`Domain "${domain}" is not approved for ${config.dbType} database connections. Please use a legitimate database service.`);
+      toast.error(`Domain "${domain}" is not an approved database provider. Please use a legitimate database service.`);
       setIsTesting(false);
       return;
     }
@@ -229,6 +247,9 @@ const DatabaseConfig = () => {
             : source
         );
         setDataSources(updatedSources);
+        
+        // Save the data source connection status
+        saveDataSourceConnection('Main Database', 'connected', config.dbType);
         
         toast.success(`Successfully connected to ${config.dbType.toUpperCase()} database "${config.database}" on domain "${domain}"`);
         
