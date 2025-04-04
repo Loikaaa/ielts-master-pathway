@@ -39,8 +39,8 @@ const AdminDashboard = () => {
     }
     
     // At this point, TypeScript might not know which specific question type we have
-    // So we need to handle this case safely - use optional chaining to avoid errors
-    return `Question ${question?.id ?? 'Unknown'}`;
+    // So we need to handle this case safely by using a type assertion
+    return `Question ${(question as any).id || 'Unknown'}`;
   };
 
   return (
