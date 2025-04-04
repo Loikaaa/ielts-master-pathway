@@ -8,7 +8,7 @@ import {
   ArrowRight 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const skills = [
   {
@@ -46,6 +46,12 @@ const skills = [
 ];
 
 const SkillsSection = () => {
+  const navigate = useNavigate();
+  
+  const handleSkillClick = (skillLink) => {
+    navigate(skillLink);
+  };
+
   return (
     <section className="py-16 lg:py-24 bg-accent/30">
       <div className="container mx-auto px-4">
@@ -58,10 +64,10 @@ const SkillsSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {skills.map((skill) => (
-            <Link 
+            <div 
               key={skill.id}
-              to={skill.link}
-              className={`skill-card ${skill.id} bg-card hover:shadow-lg transition-all duration-300 p-6 rounded-xl border hover:border-${skill.color}`}
+              onClick={() => handleSkillClick(skill.link)}
+              className={`skill-card ${skill.id} bg-card hover:shadow-lg transition-all duration-300 p-6 rounded-xl border hover:border-${skill.color} cursor-pointer`}
             >
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full bg-${skill.color}/10 text-${skill.color} mb-4`}>
                 <skill.icon className="h-6 w-6" />
@@ -74,7 +80,7 @@ const SkillsSection = () => {
               >
                 Practice Now <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-            </Link>
+            </div>
           ))}
         </div>
         
@@ -102,7 +108,7 @@ const SkillsSection = () => {
           </div>
           
           <Button size="lg" asChild>
-            <Link to="/resources">
+            <Link to="/practice">
               Explore All Practice Materials
             </Link>
           </Button>

@@ -18,7 +18,7 @@ const NavBar = () => {
   const isAdmin = true; // Set to true to show admin functionality
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b">
+    <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b shadow-sm">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <Book className="h-6 w-6 text-primary" />
