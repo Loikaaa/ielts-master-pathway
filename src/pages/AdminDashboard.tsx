@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
@@ -58,7 +57,7 @@ interface IEvent {
 }
 
 const AdminDashboard = () => {
-  const { isAdmin } = useUser();
+  const { isAdmin, currentUser } = useUser();
   const navigate = useNavigate();
   const { questions } = useQuestions();
   
@@ -66,14 +65,16 @@ const AdminDashboard = () => {
   const [studyPartners, setStudyPartners] = useState<IStudyPartner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Check for admin status and redirect if not admin
-  if (!isAdmin) {
-    console.log("User is not an admin, redirecting to dashboard");
-    return <Navigate to="/dashboard" replace />;
-  }
+  useEffect(() => {
+    if (currentUser && !isAdmin) {
+      console.log("User is not an admin, redirecting to dashboard");
+      navigate('/dashboard', { replace: true });
+    }
+    setIsLoading(false);
+  }, [currentUser, isAdmin, navigate]);
 
-  // Load community data from localStorage
   useEffect(() => {
     try {
       const storedPosts = localStorage.getItem('neplia_community_posts');
@@ -115,6 +116,22 @@ const AdminDashboard = () => {
     
     return `Question ${(question as any).id || 'Unknown'}`;
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-8">

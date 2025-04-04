@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -29,10 +28,8 @@ import { UserProvider } from "./contexts/UserContext";
 import MaintenancePage from "./pages/MaintenancePage";
 import { isMaintenanceMode, getSettings, getAnalyticsConfig } from "./utils/settingsStorage";
 
-// Create a new QueryClient instance
 const queryClient = new QueryClient();
 
-// Component to check maintenance mode and render appropriate content
 const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isInMaintenanceMode, setIsInMaintenanceMode] = useState(false);
@@ -40,10 +37,8 @@ const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
   const pathname = location.pathname;
 
   useEffect(() => {
-    // Check for maintenance mode using our utility
     const checkMaintenanceMode = () => {
       try {
-        // Get all settings for inspection
         const settings = getSettings();
         console.info('Current settings:', settings);
         
@@ -61,13 +56,11 @@ const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
 
     checkMaintenanceMode();
 
-    // Check for maintenance mode changes every 30 seconds
     const intervalId = setInterval(checkMaintenanceMode, 30000);
     
     return () => clearInterval(intervalId);
   }, []);
 
-  // Show loading indicator
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -76,16 +69,13 @@ const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // Exception for admin routes - maintenance mode does not apply
   const isAdminRoute = pathname.includes('admin') || pathname.includes('backend');
   
-  // Show maintenance page if in maintenance mode and not on an admin route
   if (isInMaintenanceMode && !isAdminRoute) {
     console.info('Rendering maintenance page for path:', pathname);
     return <MaintenancePage />;
   }
 
-  // Otherwise render normal content
   return <>{children}</>;
 };
 
@@ -94,11 +84,9 @@ const App = () => {
     const settings = getSettings();
     console.info('App mounted, settings:', settings);
     
-    // Setup analytics
     const analyticsConfig = getAnalyticsConfig();
     
     if (analyticsConfig.enabled) {
-      // Add Google Analytics if configured
       if (analyticsConfig.googleAnalyticsId) {
         const script1 = document.createElement('script');
         script1.async = true;
@@ -116,7 +104,6 @@ const App = () => {
         console.info('Google Analytics initialized with ID:', analyticsConfig.googleAnalyticsId);
       }
       
-      // Add Facebook Pixel if configured
       if (analyticsConfig.facebookPixelId) {
         const pixelScript = document.createElement('script');
         pixelScript.innerHTML = `
@@ -135,7 +122,6 @@ const App = () => {
         console.info('Facebook Pixel initialized with ID:', analyticsConfig.facebookPixelId);
       }
       
-      // Add Mixpanel if configured
       if (analyticsConfig.mixpanelToken) {
         const mixpanelScript = document.createElement('script');
         mixpanelScript.innerHTML = `
@@ -180,6 +166,7 @@ const App = () => {
                       <Route path="/signup" element={<SignUp />} />
                       <Route path="/exam-content" element={<ExamContent />} />
                       <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                      <Route path="/admin/*" element={<AdminDashboard />} />
                       <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
                       <Route path="*" element={<NotFound />} />
                     </Routes>
