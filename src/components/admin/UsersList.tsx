@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -16,16 +16,39 @@ import { Edit, Trash2, ShieldCheck, Shield } from 'lucide-react';
 import { useUser, User } from '@/contexts/UserContext';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const UsersList = () => {
   const { users, setUserAsAdmin } = useUser();
   const { toast } = useToast();
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editedUser, setEditedUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    isAdmin: false
+  });
 
-  const handleEditUser = (userId: string) => {
-    toast({
-      title: "Edit User",
-      description: `Edit functionality for user ${userId} is coming soon.`
+  const handleEditUser = (user: User) => {
+    setSelectedUser(user);
+    setEditedUser({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      isAdmin: user.isAdmin || false
     });
+    setIsEditDialogOpen(true);
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -36,11 +59,36 @@ const UsersList = () => {
     });
   };
 
-  const handleSetAdmin = (userId: string, firstName: string, lastName: string) => {
-    setUserAsAdmin(userId);
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditedUser(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    setEditedUser(prev => ({
+      ...prev,
+      isAdmin: checked
+    }));
+  };
+
+  const handleSaveUser = () => {
+    if (!selectedUser) return;
+    
+    if (editedUser.isAdmin && !selectedUser.isAdmin) {
+      setUserAsAdmin(selectedUser.id);
+      toast({
+        title: "Admin Rights Granted",
+        description: `${editedUser.firstName} ${editedUser.lastName} has been made an administrator.`
+      });
+    }
+    
+    setIsEditDialogOpen(false);
     toast({
-      title: "Admin Rights Granted",
-      description: `${firstName} ${lastName} has been made an administrator.`
+      title: "User Updated",
+      description: `User ${editedUser.firstName} ${editedUser.lastName} has been updated.`
     });
   };
 
@@ -111,13 +159,7 @@ const UsersList = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
-                      {!user.isAdmin && (
-                        <Button variant="outline" size="sm" onClick={() => handleSetAdmin(user.id, user.firstName, user.lastName)}>
-                          <Shield className="h-4 w-4 mr-1" />
-                          Make Admin
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" onClick={() => handleEditUser(user.id)}>
+                      <Button variant="outline" size="sm" onClick={() => handleEditUser(user)}>
                         <Edit className="h-4 w-4 mr-1" />
                         Edit
                       </Button>
@@ -132,6 +174,73 @@ const UsersList = () => {
             )}
           </TableBody>
         </Table>
+
+        {/* Edit User Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user information and permissions
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input 
+                    id="firstName" 
+                    name="firstName" 
+                    value={editedUser.firstName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input 
+                    id="lastName" 
+                    name="lastName" 
+                    value={editedUser.lastName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  value={editedUser.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="isAdmin" 
+                  checked={editedUser.isAdmin}
+                  onCheckedChange={handleCheckboxChange}
+                />
+                <Label htmlFor="isAdmin" className="flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Administrator Access
+                </Label>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveUser}>
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
