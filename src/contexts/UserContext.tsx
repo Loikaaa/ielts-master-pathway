@@ -53,8 +53,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (storedCurrentUser) {
         const parsedUser = JSON.parse(storedCurrentUser);
         setCurrentUser(parsedUser);
+        
         // Check if user is admin (email contains admin)
-        setIsAdmin(parsedUser?.email?.includes('admin'));
+        const isUserAdmin = parsedUser?.email?.includes('admin') || false;
+        console.log('User admin status:', isUserAdmin);
+        setIsAdmin(isUserAdmin);
       }
     } catch (error) {
       console.error('Failed to load user data:', error);
@@ -89,8 +92,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       if (user) {
         const { password, ...userWithoutPassword } = user;
         setCurrentUser(userWithoutPassword);
-        setIsAdmin(email.includes('admin'));
-        console.log('Login successful', userWithoutPassword);
+        
+        // Check if the user is an admin based on email
+        const isUserAdmin = email.includes('admin');
+        console.log('Login successful, admin status:', isUserAdmin);
+        setIsAdmin(isUserAdmin);
+        
         return true;
       }
       return false;
@@ -123,9 +130,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Log in the new user (without password in the current user state)
       const { password, ...userWithoutPassword } = newUser;
       setCurrentUser(userWithoutPassword);
-      setIsAdmin(userData.email.includes('admin'));
       
-      console.log('Signup successful', userWithoutPassword);
+      // Check if the user is an admin based on email
+      const isUserAdmin = userData.email.includes('admin');
+      console.log('Signup successful, admin status:', isUserAdmin);
+      setIsAdmin(isUserAdmin);
+      
       return true;
     } catch (error) {
       console.error('Signup error:', error);

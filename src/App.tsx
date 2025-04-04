@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
@@ -24,11 +25,31 @@ import SuccessStories from "./pages/resources/SuccessStories";
 import IeltsTips from "./pages/resources/IeltsTips";
 import { QuestionsProvider } from "./contexts/QuestionsContext";
 import { UserProgressProvider } from "./contexts/UserProgressContext";
-import { UserProvider } from "./contexts/UserContext";
+import { UserProvider, useUser } from "./contexts/UserContext";
 import MaintenancePage from "./pages/MaintenancePage";
 import { isMaintenanceMode, getSettings, getAnalyticsConfig } from "./utils/settingsStorage";
 
 const queryClient = new QueryClient();
+
+// Protected route component for admin routes
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAdmin, currentUser } = useUser();
+  const location = useLocation();
+
+  if (!currentUser) {
+    // If not logged in, redirect to sign in
+    return <Navigate to="/signin" state={{ from: location }} replace />;
+  }
+
+  if (!isAdmin) {
+    console.log("User is not an admin, redirecting to dashboard");
+    // If logged in but not admin, redirect to dashboard
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // User is admin, render the children
+  return <>{children}</>;
+};
 
 const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -77,6 +98,49 @@ const MaintenanceChecker = ({ children }: { children: React.ReactNode }) => {
   }
 
   return <>{children}</>;
+};
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/practice" element={<Practice />} />
+      <Route path="/practice/session/:skillType/:practiceId" element={<PracticeSession />} />
+      <Route path="/practice/session/:skillType" element={<PracticeSession />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/resources" element={<Resources />} />
+      <Route path="/resources/blog" element={<Blog />} />
+      <Route path="/resources/blog/:postId" element={<BlogPost />} />
+      <Route path="/resources/faq" element={<FAQ />} />
+      <Route path="/resources/success-stories" element={<SuccessStories />} />
+      <Route path="/resources/ielts-tips" element={<IeltsTips />} />
+      <Route path="/signin" element={<SignIn />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/exam-content" element={<ExamContent />} />
+      
+      {/* Admin routes with protection */}
+      <Route path="/admin-dashboard" element={
+        <AdminRoute>
+          <AdminDashboard />
+        </AdminRoute>
+      } />
+      <Route path="/admin/*" element={
+        <AdminRoute>
+          <AdminDashboard />
+        </AdminRoute>
+      } />
+      <Route path="/admin-blog-manager" element={
+        <AdminRoute>
+          <AdminBlogManager />
+        </AdminRoute>
+      } />
+      
+      {/* Catch all route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
 };
 
 const App = () => {
@@ -148,28 +212,7 @@ const App = () => {
                 <Sonner />
                 <BrowserRouter>
                   <MaintenanceChecker>
-                    <Routes>
-                      <Route path="/" element={<Index />} />
-                      <Route path="/dashboard" element={<Dashboard />} />
-                      <Route path="/practice" element={<Practice />} />
-                      <Route path="/practice/session/:skillType/:practiceId" element={<PracticeSession />} />
-                      <Route path="/practice/session/:skillType" element={<PracticeSession />} />
-                      <Route path="/community" element={<Community />} />
-                      <Route path="/onboarding" element={<Onboarding />} />
-                      <Route path="/resources" element={<Resources />} />
-                      <Route path="/resources/blog" element={<Blog />} />
-                      <Route path="/resources/blog/:postId" element={<BlogPost />} />
-                      <Route path="/resources/faq" element={<FAQ />} />
-                      <Route path="/resources/success-stories" element={<SuccessStories />} />
-                      <Route path="/resources/ielts-tips" element={<IeltsTips />} />
-                      <Route path="/signin" element={<SignIn />} />
-                      <Route path="/signup" element={<SignUp />} />
-                      <Route path="/exam-content" element={<ExamContent />} />
-                      <Route path="/admin-dashboard" element={<AdminDashboard />} />
-                      <Route path="/admin/*" element={<AdminDashboard />} />
-                      <Route path="/admin-blog-manager" element={<AdminBlogManager />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
+                    <AppRoutes />
                   </MaintenanceChecker>
                 </BrowserRouter>
               </TooltipProvider>

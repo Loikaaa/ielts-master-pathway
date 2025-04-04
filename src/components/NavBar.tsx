@@ -11,15 +11,14 @@ import {
   Shield, 
   User,
   ChevronLeft,
-  ChevronRight,
-  Square
+  ChevronRight
 } from "lucide-react";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, isAdmin } = useUser();
+  const { currentUser, isAdmin, logout } = useUser();
   
   const handleGoBack = () => {
     navigate(-1);
@@ -27,6 +26,12 @@ const NavBar = () => {
 
   const handleGoForward = () => {
     navigate(1);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    navigate('/');
   };
 
   // Check if we're on the home page to hide navigation arrows
@@ -91,12 +96,18 @@ const NavBar = () => {
               </Button>
             )}
             {currentUser ? (
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/dashboard">
-                  <User className="h-4 w-4 mr-2" />
-                  My Dashboard
-                </Link>
-              </Button>
+              <>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/dashboard">
+                    <User className="h-4 w-4 mr-2" />
+                    My Dashboard
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </>
             ) : (
               <>
                 <Button variant="outline" size="sm" asChild>
@@ -176,31 +187,27 @@ const NavBar = () => {
                 Admin Dashboard
               </Link>
             )}
-            <div className="flex flex-col space-y-2">
-              {currentUser ? (
+            {currentUser ? (
+              <Button variant="outline" className="w-full" onClick={handleLogout}>
+                <LogIn className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            ) : (
+              <>
                 <Button variant="outline" className="w-full" asChild>
-                  <Link to="/dashboard" onClick={() => setIsMenuOpen(false)}>
-                    <User className="h-4 w-4 mr-2" />
-                    My Dashboard
+                  <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Sign In
                   </Link>
                 </Button>
-              ) : (
-                <>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Sign In
-                    </Link>
-                  </Button>
-                  <Button className="w-full" asChild>
-                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Sign Up
-                    </Link>
-                  </Button>
-                </>
-              )}
-            </div>
+                <Button className="w-full" asChild>
+                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Sign Up
+                  </Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
