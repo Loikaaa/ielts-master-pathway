@@ -29,27 +29,32 @@ const NavBar = () => {
     navigate(1);
   };
 
+  // Check if we're on the home page to hide navigation arrows
+  const isHomePage = location.pathname === '/';
+
   return (
     <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b shadow-sm">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
-          <div className="flex items-center mr-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleGoBack} 
-              className="mr-1"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleGoForward}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
+          {!isHomePage && (
+            <div className="flex items-center mr-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleGoBack} 
+                className="mr-1"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={handleGoForward}
+              >
+                <ChevronRight className="h-5 w-5" />
+              </Button>
+            </div>
+          )}
           
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative flex-shrink-0">

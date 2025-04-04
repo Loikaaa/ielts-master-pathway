@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
@@ -7,11 +6,10 @@ import UsersList from '@/components/admin/UsersList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PlusCircle, FileText, Users, Settings, ChevronLeft, ChevronRight, MessageCircle, Calendar, UserCheck, ThumbsUp } from 'lucide-react';
+import { PlusCircle, FileText, Users, Settings, MessageCircle, Calendar, UserCheck, ThumbsUp, Shield, Database, BarChart4, Gauge, Server } from 'lucide-react';
 import { Question } from '@/types/questions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Interfaces for community data
 interface IPost {
   id: string;
   author: {
@@ -49,19 +47,16 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { questions } = useQuestions();
   
-  // State for community data
   const [communityPosts, setCommunityPosts] = useState<IPost[]>([]);
   const [studyPartners, setStudyPartners] = useState<IStudyPartner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Redirect non-admin users
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
 
   useEffect(() => {
-    // Load community data from localStorage
     try {
       const storedPosts = localStorage.getItem('neplia_community_posts');
       const storedPartners = localStorage.getItem('neplia_study_partners');
@@ -87,19 +82,9 @@ const AdminDashboard = () => {
     navigate('/admin/create-test');
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
-  const handleGoForward = () => {
-    navigate(1);
-  };
-
   const recentQuestions = questions?.slice(0, 5) || [];
 
-  // Helper function to get a display title for any question type
   const getQuestionTitle = (question: Question): string => {
-    // Use type guards to safely access properties
     if (question.skillType === 'reading' && 'passageTitle' in question) {
       return question.passageTitle;
     } else if (question.skillType === 'writing' && 'prompt' in question) {
@@ -110,38 +95,49 @@ const AdminDashboard = () => {
       return `Listening Section ${question.sectionNumber}`;
     }
     
-    // Use type assertion for safety as a fallback
     return `Question ${(question as any).id || 'Unknown'}`;
   };
 
   return (
     <div className="container mx-auto p-4 space-y-8">
-      <div className="flex items-center mb-4">
-        <div className="flex items-center mr-4">
-          <Button variant="ghost" size="icon" onClick={handleGoBack} className="mr-1">
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={handleGoForward}>
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+      <div className="rounded-lg bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 p-6 mb-6 border border-indigo-200 dark:border-indigo-800/30">
+        <div className="flex items-center">
+          <Shield className="h-8 w-8 text-primary mr-4" />
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
         </div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <p className="text-muted-foreground mt-2">
+          Manage content, users, and system settings from this central administrative hub.
+        </p>
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="community">Community Manager</TabsTrigger>
-          <TabsTrigger value="users">User Management</TabsTrigger>
-          <TabsTrigger value="content">Content Management</TabsTrigger>
+          <TabsTrigger value="overview">
+            <Gauge className="h-4 w-4 mr-2" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="community">
+            <MessageCircle className="h-4 w-4 mr-2" />
+            Community Manager
+          </TabsTrigger>
+          <TabsTrigger value="users">
+            <Users className="h-4 w-4 mr-2" />
+            User Management
+          </TabsTrigger>
+          <TabsTrigger value="content">
+            <FileText className="h-4 w-4 mr-2" />
+            Content Management
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview">
-          {/* Quick Actions */}
           <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
+            <Card className="border-l-4 border-l-primary">
               <CardHeader className="pb-2">
-                <CardTitle>Create New Test</CardTitle>
+                <CardTitle className="flex items-center">
+                  <PlusCircle className="h-5 w-5 mr-2 text-primary" />
+                  Create New Test
+                </CardTitle>
                 <CardDescription>Add new IELTS practice questions</CardDescription>
               </CardHeader>
               <CardContent>
@@ -156,9 +152,12 @@ const AdminDashboard = () => {
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="border-l-4 border-l-violet-500">
               <CardHeader className="pb-2">
-                <CardTitle>User Management</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-violet-500" />
+                  User Management
+                </CardTitle>
                 <CardDescription>View and manage user accounts</CardDescription>
               </CardHeader>
               <CardContent>
@@ -173,9 +172,12 @@ const AdminDashboard = () => {
               </CardFooter>
             </Card>
             
-            <Card>
+            <Card className="border-l-4 border-l-emerald-500">
               <CardHeader className="pb-2">
-                <CardTitle>System Settings</CardTitle>
+                <CardTitle className="flex items-center">
+                  <Server className="h-5 w-5 mr-2 text-emerald-500" />
+                  System Settings
+                </CardTitle>
                 <CardDescription>Configure system parameters</CardDescription>
               </CardHeader>
               <CardContent>
@@ -193,7 +195,6 @@ const AdminDashboard = () => {
             </Card>
           </section>
           
-          {/* Recent Questions */}
           <section className="space-y-4 mt-8">
             <h2 className="text-2xl font-semibold">Recent Questions</h2>
             <Card>
@@ -237,7 +238,6 @@ const AdminDashboard = () => {
             </Card>
           </section>
           
-          {/* Blog Management Section */}
           <section className="space-y-4 mt-8">
             <h2 className="text-2xl font-semibold">Blog Management</h2>
             <Card>
@@ -267,7 +267,6 @@ const AdminDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {/* Community Stats */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="bg-background rounded-lg border p-4">
                       <h3 className="text-sm font-medium text-muted-foreground mb-1">Total Discussions</h3>
@@ -287,7 +286,6 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   
-                  {/* Latest Discussions */}
                   <div>
                     <h3 className="text-lg font-medium mb-4">Latest Community Discussions</h3>
                     <div className="border rounded-lg overflow-hidden">
@@ -325,7 +323,6 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   
-                  {/* Active Study Partners */}
                   <div>
                     <h3 className="text-lg font-medium mb-4">Active Study Partners</h3>
                     <div className="border rounded-lg overflow-hidden">
@@ -362,7 +359,6 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                   
-                  {/* Upcoming Events */}
                   <div>
                     <h3 className="text-lg font-medium mb-4">Upcoming Events</h3>
                     <div className="border rounded-lg overflow-hidden">
@@ -415,7 +411,6 @@ const AdminDashboard = () => {
         </TabsContent>
         
         <TabsContent value="users">
-          {/* User Management Section */}
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold">User Management</h2>
             <UsersList />
@@ -423,7 +418,6 @@ const AdminDashboard = () => {
         </TabsContent>
         
         <TabsContent value="content">
-          {/* Content Management Section */}
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold">Content Management</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
