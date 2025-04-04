@@ -33,6 +33,9 @@ import AdminCommunityTab from '@/components/admin/AdminCommunityTab';
 import AdminUsersTab from '@/components/admin/AdminUsersTab';
 import AdminContentTab from '@/components/admin/AdminContentTab';
 import DatabaseConfig from '@/components/admin/DatabaseConfig';
+import DatabaseManager from '@/components/admin/DatabaseManager';
+import UIComponentsManager from '@/components/admin/UIComponentsManager';
+import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import {
   Sidebar,
   SidebarContent,
@@ -114,8 +117,9 @@ const AdminDashboard = () => {
 
   const backendItems = [
     { id: 'database', title: 'Database Configuration', icon: Database },
+    { id: 'database-manager', title: 'Database Manager', icon: Server },
     { id: 'api-endpoints', title: 'API Endpoints', icon: Code },
-    { id: 'server-settings', title: 'Server Configuration', icon: Server },
+    { id: 'server-settings', title: 'Server Configuration', icon: ServerCog },
     { id: 'cloud-services', title: 'Cloud Services', icon: CloudCog },
   ];
 
@@ -141,6 +145,20 @@ const AdminDashboard = () => {
         return <AdminContentTab />;
       case 'database':
         return <DatabaseConfig />;
+      case 'database-manager':
+        return <DatabaseManager />;
+      case 'ui-components':
+        return <UIComponentsManager />;
+      case 'analytics':
+        return <AnalyticsDashboard />;
+      case 'themes':
+        return (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">Theme Configuration</h2>
+            <p className="text-muted-foreground">Configure application themes and visual styles.</p>
+            <UIComponentsManager />
+          </div>
+        );
       case 'settings':
         return (
           <div className="space-y-4">
@@ -148,9 +166,6 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Configure system-wide settings and preferences.</p>
           </div>
         );
-      case 'ui-components':
-      case 'analytics':
-      case 'themes':
       case 'api-endpoints':
       case 'server-settings':
       case 'cloud-services':
