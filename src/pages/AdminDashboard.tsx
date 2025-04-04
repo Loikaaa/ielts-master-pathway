@@ -37,7 +37,8 @@ const AdminDashboard = () => {
     } else if (question.skillType === 'listening' && 'transcript' in question) {
       return `Listening Section ${question.sectionNumber}`;
     }
-    return `Question ${question.id}`;
+    // Ensure we always return a string with the question ID
+    return `Question ${question.id || 'Unknown'}`;
   };
 
   return (
