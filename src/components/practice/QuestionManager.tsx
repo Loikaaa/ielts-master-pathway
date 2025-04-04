@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -10,7 +10,7 @@ import SpeakingQuestionView from './SpeakingQuestionView';
 import ListeningQuestionView from './ListeningQuestionView';
 import ResultsView from './ResultsView';
 import { useToast } from '@/components/ui/use-toast';
-import { Clock, AlertTriangle, AlertCircle, Loader2 } from 'lucide-react';
+import { Clock, AlertTriangle, AlertCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 
 interface QuestionManagerProps {
@@ -32,10 +32,12 @@ const isListeningQuestion = (question: Question): question is ListeningQuestion 
 
 const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGranted }) => {
   const { skillType, practiceId } = useParams<{ skillType: string; practiceId: string }>();
+  const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showResults, setShowResults] = useState(false);
+  const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [warningShown, setWarningShown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +45,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const { toast } = useToast();
   const { questions: contextQuestions, loading: contextLoading } = useQuestions();
 
-  // Load questions from QuestionsContext
   useEffect(() => {
     if (contextLoading) {
       return; // Wait until context is loaded
@@ -175,7 +176,14 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     setShowResults(true);
   };
 
-  // Calculate score for results
+  const handleShowCorrectAnswers = () => {
+    setShowCorrectAnswers(true);
+  };
+
+  const backToDashboard = () => {
+    navigate('/practice');
+  };
+
   const calculateScore = (): number => {
     if (!questions.length) return 0;
     
@@ -197,7 +205,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     return score;
   };
 
-  // Calculate total possible score
   const calculateTotalPossible = (): number => {
     if (!questions.length) return 0;
     
@@ -210,7 +217,6 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     return total;
   };
 
-  // Format test time for results
   const getTestTime = (): string => {
     const date = new Date();
     return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
@@ -248,8 +254,8 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
                 ? `We couldn't find any ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}. Try creating some in the admin panel.`
                 : 'No skill type specified. Please select a practice type.'}
             </p>
-            <Button onClick={() => window.location.href = '/practice'}>
-              Back to Practice
+            <Button onClick={backToDashboard}>
+              <ChevronLeft className="h-4 w-4 mr-2" /> Back to Practice
             </Button>
           </CardContent>
         </Card>
@@ -264,7 +270,11 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
         score={calculateScore()}
         totalPossible={calculateTotalPossible()}
         resultTime={getTestTime()}
-        onBackToPractice={() => setShowResults(false)} 
+        onBackToPractice={() => setShowResults(false)}
+        showCorrectAnswers={showCorrectAnswers}
+        onShowCorrectAnswers={handleShowCorrectAnswers}
+        questions={questions}
+        userAnswers={answers}
       />
     );
   }
@@ -345,13 +355,17 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
         >
-          Previous
+          <ChevronLeft className="h-4 w-4 mr-2" /> Previous
         </Button>
         
         {currentQuestionIndex < questions.length - 1 ? (
-          <Button onClick={handleNext}>Next</Button>
+          <Button onClick={handleNext}>
+            Next <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
         ) : (
-          <Button onClick={handleSubmit} variant="default">Submit</Button>
+          <Button onClick={handleSubmit} variant="default">
+            Submit <ChevronRight className="h-4 w-4 ml-2" />
+          </Button>
         )}
       </div>
     </div>

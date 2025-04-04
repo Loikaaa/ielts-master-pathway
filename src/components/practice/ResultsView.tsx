@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Clock, Award, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Clock, Award, AlertCircle, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { usePracticeResult } from '@/hooks/use-practice-result';
 import { toast } from '@/hooks/use-toast';
+import { Question, ReadingQuestion, ListeningQuestion } from '@/types/questions';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 interface ResultsViewProps {
   skillType: 'reading' | 'writing' | 'speaking' | 'listening';
@@ -13,6 +15,10 @@ interface ResultsViewProps {
   resultTime: string;
   onBackToPractice: () => void;
   title?: string;
+  showCorrectAnswers?: boolean;
+  onShowCorrectAnswers?: () => void;
+  questions?: Question[];
+  userAnswers?: Record<string, any>;
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({
@@ -21,7 +27,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   totalPossible,
   resultTime,
   onBackToPractice,
-  title
+  title,
+  showCorrectAnswers = false,
+  onShowCorrectAnswers,
+  questions = [],
+  userAnswers = {}
 }) => {
   const { submitResult } = usePracticeResult();
   const [bandScoreEstimate, setBandScoreEstimate] = useState<number>(0);
@@ -96,6 +106,75 @@ const ResultsView: React.FC<ResultsViewProps> = ({
     });
     
     setResultsSubmitted(true);
+  };
+
+  // Function to render the correct answers section
+  const renderCorrectAnswers = () => {
+    if (!(skillType === 'reading' || skillType === 'listening') || !showCorrectAnswers || !questions.length) {
+      return null;
+    }
+
+    return (
+      <div className="mt-6 border-t pt-4">
+        <h3 className="text-lg font-medium mb-4">Correct Answers</h3>
+        <Accordion type="single" collapsible className="w-full">
+          {questions.map((question, qIndex) => {
+            if ((question as ReadingQuestion).questions) {
+              const subQuestions = (question as ReadingQuestion | ListeningQuestion).questions;
+              return (
+                <AccordionItem key={qIndex} value={`question-${qIndex}`}>
+                  <AccordionTrigger className="hover:bg-muted/50 px-3 py-2 rounded-md">
+                    <div className="flex items-start">
+                      <span className="font-medium">{question.skillType === 'reading' ? 'Reading' : 'Listening'} Questions</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pt-2">
+                    <div className="space-y-4">
+                      {subQuestions.map((subQuestion, index) => {
+                        const userAnswer = userAnswers[subQuestion.id];
+                        const isCorrect = userAnswer === subQuestion.correctAnswer ||
+                          (Array.isArray(userAnswer) && Array.isArray(subQuestion.correctAnswer) &&
+                           JSON.stringify([...userAnswer].sort()) === JSON.stringify([...subQuestion.correctAnswer].sort()));
+                        
+                        return (
+                          <div key={subQuestion.id} className="border-b pb-3 last:border-0">
+                            <div className="flex items-start mb-1">
+                              <div className="mt-0.5 mr-2">
+                                {isCorrect ? (
+                                  <Check className="h-5 w-5 text-green-500" />
+                                ) : (
+                                  <X className="h-5 w-5 text-red-500" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="font-medium">{index + 1}. {subQuestion.questionText}</p>
+                                <div className="mt-1 flex flex-col space-y-1">
+                                  <p className="text-sm">
+                                    <span className="text-muted-foreground">Your answer: </span>
+                                    <span className={isCorrect ? "text-green-600" : "text-red-600"}>
+                                      {userAnswer || "Not answered"}
+                                    </span>
+                                  </p>
+                                  <p className="text-sm">
+                                    <span className="text-muted-foreground">Correct answer: </span>
+                                    <span className="text-green-600 font-medium">{subQuestion.correctAnswer}</span>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            }
+            return null;
+          })}
+        </Accordion>
+      </div>
+    );
   };
   
   return (
@@ -176,6 +255,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 </ul>
               </div>
             )}
+
+            {/* Render correct answers if showCorrectAnswers is true */}
+            {showCorrectAnswers && renderCorrectAnswers()}
           </CardContent>
           
           <CardFooter className="flex flex-col sm:flex-row gap-3">
@@ -191,6 +273,16 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 className="w-full sm:w-auto"
               >
                 Submit for Evaluation
+              </Button>
+            )}
+
+            {(skillType === 'reading' || skillType === 'listening') && !showCorrectAnswers && (
+              <Button 
+                onClick={onShowCorrectAnswers} 
+                variant="outline"
+                className="w-full sm:w-auto"
+              >
+                Show Correct Answers
               </Button>
             )}
           </CardFooter>

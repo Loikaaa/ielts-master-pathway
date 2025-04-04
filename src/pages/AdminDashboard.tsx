@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
@@ -39,7 +40,7 @@ const AdminDashboard = () => {
     }
     
     // At this point, TypeScript might not know which specific question type we have
-    // So we need to handle this case safely by using a type assertion
+    // So we need to handle this case safely by using type assertion
     return `Question ${(question as any).id || 'Unknown'}`;
   };
 

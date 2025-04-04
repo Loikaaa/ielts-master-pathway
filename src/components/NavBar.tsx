@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Book, 
   Menu, 
@@ -9,21 +9,54 @@ import {
   LogIn, 
   UserPlus, 
   Shield, 
-  User
+  User,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   // For demo purposes, this would typically come from an auth context
   const isAdmin = true; // Set to true to show admin functionality
+
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
+  const handleGoForward = () => {
+    navigate(1);
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b shadow-sm">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <Book className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl">Neplia IELTS</span>
-        </Link>
+        <div className="flex items-center">
+          <div className="flex items-center mr-4">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleGoBack} 
+              className="mr-1"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={handleGoForward}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+          
+          <Link to="/" className="flex items-center space-x-2">
+            <Book className="h-6 w-6 text-primary" />
+            <span className="font-bold text-xl">Neplia IELTS</span>
+          </Link>
+        </div>
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">

@@ -219,7 +219,7 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
       
       {/* Desktop layout (2 columns) */}
       <div className="hidden md:block border-r overflow-y-auto max-h-[600px] p-6">
-        <div className="sticky top-0 bg-background pt-1 pb-2 mb-2">
+        <div className="bg-background pt-1 pb-2 mb-2">
           <h2 className="text-xl font-bold">{question.passageTitle}</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Remember: In IELTS Reading, you have 60 minutes to complete all 40 questions.
@@ -237,7 +237,7 @@ const ReadingQuestionView: React.FC<ReadingQuestionViewProps> = ({
       </div>
       
       <div className="hidden md:block overflow-y-auto max-h-[600px] p-6">
-        <div className="mb-4 sticky top-0 bg-background pt-1 pb-2 z-10">
+        <div className="mb-4 bg-background pt-1 pb-2 z-10">
           <h3 className="text-lg font-semibold">Questions</h3>
           <p className="text-xs text-muted-foreground">
             Answer all questions based only on the information in the reading passage.
