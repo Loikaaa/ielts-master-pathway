@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from '@/contexts/UserContext';
 import { 
-  Sparkles, 
   Menu, 
   X, 
   LogIn, 
@@ -12,7 +11,8 @@ import {
   Shield, 
   User,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Square
 } from "lucide-react";
 
 const NavBar = () => {
@@ -52,10 +52,13 @@ const NavBar = () => {
           </div>
           
           <Link to="/" className="flex items-center space-x-2">
-            <div className="flex items-center justify-center h-8 w-8 rounded-md bg-gradient-to-br from-purple-500 via-blue-400 to-emerald-400 text-white">
-              <Sparkles className="h-5 w-5" />
+            <div className="relative flex-shrink-0">
+              <div className="flex items-center justify-center h-10 w-10 rounded-md bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white shadow-md">
+                <span className="font-bold text-xl">N</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-white"></div>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-purple-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">Neplia IELTS</span>
+            <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">IELTS</span>
           </Link>
         </div>
         

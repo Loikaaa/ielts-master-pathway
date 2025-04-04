@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -28,6 +27,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Edit,
   Flag,
   Globe,
   Heart,
@@ -35,6 +35,7 @@ import {
   MessageSquare,
   Mic,
   Search,
+  Send,
   Share2,
   Tag,
   ThumbsUp,
@@ -43,7 +44,7 @@ import {
   Video,
   X
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   Dialog,
   DialogContent,
@@ -106,8 +107,20 @@ interface IEvent {
   isAttending?: boolean;
 }
 
+interface IMentor {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string;
+  specialty: string;
+  bio: string;
+  availability: string;
+  rating: number;
+  reviews: number;
+  hourlyRate: string;
+}
+
 // MOCK DATA
-// Mock data for the community posts with more detailed content
 const initialDiscussionPosts: IPost[] = [
   {
     id: "post-1",
@@ -265,10 +278,75 @@ const initialEvents: IEvent[] = [
   }
 ];
 
+// New mentor data
+const initialMentors: IMentor[] = [
+  {
+    id: "mentor-1",
+    name: 'Dr. Robert Chen',
+    role: 'Former IELTS Examiner',
+    avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+    specialty: 'Writing Assessment',
+    bio: 'With 15 years of experience as an IELTS examiner, I specialize in helping students understand the assessment criteria and improve their writing skills.',
+    availability: 'Mon-Fri, 9AM-5PM GMT',
+    rating: 4.9,
+    reviews: 128,
+    hourlyRate: '$45'
+  },
+  {
+    id: "mentor-2",
+    name: 'Sophia Williams',
+    role: 'Language Coach',
+    avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
+    specialty: 'Speaking Fluency',
+    bio: 'I help students overcome speaking anxiety and develop natural fluency for the IELTS speaking test, with focus on pronunciation and intonation.',
+    availability: 'Weekends, 10AM-8PM GMT',
+    rating: 4.8,
+    reviews: 93,
+    hourlyRate: '$40'
+  },
+  {
+    id: "mentor-3",
+    name: 'David Thompson',
+    role: 'Test Prep Specialist',
+    avatar: 'https://randomuser.me/api/portraits/men/36.jpg',
+    specialty: 'Reading & Listening',
+    bio: 'Specialized in teaching effective strategies for the Reading and Listening modules, with emphasis on time management and prediction skills.',
+    availability: 'Tue-Sat, 2PM-10PM GMT',
+    rating: 4.7,
+    reviews: 76,
+    hourlyRate: '$38'
+  },
+  {
+    id: "mentor-4",
+    name: 'Maria Garcia',
+    role: 'IELTS Trainer & Linguist',
+    avatar: 'https://randomuser.me/api/portraits/women/28.jpg',
+    specialty: 'Grammar & Vocabulary',
+    bio: 'As a linguist with CELTA certification, I help students expand their lexical resource and improve grammatical accuracy for better IELTS scores.',
+    availability: 'Mon-Thu, 12PM-8PM GMT',
+    rating: 4.9,
+    reviews: 112,
+    hourlyRate: '$42'
+  },
+  {
+    id: "mentor-5",
+    name: 'Dr. James Peterson',
+    role: 'Academic Director',
+    avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+    specialty: 'Overall Test Strategy',
+    bio: 'With a PhD in Applied Linguistics, I provide comprehensive IELTS preparation with focus on academic writing and research skills.',
+    availability: 'Wed-Sun, 9AM-7PM GMT',
+    rating: 5.0,
+    reviews: 145,
+    hourlyRate: '$50'
+  }
+];
+
 // Storage keys
 const POSTS_STORAGE_KEY = 'neplia_community_posts';
 const PARTNERS_STORAGE_KEY = 'neplia_study_partners';
 const EVENTS_STORAGE_KEY = 'neplia_community_events';
+const MENTORS_STORAGE_KEY = 'neplia_community_mentors';
 
 const Community = () => {
   const { currentUser } = useUser();
@@ -284,19 +362,34 @@ const Community = () => {
   const [selectedPost, setSelectedPost] = useState<IPost | null>(null);
   const [newComment, setNewComment] = useState('');
   
+  // State for editing posts
+  const [isEditingPost, setIsEditingPost] = useState(false);
+  const [editPostTitle, setEditPostTitle] = useState('');
+  const [editPostContent, setEditPostContent] = useState('');
+  const [editPostTags, setEditPostTags] = useState('');
+  
   // State for study partners
   const [studyPartners, setStudyPartners] = useState<IStudyPartner[]>([]);
   const [partnerSearchQuery, setPartnerSearchQuery] = useState('');
   const [selectedPartner, setSelectedPartner] = useState<IStudyPartner | null>(null);
+  const [conversationMessage, setConversationMessage] = useState('');
+  const [conversations, setConversations] = useState<{[key: string]: {message: string, sender: string, time: string}[]}>({});
   
   // State for events
   const [events, setEvents] = useState<IEvent[]>([]);
   const [eventSearchQuery, setEventSearchQuery] = useState('');
   
+  // State for mentors
+  const [mentors, setMentors] = useState<IMentor[]>([]);
+  const [mentorSearchQuery, setMentorSearchQuery] = useState('');
+  const [showAllMentors, setShowAllMentors] = useState(false);
+  
   // Dialog states
   const [isNewPostDialogOpen, setIsNewPostDialogOpen] = useState(false);
   const [isPostDetailDialogOpen, setIsPostDetailDialogOpen] = useState(false);
   const [isContactPartnerDialogOpen, setIsContactPartnerDialogOpen] = useState(false);
+  const [isStartConversationDialogOpen, setIsStartConversationDialogOpen] = useState(false);
+  const [isAllMentorsDialogOpen, setIsAllMentorsDialogOpen] = useState(false);
   
   // Load data from localStorage on component mount
   useEffect(() => {
@@ -305,6 +398,7 @@ const Community = () => {
         const storedPosts = localStorage.getItem(POSTS_STORAGE_KEY);
         const storedPartners = localStorage.getItem(PARTNERS_STORAGE_KEY);
         const storedEvents = localStorage.getItem(EVENTS_STORAGE_KEY);
+        const storedMentors = localStorage.getItem(MENTORS_STORAGE_KEY);
         
         if (storedPosts) {
           setDiscussionPosts(JSON.parse(storedPosts));
@@ -326,12 +420,20 @@ const Community = () => {
           setEvents(initialEvents);
           localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(initialEvents));
         }
+        
+        if (storedMentors) {
+          setMentors(JSON.parse(storedMentors));
+        } else {
+          setMentors(initialMentors);
+          localStorage.setItem(MENTORS_STORAGE_KEY, JSON.stringify(initialMentors));
+        }
       } catch (error) {
         console.error('Error loading community data:', error);
         // Fallback to initial data
         setDiscussionPosts(initialDiscussionPosts);
         setStudyPartners(initialStudyPartners);
         setEvents(initialEvents);
+        setMentors(initialMentors);
       }
     };
     
@@ -357,6 +459,12 @@ const Community = () => {
     }
   }, [events]);
   
+  useEffect(() => {
+    if (mentors.length > 0) {
+      localStorage.setItem(MENTORS_STORAGE_KEY, JSON.stringify(mentors));
+    }
+  }, [mentors]);
+  
   // Filter posts based on search query
   const filteredPosts = discussionPosts.filter(post => 
     post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -377,6 +485,19 @@ const Community = () => {
     event.description.toLowerCase().includes(eventSearchQuery.toLowerCase()) ||
     event.type.toLowerCase().includes(eventSearchQuery.toLowerCase())
   );
+  
+  // Filter mentors based on search query
+  const filteredMentors = mentors.filter(mentor => 
+    mentor.name.toLowerCase().includes(mentorSearchQuery.toLowerCase()) || 
+    mentor.specialty.toLowerCase().includes(mentorSearchQuery.toLowerCase()) ||
+    mentor.role.toLowerCase().includes(mentorSearchQuery.toLowerCase())
+  );
+  
+  // Check if the current user is the author of a post
+  const isPostAuthor = (post: IPost) => {
+    if (!currentUser) return false;
+    return post.author.id === currentUser.id;
+  };
   
   // Handle creating a new post
   const handleCreatePost = () => {
@@ -435,6 +556,75 @@ const Community = () => {
     });
   };
   
+  // Handle editing a post
+  const handleEditPost = () => {
+    if (!selectedPost || !currentUser) return;
+    
+    if (!isPostAuthor(selectedPost)) {
+      toast({
+        title: "Permission denied",
+        description: "You can only edit your own posts",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!editPostTitle.trim() || !editPostContent.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please provide both a title and content for your post",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const tagsArray = editPostTags.split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+    
+    const updatedPost = {
+      ...selectedPost,
+      title: editPostTitle,
+      content: editPostContent,
+      tags: tagsArray.length > 0 ? tagsArray : ['General'],
+      time: 'Edited just now'
+    };
+    
+    setDiscussionPosts(prevPosts => 
+      prevPosts.map(post => post.id === selectedPost.id ? updatedPost : post)
+    );
+    
+    setSelectedPost(updatedPost);
+    setIsEditingPost(false);
+    
+    toast({
+      title: "Post updated",
+      description: "Your discussion has been updated successfully"
+    });
+  };
+  
+  // Start editing a post
+  const startEditingPost = (post: IPost) => {
+    if (!isPostAuthor(post)) {
+      toast({
+        title: "Permission denied",
+        description: "You can only edit your own posts",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setEditPostTitle(post.title);
+    setEditPostContent(post.content);
+    setEditPostTags(post.tags.join(', '));
+    setIsEditingPost(true);
+  };
+  
+  // Cancel editing a post
+  const cancelEditingPost = () => {
+    setIsEditingPost(false);
+  };
+  
   // Handle post like
   const handleLikePost = (postId: string) => {
     if (!currentUser) {
@@ -457,12 +647,25 @@ const Community = () => {
       }
       return post;
     }));
+    
+    // Also update selected post if it's the one being liked
+    if (selectedPost && selectedPost.id === postId) {
+      setSelectedPost(prev => {
+        if (!prev) return null;
+        if (prev.isLiked) {
+          return { ...prev, likes: prev.likes - 1, isLiked: false };
+        } else {
+          return { ...prev, likes: prev.likes + 1, isLiked: true };
+        }
+      });
+    }
   };
   
   // Handle opening a post detail
   const handleOpenPostDetail = (post: IPost) => {
     setSelectedPost(post);
     setIsPostDetailDialogOpen(true);
+    setIsEditingPost(false);
   };
   
   // Handle adding a comment
@@ -588,6 +791,69 @@ const Community = () => {
     console.log(`Practice session requested with ${partner.name}`);
   };
   
+  // Handle start conversation
+  const handleStartConversation = (partner: IStudyPartner) => {
+    if (!currentUser) {
+      toast({
+        title: "Authentication required",
+        description: "Please sign in to start a conversation",
+        variant: "destructive"
+      });
+      navigate('/signin');
+      return;
+    }
+    
+    setSelectedPartner(partner);
+    setIsStartConversationDialogOpen(true);
+  };
+  
+  // Handle sending message in conversation
+  const handleSendConversationMessage = () => {
+    if (!selectedPartner || !conversationMessage.trim()) return;
+    
+    const partnerId = selectedPartner.id;
+    const newMessage = {
+      message: conversationMessage,
+      sender: 'user',
+      time: new Date().toLocaleTimeString()
+    };
+    
+    setConversations(prev => {
+      const existingConversation = prev[partnerId] || [];
+      return {
+        ...prev,
+        [partnerId]: [...existingConversation, newMessage]
+      };
+    });
+    
+    setConversationMessage('');
+    
+    // Simulate partner response after a short delay
+    setTimeout(() => {
+      const responseMessages = [
+        "Thanks for reaching out! I'd be happy to practice together.",
+        "That's a great question about IELTS. Let me think about it.",
+        "Yes, I'm available for a study session this weekend.",
+        "I'm preparing for the speaking test too. We should practice together!",
+        "That's an interesting perspective on the writing task."
+      ];
+      
+      const partnerResponse = {
+        message: responseMessages[Math.floor(Math.random() * responseMessages.length)],
+        sender: 'partner',
+        time: new Date().toLocaleTimeString()
+      };
+      
+      setConversations(prev => {
+        const existingConversation = prev[partnerId] || [];
+        return {
+          ...prev,
+          [partnerId]: [...existingConversation, partnerResponse]
+        };
+      });
+    }, 1500);
+  };
+  
   // Handle sending message to partner
   const handleSendMessage = () => {
     if (!selectedPartner) return;
@@ -607,785 +873,16 @@ const Community = () => {
       description: `${event.title} has been added to your calendar`
     });
   };
+  
+  // Handle view all mentors
+  const handleViewAllMentors = () => {
+    setMentorSearchQuery('');
+    setIsAllMentorsDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold">Community</h1>
-              <p className="text-muted-foreground">Connect with fellow test-takers and experts worldwide</p>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <Button onClick={() => {
-                if (!currentUser) {
-                  toast({
-                    title: "Authentication required",
-                    description: "Please sign in to create a discussion",
-                    variant: "destructive"
-                  });
-                  navigate('/signin');
-                  return;
-                }
-                setIsNewPostDialogOpen(true);
-              }}>
-                <MessageSquare className="h-4 w-4 mr-2" />
-                New Discussion
-              </Button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <Tabs defaultValue="discussions">
-                <TabsList className="mb-6">
-                  <TabsTrigger value="discussions">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Discussions
-                  </TabsTrigger>
-                  <TabsTrigger value="studyPartners">
-                    <Users className="h-4 w-4 mr-2" />
-                    Study Partners
-                  </TabsTrigger>
-                  <TabsTrigger value="events">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    Events
-                  </TabsTrigger>
-                </TabsList>
-                
-                {/* Discussions Tab */}
-                <TabsContent value="discussions">
-                  <div className="mb-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Search discussions..." 
-                        className="pl-9" 
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <Button variant="outline" size="sm">Latest</Button>
-                      <Button variant="outline" size="sm">Popular</Button>
-                      <Button variant="outline" size="sm">
-                        <Tag className="h-4 w-4 mr-1" />
-                        Reading
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Tag className="h-4 w-4 mr-1" />
-                        Writing
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Tag className="h-4 w-4 mr-1" />
-                        Speaking
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Tag className="h-4 w-4 mr-1" />
-                        Listening
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {filteredPosts.length > 0 ? (
-                    <div className="space-y-6">
-                      {filteredPosts.map((post) => (
-                        <Card key={post.id} className="hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex justify-between">
-                              <div className="flex items-center gap-3">
-                                <Avatar>
-                                  <AvatarImage src={post.author.avatar} alt={post.author.name} />
-                                  <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <div className="font-medium">{post.author.name}</div>
-                                  <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                    <span className="flex items-center">
-                                      <Flag className="h-3 w-3 mr-1" />
-                                      {post.author.country}
-                                    </span>
-                                    <span>•</span>
-                                    <span>{post.author.level}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="text-xs text-muted-foreground">{post.time}</div>
-                            </div>
-                            <CardTitle 
-                              className="text-lg mt-3 cursor-pointer hover:text-primary transition-colors"
-                              onClick={() => handleOpenPostDetail(post)}
-                            >
-                              {post.title}
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <p 
-                              className="text-muted-foreground cursor-pointer"
-                              onClick={() => handleOpenPostDetail(post)}
-                            >
-                              {post.content.length > 200 
-                                ? `${post.content.substring(0, 200)}...` 
-                                : post.content}
-                            </p>
-                            <div className="flex flex-wrap gap-2 mt-4">
-                              {post.tags.map((tag, index) => (
-                                <div key={index} className="text-xs bg-accent text-accent-foreground rounded-full px-2 py-1">
-                                  {tag}
-                                </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                          <CardFooter className="border-t pt-3">
-                            <div className="flex items-center gap-4">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className={`h-8 ${post.isLiked ? 'text-primary' : 'text-muted-foreground'}`}
-                                onClick={() => handleLikePost(post.id)}
-                              >
-                                <ThumbsUp className="h-4 w-4 mr-1" />
-                                {post.likes}
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="h-8 text-muted-foreground"
-                                onClick={() => handleOpenPostDetail(post)}
-                              >
-                                <MessageCircle className="h-4 w-4 mr-1" />
-                                {post.comments.length}
-                              </Button>
-                              <Button variant="ghost" size="sm" className="h-8 text-muted-foreground">
-                                <Share2 className="h-4 w-4 mr-1" />
-                                Share
-                              </Button>
-                            </div>
-                          </CardFooter>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12 text-center">
-                      <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="font-semibold text-lg mb-2">No discussions found</h3>
-                      <p className="text-muted-foreground mb-6">
-                        {searchQuery 
-                          ? "No discussions match your search criteria. Try a different search term."
-                          : "Be the first to start a discussion in this community!"}
-                      </p>
-                      <Button onClick={() => {
-                        if (!currentUser) {
-                          toast({
-                            title: "Authentication required",
-                            description: "Please sign in to create a discussion",
-                            variant: "destructive"
-                          });
-                          navigate('/signin');
-                          return;
-                        }
-                        setIsNewPostDialogOpen(true);
-                      }}>
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Start a Discussion
-                      </Button>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                {/* Study Partners Tab */}
-                <TabsContent value="studyPartners">
-                  <div className="mb-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Find study partners..." 
-                        className="pl-9"
-                        value={partnerSearchQuery}
-                        onChange={e => setPartnerSearchQuery(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setPartnerSearchQuery(partnerSearchQuery.includes('online') ? '' : 'online')}
-                        className={partnerSearchQuery.includes('online') ? 'bg-primary/10' : ''}
-                      >
-                        Online Now
-                      </Button>
-                      <Button variant="outline" size="sm">Same Level</Button>
-                      <Button variant="outline" size="sm">Same Target</Button>
-                      <Button variant="outline" size="sm">
-                        <Globe className="h-4 w-4 mr-1" />
-                        Filter by Region
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {filteredPartners.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {filteredPartners.map((partner) => (
-                        <Card key={partner.id} className="hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="relative">
-                                  <Avatar>
-                                    <AvatarImage src={partner.avatar} alt={partner.name} />
-                                    <AvatarFallback>{partner.name.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  {partner.online && (
-                                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></div>
-                                  )}
-                                </div>
-                                <div>
-                                  <div className="font-medium">{partner.name}</div>
-                                  <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                    <span className="flex items-center">
-                                      <Flag className="h-3 w-3 mr-1" />
-                                      {partner.country}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                              {partner.online ? (
-                                <div className="text-xs bg-green-500/10 text-green-500 px-2 py-0.5 rounded-full">Online</div>
-                              ) : (
-                                <div className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">Offline</div>
-                              )}
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="grid grid-cols-2 gap-2 mb-3">
-                              <div>
-                                <div className="text-xs text-muted-foreground">Current Level</div>
-                                <div>{partner.level}</div>
-                              </div>
-                              <div>
-                                <div className="text-xs text-muted-foreground">Target Score</div>
-                                <div>{partner.targetScore}</div>
-                              </div>
-                            </div>
-                            <div>
-                              <div className="text-xs text-muted-foreground mb-1">Interests</div>
-                              <div className="flex flex-wrap gap-2">
-                                {partner.interests.map((interest, index) => (
-                                  <div key={index} className="text-xs bg-accent text-accent-foreground rounded-full px-2 py-1">
-                                    {interest}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="border-t pt-3">
-                            <div className="flex gap-2 w-full">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="flex-1"
-                                onClick={() => handleContactPartner(partner)}
-                              >
-                                <MessageSquare className="h-4 w-4 mr-1" />
-                                Message
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                className="flex-1"
-                                disabled={!partner.online}
-                                onClick={() => handlePracticeWithPartner(partner)}
-                              >
-                                <Mic className="h-4 w-4 mr-1" />
-                                Practice
-                              </Button>
-                            </div>
-                          </CardFooter>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12 text-center">
-                      <Users className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="font-semibold text-lg mb-2">No study partners found</h3>
-                      <p className="text-muted-foreground mb-6">
-                        {partnerSearchQuery 
-                          ? "No study partners match your search criteria. Try a different search term."
-                          : "There are no study partners available at the moment."}
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-                
-                {/* Events Tab */}
-                <TabsContent value="events">
-                  <div className="mb-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Search events..." 
-                        className="pl-9"
-                        value={eventSearchQuery}
-                        onChange={e => setEventSearchQuery(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <Button variant="outline" size="sm">This Week</Button>
-                      <Button variant="outline" size="sm">This Month</Button>
-                      <Button variant="outline" size="sm">
-                        <BookOpen className="h-4 w-4 mr-1" />
-                        Workshops
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <User className="h-4 w-4 mr-1" />
-                        Q&A Sessions
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Users className="h-4 w-4 mr-1" />
-                        Practice Groups
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  {filteredEvents.length > 0 ? (
-                    <div className="space-y-6">
-                      {filteredEvents.map((event) => (
-                        <Card key={event.id} className="hover:shadow-md transition-shadow">
-                          <CardHeader className="pb-3">
-                            <div className="flex justify-between">
-                              <div>
-                                <div className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full inline-block mb-2">
-                                  {event.type}
-                                </div>
-                                <CardTitle className="text-lg">{event.title}</CardTitle>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium">{event.date}</div>
-                                <div className="text-xs text-muted-foreground">{event.time}</div>
-                              </div>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground mb-4">{event.description}</p>
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm">Host: {event.host}</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Users className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm">{event.attendees} attending</span>
-                              </div>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="border-t pt-3">
-                            <div className="flex gap-2 w-full">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="flex-1"
-                                onClick={() => handleAddToCalendar(event)}
-                              >
-                                <Calendar className="h-4 w-4 mr-1" />
-                                Add to Calendar
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                className={`flex-1 ${event.isAttending ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                                onClick={() => handleJoinEvent(event.id)}
-                              >
-                                {event.isAttending ? 'Attending' : 'Join Event'}
-                              </Button>
-                            </div>
-                          </CardFooter>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center p-12 text-center">
-                      <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                      <h3 className="font-semibold text-lg mb-2">No events found</h3>
-                      <p className="text-muted-foreground mb-6">
-                        {eventSearchQuery 
-                          ? "No events match your search criteria. Try a different search term."
-                          : "There are no upcoming events at the moment."}
-                      </p>
-                    </div>
-                  )}
-                </TabsContent>
-              </Tabs>
-            </div>
-            
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Community Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Community Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <Users className="h-5 w-5 text-muted-foreground" />
-                        <span>Active Members</span>
-                      </div>
-                      <div className="font-medium">14,532</div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-5 w-5 text-muted-foreground" />
-                        <span>Countries</span>
-                      </div>
-                      <div className="font-medium">120+</div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-5 w-5 text-muted-foreground" />
-                        <span>Discussions</span>
-                      </div>
-                      <div className="font-medium">{discussionPosts.length + 8745}</div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-muted-foreground" />
-                        <span>Events This Month</span>
-                      </div>
-                      <div className="font-medium">{events.length + 39}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Trending Tags */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Trending Topics</CardTitle>
-                </CardHeader>
-                <CardContent className="pb-4">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'Writing Task 2', 'Speaking Part 3', 'Reading Strategies',
-                      'Vocabulary', 'Grammar', 'Time Management',
-                      'Listening Section 4', 'Academic vs General', 'Band 7+',
-                      'Test Day Tips'
-                    ].map((tag, index) => (
-                      <div key={index} className="text-sm bg-accent text-accent-foreground rounded-full px-3 py-1 cursor-pointer hover:bg-accent/70 transition-colors">
-                        #{tag.replace(/\s+/g, '')}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Expert Mentors */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Expert Mentors</CardTitle>
-                  <CardDescription>Connect with certified IELTS instructors</CardDescription>
-                </CardHeader>
-                <CardContent className="pb-4">
-                  <div className="space-y-4">
-                    {[
-                      {
-                        name: 'Dr. Robert Chen',
-                        role: 'Former IELTS Examiner',
-                        avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
-                        specialty: 'Writing Assessment'
-                      },
-                      {
-                        name: 'Sophia Williams',
-                        role: 'Language Coach',
-                        avatar: 'https://randomuser.me/api/portraits/women/55.jpg',
-                        specialty: 'Speaking Fluency'
-                      },
-                      {
-                        name: 'David Thompson',
-                        role: 'Test Prep Specialist',
-                        avatar: 'https://randomuser.me/api/portraits/men/36.jpg',
-                        specialty: 'Reading & Listening'
-                      }
-                    ].map((mentor, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={mentor.avatar} alt={mentor.name} />
-                          <AvatarFallback>{mentor.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{mentor.name}</div>
-                          <div className="text-xs text-muted-foreground">{mentor.role} • {mentor.specialty}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Button variant="outline" className="w-full mt-4">
-                    View All Mentors
-                  </Button>
-                </CardContent>
-              </Card>
-              
-              {/* Community Guidelines */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Community Guidelines</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">1</div>
-                      <span>Be respectful and supportive of all community members</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">2</div>
-                      <span>No spamming, advertising, or off-topic discussions</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">3</div>
-                      <span>Do not share exam questions or materials from actual IELTS tests</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-primary/10 text-primary rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0 mt-0.5">4</div>
-                      <span>Give credit when using others' materials or resources</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </main>
-      
-      {/* Create New Post Dialog */}
-      <Dialog open={isNewPostDialogOpen} onOpenChange={setIsNewPostDialogOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Create a New Discussion</DialogTitle>
-            <DialogDescription>
-              Share your IELTS questions, tips, or experiences with the community
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="post-title" className="text-sm font-medium">Title</label>
-              <Input
-                id="post-title"
-                placeholder="What's your question or topic?"
-                value={newPostTitle}
-                onChange={e => setNewPostTitle(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="post-content" className="text-sm font-medium">Content</label>
-              <Textarea
-                id="post-content"
-                placeholder="Share your thoughts, questions, or experiences..."
-                className="min-h-[150px]"
-                value={newPostContent}
-                onChange={e => setNewPostContent(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="post-tags" className="text-sm font-medium">Tags</label>
-              <Input
-                id="post-tags"
-                placeholder="e.g., Speaking, Writing, Band 7, Tips (comma separated)"
-                value={newPostTags}
-                onChange={e => setNewPostTags(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Separate tags with commas to help others find your post
-              </p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsNewPostDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleCreatePost}>Post Discussion</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Post Detail Dialog */}
-      <Dialog open={isPostDetailDialogOpen} onOpenChange={setIsPostDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-          {selectedPost && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <Avatar>
-                    <AvatarImage src={selectedPost.author.avatar} alt={selectedPost.author.name} />
-                    <AvatarFallback>{selectedPost.author.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{selectedPost.author.name}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-2">
-                      <span className="flex items-center">
-                        <Flag className="h-3 w-3 mr-1" />
-                        {selectedPost.author.country}
-                      </span>
-                      <span>•</span>
-                      <span>{selectedPost.author.level}</span>
-                      <span>•</span>
-                      <span>{selectedPost.time}</span>
-                    </div>
-                  </div>
-                </div>
-                <DialogTitle className="text-xl mt-2">{selectedPost.title}</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <p className="text-muted-foreground mb-4 whitespace-pre-line">{selectedPost.content}</p>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {selectedPost.tags.map((tag, index) => (
-                    <div key={index} className="text-xs bg-accent text-accent-foreground rounded-full px-2 py-1">
-                      {tag}
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="flex items-center gap-4 mb-6 border-t border-b py-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`h-8 ${selectedPost.isLiked ? 'text-primary' : 'text-muted-foreground'}`}
-                    onClick={() => handleLikePost(selectedPost.id)}
-                  >
-                    <ThumbsUp className="h-4 w-4 mr-1" />
-                    {selectedPost.likes}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-muted-foreground">
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    {selectedPost.comments.length}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="h-8 text-muted-foreground">
-                    <Share2 className="h-4 w-4 mr-1" />
-                    Share
-                  </Button>
-                </div>
-                
-                {currentUser && (
-                  <div className="mb-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar>
-                        <AvatarImage src="https://randomuser.me/api/portraits/lego/1.jpg" alt={`${currentUser.firstName} ${currentUser.lastName}`} />
-                        <AvatarFallback>{currentUser.firstName.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <Textarea
-                        placeholder="Add a comment..."
-                        className="min-h-[80px]"
-                        value={newComment}
-                        onChange={e => setNewComment(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button onClick={handleAddComment}>Post Comment</Button>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="space-y-4">
-                  <h4 className="font-medium text-lg">Comments ({selectedPost.comments.length})</h4>
-                  {selectedPost.comments.length > 0 ? (
-                    selectedPost.comments.map((comment) => (
-                      <div key={comment.id} className="border rounded-lg p-4">
-                        <div className="flex items-center gap-3 mb-2">
-                          <Avatar>
-                            <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
-                            <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium">{comment.author.name}</div>
-                            <div className="text-xs text-muted-foreground">{comment.time}</div>
-                          </div>
-                        </div>
-                        <p className="text-muted-foreground whitespace-pre-line">{comment.content}</p>
-                        <div className="flex items-center gap-3 mt-3">
-                          <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">
-                            <ThumbsUp className="h-3 w-3 mr-1" />
-                            {comment.likes}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="h-7 text-xs text-muted-foreground">
-                            Reply
-                          </Button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-muted-foreground text-center py-6">
-                      No comments yet. Be the first to share your thoughts!
-                    </p>
-                  )}
-                </div>
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      {/* Contact Study Partner Dialog */}
-      <Dialog open={isContactPartnerDialogOpen} onOpenChange={setIsContactPartnerDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          {selectedPartner && (
-            <>
-              <DialogHeader>
-                <div className="flex items-center gap-3 mb-2">
-                  <Avatar>
-                    <AvatarImage src={selectedPartner.avatar} alt={selectedPartner.name} />
-                    <AvatarFallback>{selectedPartner.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <DialogTitle>Message {selectedPartner.name}</DialogTitle>
-                    <DialogDescription>
-                      {selectedPartner.online ? 'Currently online' : 'Currently offline'}
-                    </DialogDescription>
-                  </div>
-                </div>
-              </DialogHeader>
-              <div className="py-4">
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4 mb-2">
-                    <div>
-                      <div className="text-xs text-muted-foreground">Country</div>
-                      <div className="font-medium">{selectedPartner.country}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-muted-foreground">IELTS Level</div>
-                      <div className="font-medium">{selectedPartner.level}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="text-sm font-medium">
-                      Your Message
-                    </label>
-                    <Textarea
-                      id="message"
-                      placeholder={`Hi ${selectedPartner.name}, I'd like to practice IELTS with you...`}
-                      className="min-h-[120px] mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsContactPartnerDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={handleSendMessage}>Send Message</Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default Community;
+          <div className="flex flex
