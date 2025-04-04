@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface User {
@@ -10,7 +9,9 @@ export interface User {
   targetScore: string;
   examDate: string;
   created: Date;
-  isAdmin?: boolean; // Added isAdmin property to User interface
+  isAdmin?: boolean; 
+  ipAddress?: string;
+  lastLogin?: Date;
 }
 
 interface UserContextType {
@@ -20,7 +21,7 @@ interface UserContextType {
   signup: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
-  setUserAsAdmin: (userId: string) => void; // Add method to set a user as admin
+  setUserAsAdmin: (userId: string) => void;
 }
 
 const UserContext = createContext<UserContextType>({
@@ -39,7 +40,6 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
-// List of admin emails for initial setup
 const ADMIN_EMAILS = ['admin@neplia.com', 'hhjkad@gmail.com'];
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
@@ -47,7 +47,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Load users and current user from localStorage on component mount
   useEffect(() => {
     try {
       const storedUsers = localStorage.getItem('neplia_users');
@@ -60,7 +59,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         const parsedUser = JSON.parse(storedCurrentUser);
         setCurrentUser(parsedUser);
         
-        // Check if user is admin either by isAdmin flag or by email inclusion in ADMIN_EMAILS
         const isUserAdmin = parsedUser?.isAdmin === true || ADMIN_EMAILS.includes(parsedUser?.email);
         console.log('User admin status:', isUserAdmin, 'Email:', parsedUser?.email);
         setIsAdmin(isUserAdmin);
@@ -70,14 +68,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Save users to localStorage whenever they change
   useEffect(() => {
     if (users.length > 0) {
       localStorage.setItem('neplia_users', JSON.stringify(users));
     }
   }, [users]);
 
-  // Save current user to localStorage whenever it changes
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('neplia_current_user', JSON.stringify(currentUser));
@@ -87,7 +83,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   }, [currentUser]);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    // Simple login implementation using localStorage
     try {
       const storedUsers = localStorage.getItem('neplia_users');
       if (!storedUsers) return false;
@@ -96,12 +91,27 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const user = users.find(u => u.email === email && u.password === password);
       
       if (user) {
-        const { password, ...userWithoutPassword } = user;
+        const ipAddress = await fetchUserIP();
+        
+        const updatedUser = {
+          ...user,
+          ipAddress,
+          lastLogin: new Date()
+        };
+        
+        const updatedUsers = users.map(u => 
+          u.id === updatedUser.id 
+            ? { ...u, ipAddress, lastLogin: new Date() } 
+            : u
+        );
+        setUsers(updatedUsers);
+        localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
+        
+        const { password, ...userWithoutPassword } = updatedUser;
         setCurrentUser(userWithoutPassword);
         
-        // Check if the user is an admin based on isAdmin flag or email
         const isUserAdmin = user.isAdmin === true || ADMIN_EMAILS.includes(email);
-        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email);
+        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email, 'IP:', ipAddress);
         setIsAdmin(isUserAdmin);
         
         return true;
@@ -115,33 +125,32 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
 
   const signup = async (userData: Omit<User, 'id' | 'created'> & { password: string }): Promise<boolean> => {
     try {
-      // Check if email already exists
       const existingUser = users.find(u => u.email === userData.email);
       if (existingUser) {
         console.error('User with this email already exists');
         return false;
       }
 
-      // Check if this is a forced admin creation or email is in admin list
+      const ipAddress = await fetchUserIP();
+
       const isUserAdmin = userData.isAdmin === true || ADMIN_EMAILS.includes(userData.email);
 
-      // Create new user with id and creation date
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         created: new Date(),
+        lastLogin: new Date(),
+        ipAddress,
         isAdmin: isUserAdmin
       };
 
-      // Add to users list
       const updatedUsers = [...users, newUser];
       setUsers(updatedUsers);
       
-      // Log in the new user (without password in the current user state)
       const { password, ...userWithoutPassword } = newUser;
       setCurrentUser(userWithoutPassword);
       
-      console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email);
+      console.log('Signup successful, admin status:', isUserAdmin, 'Email:', userData.email, 'IP:', ipAddress);
       setIsAdmin(isUserAdmin);
       
       return true;
@@ -151,13 +160,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const fetchUserIP = async (): Promise<string> => {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error('Error fetching IP address:', error);
+      return 'Unknown';
+    }
+  };
+
   const logout = () => {
     setCurrentUser(null);
     setIsAdmin(false);
     localStorage.removeItem('neplia_current_user');
   };
 
-  // Function to set a user as admin
   const setUserAsAdmin = (userId: string) => {
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
@@ -168,7 +187,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     
     setUsers(updatedUsers);
     
-    // If the current user is being set as admin, update their status
     if (currentUser && currentUser.id === userId) {
       setCurrentUser({ ...currentUser, isAdmin: true });
       setIsAdmin(true);

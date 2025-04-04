@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -12,7 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, ShieldCheck, Shield, Mail, Calendar, Target } from 'lucide-react';
+import { Edit, Trash2, ShieldCheck, Shield, Mail, Calendar, Target, Wifi, Clock } from 'lucide-react';
 import { useUser, User } from '@/contexts/UserContext';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
@@ -150,6 +149,8 @@ const UsersList = () => {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>IP Address</TableHead>
+              <TableHead>Last Login</TableHead>
               <TableHead>Test Type</TableHead>
               <TableHead>Target Score</TableHead>
               <TableHead>Exam Date</TableHead>
@@ -160,7 +161,7 @@ const UsersList = () => {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center">No users registered yet</TableCell>
+                <TableCell colSpan={10} className="text-center">No users registered yet</TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
@@ -178,6 +179,20 @@ const UsersList = () => {
                         User
                       </Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <Wifi className="h-3 w-3 mr-1 text-primary" />
+                      {user.ipAddress || 'Unknown'}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {user.lastLogin ? (
+                      <div className="flex items-center text-xs">
+                        <Clock className="h-3 w-3 mr-1 text-muted-foreground" />
+                        {format(new Date(user.lastLogin), 'PPp')}
+                      </div>
+                    ) : 'Never'}
                   </TableCell>
                   <TableCell>
                     <Badge variant="outline" className={getTestTypeBadgeStyle(user.testType)}>
@@ -222,9 +237,10 @@ const UsersList = () => {
             </DialogHeader>
             
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid grid-cols-2 w-full">
+              <TabsList className="grid grid-cols-3 w-full">
                 <TabsTrigger value="profile">Profile</TabsTrigger>
                 <TabsTrigger value="access">Access & Permissions</TabsTrigger>
+                <TabsTrigger value="security">Security Info</TabsTrigger>
               </TabsList>
               
               <TabsContent value="profile" className="space-y-4">
@@ -377,6 +393,43 @@ const UsersList = () => {
                   <p className="text-xs text-muted-foreground mt-2">
                     Note: Individual permissions can only be set for non-admin users
                   </p>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="security" className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">IP Address</Label>
+                  <div className="flex items-center p-3 rounded-md bg-muted/50">
+                    <Wifi className="h-4 w-4 mr-2 text-primary" />
+                    <span className="font-mono">{selectedUser?.ipAddress || 'Unknown'}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Last detected IP address for this user
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Last Login</Label>
+                  <div className="flex items-center p-3 rounded-md bg-muted/50">
+                    <Clock className="h-4 w-4 mr-2 text-primary" />
+                    <span>
+                      {selectedUser?.lastLogin 
+                        ? format(new Date(selectedUser.lastLogin), 'PPp') 
+                        : 'Never logged in'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Account Created</Label>
+                  <div className="flex items-center p-3 rounded-md bg-muted/50">
+                    <Calendar className="h-4 w-4 mr-2 text-primary" />
+                    <span>
+                      {selectedUser?.created 
+                        ? format(new Date(selectedUser.created), 'PPp') 
+                        : 'Unknown'}
+                    </span>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
