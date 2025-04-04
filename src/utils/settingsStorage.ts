@@ -568,3 +568,132 @@ export const clearAllSettings = () => {
     };
   }
 };
+
+// Blog post management functions
+// =============================
+
+// Get all blog posts
+export const getBlogPosts = () => {
+  try {
+    const settings = getSettings() || {};
+    return settings.blogPosts || [];
+  } catch (error) {
+    console.error('Error retrieving blog posts:', error);
+    return [];
+  }
+};
+
+// Get a single blog post by ID
+export const getBlogPostById = (id: string) => {
+  try {
+    const posts = getBlogPosts();
+    return posts.find(post => post.id === id) || null;
+  } catch (error) {
+    console.error(`Error retrieving blog post with ID ${id}:`, error);
+    return null;
+  }
+};
+
+// Save a blog post (create or update)
+export const saveBlogPost = (blogPost: any) => {
+  try {
+    const settings = getSettings() || {};
+    const posts = settings.blogPosts || [];
+    
+    // Check if post already exists (update) or is new (create)
+    const existingPostIndex = posts.findIndex(post => post.id === blogPost.id);
+    
+    if (existingPostIndex >= 0) {
+      // Update existing post
+      posts[existingPostIndex] = blogPost;
+    } else {
+      // Add new post
+      posts.push(blogPost);
+    }
+    
+    settings.blogPosts = posts;
+    return saveSettings(settings);
+  } catch (error) {
+    console.error('Error saving blog post:', error);
+    return false;
+  }
+};
+
+// Delete a blog post by ID
+export const deleteBlogPost = (id: string) => {
+  try {
+    const settings = getSettings() || {};
+    const posts = settings.blogPosts || [];
+    
+    // Filter out the post with the matching ID
+    settings.blogPosts = posts.filter(post => post.id !== id);
+    
+    return saveSettings(settings);
+  } catch (error) {
+    console.error(`Error deleting blog post with ID ${id}:`, error);
+    return false;
+  }
+};
+
+// Get featured blog posts
+export const getFeaturedBlogPosts = () => {
+  try {
+    const posts = getBlogPosts();
+    return posts.filter(post => post.featured && post.status === 'published');
+  } catch (error) {
+    console.error('Error retrieving featured blog posts:', error);
+    return [];
+  }
+};
+
+// Get blog posts by category
+export const getBlogPostsByCategory = (category: string) => {
+  try {
+    const posts = getBlogPosts();
+    return posts.filter(post => 
+      post.category.toLowerCase() === category.toLowerCase() && 
+      post.status === 'published'
+    );
+  } catch (error) {
+    console.error(`Error retrieving blog posts for category ${category}:`, error);
+    return [];
+  }
+};
+
+// Get blog posts by tag
+export const getBlogPostsByTag = (tag: string) => {
+  try {
+    const posts = getBlogPosts();
+    return posts.filter(post => 
+      post.tags && 
+      post.tags.some((t: string) => t.toLowerCase() === tag.toLowerCase()) && 
+      post.status === 'published'
+    );
+  } catch (error) {
+    console.error(`Error retrieving blog posts for tag ${tag}:`, error);
+    return [];
+  }
+};
+
+// Search blog posts
+export const searchBlogPosts = (query: string) => {
+  try {
+    if (!query) return getBlogPosts().filter(post => post.status === 'published');
+    
+    const lowercaseQuery = query.toLowerCase();
+    const posts = getBlogPosts();
+    
+    return posts.filter(post => 
+      (post.title.toLowerCase().includes(lowercaseQuery) ||
+       post.content.toLowerCase().includes(lowercaseQuery) ||
+       post.excerpt.toLowerCase().includes(lowercaseQuery) ||
+       post.author.toLowerCase().includes(lowercaseQuery) ||
+       (post.tags && post.tags.some((tag: string) => tag.toLowerCase().includes(lowercaseQuery)))) &&
+      post.status === 'published'
+    );
+  } catch (error) {
+    console.error(`Error searching blog posts for "${query}":`, error);
+    return [];
+  }
+};
+
