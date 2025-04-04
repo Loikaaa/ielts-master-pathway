@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { useUser } from '@/contexts/UserContext';
@@ -28,6 +27,7 @@ const AdminDashboard = () => {
 
   // Helper function to get a display title for any question type
   const getQuestionTitle = (question: Question): string => {
+    // Use type guards to safely access properties
     if (question.skillType === 'reading' && 'passageTitle' in question) {
       return question.passageTitle;
     } else if (question.skillType === 'writing' && 'prompt' in question) {
@@ -37,8 +37,10 @@ const AdminDashboard = () => {
     } else if (question.skillType === 'listening' && 'transcript' in question) {
       return `Listening Section ${question.sectionNumber}`;
     }
-    // Ensure we always return a string with the question ID
-    return `Question ${question.id || 'Unknown'}`;
+    
+    // At this point, TypeScript might not know which specific question type we have
+    // So we need to handle this case safely - use optional chaining to avoid errors
+    return `Question ${question?.id ?? 'Unknown'}`;
   };
 
   return (
