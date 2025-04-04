@@ -7,7 +7,7 @@ import UsersList from '@/components/admin/UsersList';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { PlusCircle, FileText, Users, Settings, ChevronLeft, ChevronRight, MessageCircle, Calendar, UserCheck } from 'lucide-react';
+import { PlusCircle, FileText, Users, Settings, ChevronLeft, ChevronRight, MessageCircle, Calendar, UserCheck, ThumbsUp } from 'lucide-react';
 import { Question } from '@/types/questions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
