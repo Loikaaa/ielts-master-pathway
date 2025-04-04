@@ -15,7 +15,17 @@ import {
   Database,
   ServerCog,
   LayoutDashboard,
-  Bell
+  Bell,
+  Code,
+  Palette,
+  LineChart,
+  Server,
+  CloudCog,
+  Globe,
+  Lock,
+  CreditCard,
+  Mail,
+  UploadCloud
 } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import AdminOverviewTab from '@/components/admin/AdminOverviewTab';
@@ -88,14 +98,34 @@ const AdminDashboard = () => {
     );
   }
 
-  // Menu items for the sidebar
-  const sidebarItems = [
-    { id: 'overview', title: 'Overview', icon: Gauge },
-    { id: 'community', title: 'Community', icon: MessageCircle },
+  // Enhanced menu items for the sidebar
+  const mainNavigationItems = [
+    { id: 'overview', title: 'Dashboard Overview', icon: Gauge },
+    { id: 'community', title: 'Community Management', icon: MessageCircle },
     { id: 'users', title: 'User Management', icon: Users },
     { id: 'content', title: 'Content Management', icon: FileText },
-    { id: 'database', title: 'Database Config', icon: Database },
-    { id: 'settings', title: 'Settings', icon: Settings },
+  ];
+
+  const frontendItems = [
+    { id: 'ui-components', title: 'UI Components', icon: Palette },
+    { id: 'analytics', title: 'Analytics Dashboard', icon: LineChart },
+    { id: 'themes', title: 'Theme Configuration', icon: Palette },
+  ];
+
+  const backendItems = [
+    { id: 'database', title: 'Database Configuration', icon: Database },
+    { id: 'api-endpoints', title: 'API Endpoints', icon: Code },
+    { id: 'server-settings', title: 'Server Configuration', icon: Server },
+    { id: 'cloud-services', title: 'Cloud Services', icon: CloudCog },
+  ];
+
+  const systemItems = [
+    { id: 'security', title: 'Security & Access', icon: Lock },
+    { id: 'integrations', title: 'Third-party Integrations', icon: Globe },
+    { id: 'payment-gateway', title: 'Payment Gateway', icon: CreditCard },
+    { id: 'email-templates', title: 'Email Templates', icon: Mail },
+    { id: 'backup-restore', title: 'Backup & Restore', icon: UploadCloud },
+    { id: 'settings', title: 'System Settings', icon: Settings },
   ];
 
   // Render the content based on the active tab
@@ -118,6 +148,23 @@ const AdminDashboard = () => {
             <p className="text-muted-foreground">Configure system-wide settings and preferences.</p>
           </div>
         );
+      case 'ui-components':
+      case 'analytics':
+      case 'themes':
+      case 'api-endpoints':
+      case 'server-settings':
+      case 'cloud-services':
+      case 'security':
+      case 'integrations':
+      case 'payment-gateway':
+      case 'email-templates':
+      case 'backup-restore':
+        return (
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold">{activeTab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</h2>
+            <p className="text-muted-foreground">This feature will be implemented soon.</p>
+          </div>
+        );
       default:
         return <AdminOverviewTab />;
     }
@@ -126,37 +173,11 @@ const AdminDashboard = () => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-muted/10">
-        {/* Main content */}
-        <div className="flex flex-1 flex-col">
-          {/* Header */}
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-            <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-            </div>
-            <div className="ml-auto flex items-center gap-4">
-              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2">
-                <LogOut className="h-4 w-4" />
-                Sign out
-              </Button>
-            </div>
-          </header>
-          
-          {/* Main dashboard content */}
-          <main className="flex flex-1">
-            <SidebarInset className="p-4 md:p-6 pt-0">
-              <div className="rounded-lg border bg-card p-6 shadow-sm">
-                {renderTabContent()}
-              </div>
-            </SidebarInset>
-          </main>
-        </div>
-
-        {/* Sidebar */}
-        <Sidebar side="right" variant="floating" collapsible="icon">
+        {/* Sidebar - Now on the left */}
+        <Sidebar side="left" variant="floating" collapsible="icon">
           <SidebarHeader className="flex h-16 items-center border-b px-6">
             <div className="flex items-center gap-2 font-semibold">
-              <LayoutDashboard className="h-5 w-5" />
+              <Shield className="h-5 w-5 text-primary" />
               Admin Controls
             </div>
           </SidebarHeader>
@@ -165,7 +186,47 @@ const AdminDashboard = () => {
               <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {sidebarItems.map((item) => (
+                  {mainNavigationItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeTab === item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        tooltip={item.title}
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>Frontend Management</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {frontendItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeTab === item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        tooltip={item.title}
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            
+            <SidebarGroup>
+              <SidebarGroupLabel>Backend Configuration</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {backendItems.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton 
                         isActive={activeTab === item.id}
@@ -185,18 +246,18 @@ const AdminDashboard = () => {
               <SidebarGroupLabel>System</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Maintenance">
-                      <ServerCog className="mr-2 h-4 w-4" />
-                      <span>Maintenance</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton tooltip="Notifications">
-                      <Bell className="mr-2 h-4 w-4" />
-                      <span>Notifications</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  {systemItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton 
+                        isActive={activeTab === item.id}
+                        onClick={() => setActiveTab(item.id)}
+                        tooltip={item.title}
+                      >
+                        <item.icon className="mr-2 h-4 w-4" />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -211,6 +272,32 @@ const AdminDashboard = () => {
             </div>
           </SidebarFooter>
         </Sidebar>
+
+        {/* Main content */}
+        <div className="flex flex-1 flex-col">
+          {/* Header */}
+          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+            <div className="flex items-center gap-2">
+              <LayoutDashboard className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-semibold">Admin Dashboard</h1>
+            </div>
+            <div className="ml-auto flex items-center gap-4">
+              <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut className="h-4 w-4" />
+                Sign out
+              </Button>
+            </div>
+          </header>
+          
+          {/* Main dashboard content */}
+          <main className="flex flex-1">
+            <SidebarInset className="p-4 md:p-6 pt-0">
+              <div className="rounded-lg border bg-card p-6 shadow-sm">
+                {renderTabContent()}
+              </div>
+            </SidebarInset>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );
