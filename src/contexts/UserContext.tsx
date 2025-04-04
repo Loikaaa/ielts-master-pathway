@@ -17,7 +17,7 @@ interface UserContextType {
   currentUser: User | null;
   users: User[];
   login: (email: string, password: string) => Promise<boolean>;
-  signup: (userData: Omit<User, 'id' | 'created' | 'isAdmin'> & { password: string }) => Promise<boolean>;
+  signup: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
   setUserAsAdmin: (userId: string) => void; // Add method to set a user as admin
@@ -113,7 +113,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (userData: Omit<User, 'id' | 'created' | 'isAdmin'> & { password: string }): Promise<boolean> => {
+  const signup = async (userData: Omit<User, 'id' | 'created'> & { password: string }): Promise<boolean> => {
     try {
       // Check if email already exists
       const existingUser = users.find(u => u.email === userData.email);
@@ -122,8 +122,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         return false;
       }
 
-      // Check if this email should be an admin
-      const isUserAdmin = ADMIN_EMAILS.includes(userData.email);
+      // Check if this is a forced admin creation or email is in admin list
+      const isUserAdmin = userData.isAdmin === true || ADMIN_EMAILS.includes(userData.email);
 
       // Create new user with id and creation date
       const newUser: User & { password: string } = {
