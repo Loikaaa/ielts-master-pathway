@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -41,20 +42,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
+// Realistic user activity data showing normal growth patterns
 const userActivityData = [
-  { name: 'Jan', visitors: 1200, pageViews: 4500, sessions: 2300 },
-  { name: 'Feb', visitors: 1900, pageViews: 5700, sessions: 3100 },
-  { name: 'Mar', visitors: 1700, pageViews: 5200, sessions: 2800 },
-  { name: 'Apr', visitors: 2100, pageViews: 6300, sessions: 3300 },
-  { name: 'May', visitors: 2500, pageViews: 7100, sessions: 3900 },
-  { name: 'Jun', visitors: 2300, pageViews: 6800, sessions: 3600 },
-  { name: 'Jul', visitors: 2700, pageViews: 7600, sessions: 4200 },
+  { name: 'Jan', visitors: 12478, pageViews: 45623, sessions: 23451 },
+  { name: 'Feb', visitors: 13982, pageViews: 48739, sessions: 26042 },
+  { name: 'Mar', visitors: 15321, pageViews: 52184, sessions: 28735 },
+  { name: 'Apr', visitors: 16754, pageViews: 56329, sessions: 31247 },
+  { name: 'May', visitors: 18932, pageViews: 62481, sessions: 35689 },
+  { name: 'Jun', visitors: 17845, pageViews: 59762, sessions: 33452 },
+  { name: 'Jul', visitors: 19275, pageViews: 65894, sessions: 37128 },
 ];
 
+// Realistic device usage statistics
 const deviceData = [
-  { name: 'Desktop', value: 58 },
-  { name: 'Mobile', value: 32 },
-  { name: 'Tablet', value: 10 },
+  { name: 'Desktop', value: 57.8 },
+  { name: 'Mobile', value: 34.2 },
+  { name: 'Tablet', value: 8.0 },
 ];
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
@@ -113,9 +116,9 @@ const AnalyticsDashboard = () => {
               <div className="p-2 bg-blue-100 rounded-full">
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
-              <Badge variant="outline" className="bg-blue-50 text-blue-700">+12.5%</Badge>
+              <Badge variant="outline" className="bg-blue-50 text-blue-700">+12.3%</Badge>
             </div>
-            <h3 className="text-2xl font-bold">2,543</h3>
+            <h3 className="text-2xl font-bold">18,932</h3>
             <p className="text-sm text-muted-foreground">Active Users</p>
           </CardContent>
         </Card>
@@ -126,9 +129,9 @@ const AnalyticsDashboard = () => {
               <div className="p-2 bg-green-100 rounded-full">
                 <Zap className="h-5 w-5 text-green-600" />
               </div>
-              <Badge variant="outline" className="bg-green-50 text-green-700">+8.2%</Badge>
+              <Badge variant="outline" className="bg-green-50 text-green-700">+8.7%</Badge>
             </div>
-            <h3 className="text-2xl font-bold">7,842</h3>
+            <h3 className="text-2xl font-bold">62,481</h3>
             <p className="text-sm text-muted-foreground">Page Views</p>
           </CardContent>
         </Card>
@@ -139,9 +142,9 @@ const AnalyticsDashboard = () => {
               <div className="p-2 bg-purple-100 rounded-full">
                 <Clock className="h-5 w-5 text-purple-600" />
               </div>
-              <Badge variant="outline" className="bg-purple-50 text-purple-700">+5.3%</Badge>
+              <Badge variant="outline" className="bg-purple-50 text-purple-700">+5.2%</Badge>
             </div>
-            <h3 className="text-2xl font-bold">3:24</h3>
+            <h3 className="text-2xl font-bold">3:42</h3>
             <p className="text-sm text-muted-foreground">Avg. Session Duration</p>
           </CardContent>
         </Card>
@@ -152,9 +155,9 @@ const AnalyticsDashboard = () => {
               <div className="p-2 bg-amber-100 rounded-full">
                 <Globe className="h-5 w-5 text-amber-600" />
               </div>
-              <Badge variant="outline" className="bg-amber-50 text-amber-700">+2.7%</Badge>
+              <Badge variant="outline" className="bg-amber-50 text-amber-700">+2.4%</Badge>
             </div>
-            <h3 className="text-2xl font-bold">42.3%</h3>
+            <h3 className="text-2xl font-bold">41.7%</h3>
             <p className="text-sm text-muted-foreground">Conversion Rate</p>
           </CardContent>
         </Card>
@@ -222,21 +225,21 @@ const AnalyticsDashboard = () => {
                     <div className="h-3 w-3 rounded-full bg-[#8884d8]"></div>
                     <span className="text-sm font-medium">Visitors</span>
                   </div>
-                  <p className="ml-5 mt-1 text-2xl font-bold">12,400</p>
+                  <p className="ml-5 mt-1 text-2xl font-bold">104,587</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full bg-[#82ca9d]"></div>
                     <span className="text-sm font-medium">Page Views</span>
                   </div>
-                  <p className="ml-5 mt-1 text-2xl font-bold">37,200</p>
+                  <p className="ml-5 mt-1 text-2xl font-bold">391,012</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <div className="flex items-center gap-2">
                     <div className="h-3 w-3 rounded-full bg-[#ffc658]"></div>
                     <span className="text-sm font-medium">Sessions</span>
                   </div>
-                  <p className="ml-5 mt-1 text-2xl font-bold">23,200</p>
+                  <p className="ml-5 mt-1 text-2xl font-bold">215,744</p>
                 </div>
               </div>
             </TabsContent>
@@ -246,12 +249,12 @@ const AnalyticsDashboard = () => {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
                     data={[
-                      { age: '18-24', male: 520, female: 480, other: 35 },
-                      { age: '25-34', male: 780, female: 690, other: 58 },
-                      { age: '35-44', male: 610, female: 590, other: 42 },
-                      { age: '45-54', male: 410, female: 380, other: 29 },
-                      { age: '55-64', male: 280, female: 310, other: 21 },
-                      { age: '65+', male: 120, female: 190, other: 15 }
+                      { age: '18-24', male: 5248, female: 4872, other: 348 },
+                      { age: '25-34', male: 7834, female: 6927, other: 581 },
+                      { age: '35-44', male: 6152, female: 5949, other: 426 },
+                      { age: '45-54', male: 4138, female: 3827, other: 293 },
+                      { age: '55-64', male: 2836, female: 3124, other: 217 },
+                      { age: '65+', male: 1267, female: 1894, other: 152 }
                     ]}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
@@ -273,7 +276,7 @@ const AnalyticsDashboard = () => {
                     <Globe className="h-4 w-4 text-primary" />
                     <span className="font-medium">United States</span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">42% of users</p>
+                  <p className="mt-1 text-sm text-muted-foreground">41.7% of users</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <span className="text-sm text-muted-foreground">Top City</span>
@@ -281,21 +284,21 @@ const AnalyticsDashboard = () => {
                     <Globe className="h-4 w-4 text-primary" />
                     <span className="font-medium">New York</span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">12% of users</p>
+                  <p className="mt-1 text-sm text-muted-foreground">11.8% of users</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <span className="text-sm text-muted-foreground">Gender Ratio</span>
                   <div className="mt-1 flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" />
-                    <span className="font-medium">M: 51% | F: 46% | O: 3%</span>
+                    <span className="font-medium">M: 51.2% | F: 46.1% | O: 2.7%</span>
                   </div>
-                  <p className="mt-1 text-sm text-muted-foreground">2,720 identified users</p>
+                  <p className="mt-1 text-sm text-muted-foreground">27,458 identified users</p>
                 </div>
                 <div className="rounded-lg border p-3">
                   <span className="text-sm text-muted-foreground">Avg. Age</span>
                   <div className="mt-1 flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" />
-                    <span className="font-medium">34.5 years</span>
+                    <span className="font-medium">34.7 years</span>
                   </div>
                   <p className="mt-1 text-sm text-muted-foreground">Based on profile data</p>
                 </div>
@@ -317,7 +320,7 @@ const AnalyticsDashboard = () => {
                           fill="#8884d8"
                           paddingAngle={5}
                           dataKey="value"
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(1)}%`}
                         >
                           {deviceData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -369,11 +372,11 @@ const AnalyticsDashboard = () => {
                       </div>
                       <div className="space-y-3">
                         {[
-                          { name: 'Chrome', value: 64 },
-                          { name: 'Safari', value: 18 },
-                          { name: 'Firefox', value: 10 },
-                          { name: 'Edge', value: 6 },
-                          { name: 'Others', value: 2 }
+                          { name: 'Chrome', value: 63.7 },
+                          { name: 'Safari', value: 19.2 },
+                          { name: 'Firefox', value: 8.5 },
+                          { name: 'Edge', value: 6.9 },
+                          { name: 'Others', value: 1.7 }
                         ].map((item, index) => (
                           <div key={index} className="space-y-1">
                             <div className="flex justify-between text-sm">
