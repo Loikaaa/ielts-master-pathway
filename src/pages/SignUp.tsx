@@ -9,11 +9,20 @@ import { useToast } from "@/components/ui/use-toast";
 import Footer from '@/components/Footer';
 import NavBar from '@/components/NavBar';
 import { detectUserCountry } from '@/utils/countryDetection';
+import { useUser } from '@/contexts/UserContext';
+import { Loader2 } from 'lucide-react';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userCountry, setUserCountry] = useState<string>('');
+  const { signup } = useUser();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   useEffect(() => {
     const fetchCountry = async () => {
@@ -24,13 +33,49 @@ const SignUp = () => {
     fetchCountry();
   }, []);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Account created!",
-      description: "Welcome to your IELTS preparation journey.",
-    });
-    navigate('/onboarding');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const userData = {
+        firstName,
+        lastName,
+        email,
+        password,
+        testType: 'General',
+        targetScore: '7.0',
+        examDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        country: userCountry,
+      };
+      
+      const success = await signup(userData);
+      
+      if (success) {
+        toast({
+          title: "Account created!",
+          description: "Welcome to your IELTS preparation journey.",
+        });
+        navigate('/onboarding');
+      } else {
+        setError('Failed to create account. Email might already be registered.');
+        toast({
+          title: "Sign up failed",
+          description: "Failed to create account. Please try again with a different email.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again later.');
+      toast({
+        title: "Sign up failed",
+        description: "An error occurred during sign up. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,27 +113,73 @@ const SignUp = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
+            {error && (
+              <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First name</Label>
-                  <Input id="firstName" placeholder="John" required />
+                  <Input 
+                    id="firstName" 
+                    placeholder="John" 
+                    required 
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last name</Label>
-                  <Input id="lastName" placeholder="Doe" required />
+                  <Input 
+                    id="lastName" 
+                    placeholder="Doe" 
+                    required 
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="name@example.com" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="name@example.com" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="••••••••" required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300">
-                Create Account
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating Account...
+                  </>
+                ) : (
+                  "Create Account"
+                )}
               </Button>
             </form>
           </CardContent>

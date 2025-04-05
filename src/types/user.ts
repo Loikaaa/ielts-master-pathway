@@ -16,4 +16,12 @@ export interface User {
     speaking: number;
     listening: number;
   };
+  displayName?: string;
+  stories?: Array<{
+    id: string;
+    title: string;
+    content: string;
+    date: string;
+    imageUrl?: string;
+  }>;
 }

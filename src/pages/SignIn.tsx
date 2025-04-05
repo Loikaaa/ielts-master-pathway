@@ -9,11 +9,18 @@ import { useToast } from "@/components/ui/use-toast";
 import Footer from '@/components/Footer';
 import NavBar from '@/components/NavBar';
 import { detectUserCountry } from '@/utils/countryDetection';
+import { useUser } from '@/contexts/UserContext';
+import { Loader2 } from 'lucide-react';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userCountry, setUserCountry] = useState<string>('');
+  const { login } = useUser();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   
   useEffect(() => {
     const fetchCountry = async () => {
@@ -24,13 +31,38 @@ const SignIn = () => {
     fetchCountry();
   }, []);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Sign in successful!",
-      description: "Welcome back to your IELTS preparation journey.",
-    });
-    navigate('/dashboard');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      const success = await login(email, password);
+      
+      if (success) {
+        toast({
+          title: "Sign in successful!",
+          description: "Welcome back to your IELTS preparation journey.",
+        });
+        navigate('/dashboard');
+      } else {
+        setError('Invalid email or password. Please try again.');
+        toast({
+          title: "Sign in failed",
+          description: "Invalid email or password. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again later.');
+      toast({
+        title: "Sign in failed",
+        description: "An error occurred during sign in. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,10 +100,23 @@ const SignIn = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
+            {error && (
+              <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+                {error}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="name@example.com" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="name@example.com" 
+                  required 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -80,12 +125,45 @@ const SignIn = () => {
                     Forgot password?
                   </Link>
                 </div>
-                <Input id="password" type="password" placeholder="••••••••" required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="••••••••" 
+                  required 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                />
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300">
-                Sign In
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
               </Button>
             </form>
+            
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-muted-foreground">Admin credentials</span>
+              </div>
+            </div>
+            
+            <div className="bg-muted/30 p-3 rounded-md text-sm">
+              <p className="font-medium">Admin Email: <span className="text-primary">govindabohara726@gmail.com</span></p>
+              <p className="font-medium">Admin Password: <span className="text-primary">Neplia726@</span></p>
+            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <div className="text-sm text-center text-muted-foreground">
