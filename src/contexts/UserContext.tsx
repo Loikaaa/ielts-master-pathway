@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface User {
@@ -26,6 +25,7 @@ interface UserContextType {
   isAdmin: boolean;
   setUserAsAdmin: (userId: string) => void;
   createUser: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
+  updateAdminCredentials: (email: string, password: string) => boolean;
 }
 
 const UserContext = createContext<UserContextType>({
@@ -37,6 +37,7 @@ const UserContext = createContext<UserContextType>({
   isAdmin: false,
   setUserAsAdmin: () => {},
   createUser: async () => false,
+  updateAdminCredentials: () => false,
 });
 
 export const useUser = () => useContext(UserContext);
@@ -45,8 +46,8 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
-// List of admin emails
-const ADMIN_EMAILS = ['admin@neplia.com', 'hhjkad@gmail.com'];
+// List of admin emails - adding the new email
+const ADMIN_EMAILS = ['admin@neplia.com', 'hhjkad@gmail.com', 'govindabohara726@gmail.com'];
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -100,26 +101,44 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   
   // Create default admin user if no users exist
   const createDefaultAdminUser = () => {
-    const adminUser = {
-      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      firstName: 'Admin',
-      lastName: 'User',
-      email: 'admin@neplia.com',
-      password: 'admin123',
-      testType: 'General',
-      targetScore: '8.0',
-      examDate: '2023-12-31',
-      created: new Date(),
-      isAdmin: true,
-      ipAddress: 'localhost',
-      country: 'System',
-      countryCode: 'SYS',
-      lastLogin: new Date()
-    };
+    const adminUsers = [
+      {
+        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@neplia.com',
+        password: 'admin123',
+        testType: 'General',
+        targetScore: '8.0',
+        examDate: '2023-12-31',
+        created: new Date(),
+        isAdmin: true,
+        ipAddress: 'localhost',
+        country: 'System',
+        countryCode: 'SYS',
+        lastLogin: new Date()
+      },
+      {
+        id: `user-${Date.now()+1}-${Math.random().toString(36).substr(2, 9)}`,
+        firstName: 'Govinda',
+        lastName: 'Bohara',
+        email: 'govindabohara726@gmail.com',
+        password: 'Neplia726@',
+        testType: 'General',
+        targetScore: '8.0',
+        examDate: '2025-12-31',
+        created: new Date(),
+        isAdmin: true,
+        ipAddress: 'Default',
+        country: 'Nepal',
+        countryCode: 'NP',
+        lastLogin: new Date()
+      }
+    ];
     
-    setUsers([adminUser]);
-    localStorage.setItem('neplia_users', JSON.stringify([adminUser]));
-    console.log('Default admin user created');
+    setUsers(adminUsers);
+    localStorage.setItem('neplia_users', JSON.stringify(adminUsers));
+    console.log('Default admin users created');
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
@@ -313,6 +332,40 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const updateAdminCredentials = (email: string, password: string): boolean => {
+    try {
+      // Find admin user to update
+      const updatedUsers = users.map(user => {
+        if (user.email === 'govindabohara726@gmail.com') {
+          return { ...user, email, password };
+        }
+        return user;
+      });
+      
+      setUsers(updatedUsers);
+      localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
+      
+      // If the current user is the admin being updated, update their session too
+      if (currentUser && currentUser.email === 'govindabohara726@gmail.com') {
+        const { password: _, ...userWithoutPassword } = { 
+          ...currentUser, 
+          email 
+        };
+        setCurrentUser(userWithoutPassword);
+      }
+      
+      // Update admin emails list if needed
+      if (email !== 'govindabohara726@gmail.com' && !ADMIN_EMAILS.includes(email)) {
+        ADMIN_EMAILS.push(email);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error updating admin credentials:', error);
+      return false;
+    }
+  };
+
   return (
     <UserContext.Provider value={{ 
       currentUser, 
@@ -322,7 +375,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       logout, 
       isAdmin,
       setUserAsAdmin,
-      createUser
+      createUser,
+      updateAdminCredentials
     }}>
       {children}
     </UserContext.Provider>

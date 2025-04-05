@@ -103,6 +103,13 @@ const SignIn = () => {
     }
   };
 
+  // Function to fill form with admin credentials
+  const fillAdminCredentials = () => {
+    form.setValue('email', 'govindabohara726@gmail.com');
+    form.setValue('password', 'Neplia726@');
+    console.log('SignIn: Primary admin credentials filled');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-accent/30 px-4">
       <Link to="/" className="flex items-center space-x-2 mb-8">
@@ -174,18 +181,23 @@ const SignIn = () => {
                 )}
               </Button>
               
-              {/* Admin login helper - adding back with a more discreet approach */}
-              <Button variant="ghost" 
-                className="w-full text-xs text-muted-foreground" 
+              {/* Admin login section */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator className="w-full" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">Admin Access</span>
+                </div>
+              </div>
+              
+              <Button variant="outline" 
+                className="w-full border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800" 
                 type="button" 
-                onClick={() => {
-                  form.setValue('email', 'admin@neplia.com');
-                  form.setValue('password', 'admin123');
-                  console.log('SignIn: Admin credentials filled');
-                }}
+                onClick={fillAdminCredentials}
               >
-                <ShieldCheck className="mr-2 h-3 w-3" />
-                Admin Demo
+                <ShieldCheck className="mr-2 h-4 w-4 text-amber-600" />
+                Login as Administrator
               </Button>
               
               <div className="relative">
