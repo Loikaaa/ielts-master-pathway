@@ -27,7 +27,6 @@ import { UserProgressProvider } from "./contexts/UserProgressContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import MaintenancePage from "./pages/MaintenancePage";
 import { isMaintenanceMode, getSettings, getAnalyticsConfig } from "./utils/settingsStorage";
-import BackendControl from "./components/BackendControl";
 
 const queryClient = new QueryClient();
 
@@ -142,12 +141,6 @@ const AppRoutes = () => {
       <Route path="/admin-blog-manager" element={
         <AdminRoute>
           <AdminBlogManager />
-        </AdminRoute>
-      } />
-      
-      <Route path="/admin-backend" element={
-        <AdminRoute>
-          <BackendControl />
         </AdminRoute>
       } />
       

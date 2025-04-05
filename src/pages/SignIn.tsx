@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -102,6 +103,44 @@ const SignIn = () => {
     }
   };
 
+  const handleGoogleSignIn = () => {
+    // Open a popup window for Google authentication
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    
+    window.open(
+      'https://accounts.google.com/o/oauth2/v2/auth?redirect_uri=https://neplia.com/auth/google&prompt=consent&response_type=code&client_id=demo_client_id&scope=profile+email&access_type=offline',
+      'Google Sign In',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+    );
+    
+    toast({
+      title: "Google Authentication",
+      description: "A popup window has been opened for Google authentication. Please complete the sign-in process there.",
+    });
+  };
+
+  const handleFacebookSignIn = () => {
+    // Open a popup window for Facebook authentication
+    const width = 500;
+    const height = 600;
+    const left = window.screenX + (window.outerWidth - width) / 2;
+    const top = window.screenY + (window.outerHeight - height) / 2;
+    
+    window.open(
+      'https://www.facebook.com/v18.0/dialog/oauth?client_id=demo_client_id&redirect_uri=https://neplia.com/auth/facebook&scope=email,public_profile',
+      'Facebook Sign In',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`
+    );
+    
+    toast({
+      title: "Facebook Authentication",
+      description: "A popup window has been opened for Facebook authentication. Please complete the sign-in process there.",
+    });
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-accent/30 px-4">
       <Link to="/" className="flex items-center space-x-2 mb-8">
@@ -186,12 +225,7 @@ const SignIn = () => {
                 <Button variant="outline" 
                   className="bg-[#4267B2]/10 hover:bg-[#4267B2]/20 border-[#4267B2]/20" 
                   type="button"
-                  onClick={() => {
-                    toast({
-                      title: "Facebook login",
-                      description: "Connecting to Facebook authentication...",
-                    });
-                  }}
+                  onClick={handleFacebookSignIn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4267B2" className="mr-2" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -202,12 +236,7 @@ const SignIn = () => {
                   variant="outline" 
                   className="bg-white hover:bg-gray-100 border-gray-300" 
                   type="button"
-                  onClick={() => {
-                    toast({
-                      title: "Google login",
-                      description: "Connecting to Google authentication...",
-                    });
-                  }}
+                  onClick={handleGoogleSignIn}
                 >
                   <svg viewBox="0 0 24 24" width="16" height="16" className="mr-2" xmlns="http://www.w3.org/2000/svg">
                     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
