@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -101,14 +102,6 @@ const NavBar = () => {
                     My Dashboard
                   </Link>
                 </Button>
-                {isAdmin && (
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/admin">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Admin
-                    </Link>
-                  </Button>
-                )}
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogIn className="h-4 w-4 mr-2" />
                   Logout
@@ -181,16 +174,6 @@ const NavBar = () => {
             >
               Resources
             </Link>
-            {isAdmin && (
-              <Link 
-                to="/admin" 
-                className="px-4 py-2 hover:bg-accent rounded-md transition-colors flex items-center"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                Admin Dashboard
-              </Link>
-            )}
             {currentUser ? (
               <Button variant="outline" className="w-full" onClick={handleLogout}>
                 <LogIn className="h-4 w-4 mr-2" />
