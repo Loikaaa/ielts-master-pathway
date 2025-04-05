@@ -16,9 +16,20 @@ import {
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, isAdmin, logout } = useUser();
+  
+  useEffect(() => {
+    // Track scrolling to add shadow/background effect
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   useEffect(() => {
     if (currentUser) {
@@ -46,7 +57,7 @@ const NavBar = () => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <nav className="fixed top-0 left-0 w-full bg-background/80 backdrop-blur-md z-50 border-b shadow-sm">
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-background/95 backdrop-blur-lg shadow-md' : 'bg-background/80 backdrop-blur-md border-b shadow-sm'}`}>
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center">
           {!isHomePage && (
