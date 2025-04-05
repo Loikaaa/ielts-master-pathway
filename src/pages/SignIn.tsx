@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, LogIn, Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
+import { Book, LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -103,13 +102,6 @@ const SignIn = () => {
     }
   };
 
-  // Function to fill form with admin credentials
-  const fillAdminCredentials = () => {
-    form.setValue('email', 'govindabohara726@gmail.com');
-    form.setValue('password', 'Neplia726@');
-    console.log('SignIn: Primary admin credentials filled');
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-accent/30 px-4">
       <Link to="/" className="flex items-center space-x-2 mb-8">
@@ -181,25 +173,6 @@ const SignIn = () => {
                 )}
               </Button>
               
-              {/* Admin login section */}
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Admin Access</span>
-                </div>
-              </div>
-              
-              <Button variant="outline" 
-                className="w-full border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800" 
-                type="button" 
-                onClick={fillAdminCredentials}
-              >
-                <ShieldCheck className="mr-2 h-4 w-4 text-amber-600" />
-                Login as Administrator
-              </Button>
-              
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <Separator className="w-full" />
@@ -210,13 +183,32 @@ const SignIn = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <Button variant="outline" className="bg-[#4267B2]/10 hover:bg-[#4267B2]/20 border-[#4267B2]/20" type="button">
+                <Button variant="outline" 
+                  className="bg-[#4267B2]/10 hover:bg-[#4267B2]/20 border-[#4267B2]/20" 
+                  type="button"
+                  onClick={() => {
+                    toast({
+                      title: "Facebook login",
+                      description: "Connecting to Facebook authentication...",
+                    });
+                  }}
+                >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#4267B2" className="mr-2" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                   Facebook
                 </Button>
-                <Button variant="outline" className="bg-white hover:bg-gray-100 border-gray-300" type="button">
+                <Button 
+                  variant="outline" 
+                  className="bg-white hover:bg-gray-100 border-gray-300" 
+                  type="button"
+                  onClick={() => {
+                    toast({
+                      title: "Google login",
+                      description: "Connecting to Google authentication...",
+                    });
+                  }}
+                >
                   <svg viewBox="0 0 24 24" width="16" height="16" className="mr-2" xmlns="http://www.w3.org/2000/svg">
                     <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
                       <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>

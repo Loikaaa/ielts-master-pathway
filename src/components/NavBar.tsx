@@ -10,7 +10,8 @@ import {
   UserPlus, 
   User,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield
 } from "lucide-react";
 
 const NavBar = () => {
@@ -101,6 +102,14 @@ const NavBar = () => {
                     My Dashboard
                   </Link>
                 </Button>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" asChild className="bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100">
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4 mr-2 text-amber-600" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogIn className="h-4 w-4 mr-2" />
                   Logout
@@ -151,6 +160,16 @@ const NavBar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 My Dashboard
+              </Link>
+            )}
+            {isAdmin && currentUser && (
+              <Link 
+                to="/admin" 
+                className="px-4 py-2 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded-md transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Shield className="inline-block h-4 w-4 mr-2 text-amber-600" />
+                Admin Panel
               </Link>
             )}
             <Link 
