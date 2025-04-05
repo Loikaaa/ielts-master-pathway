@@ -337,6 +337,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       // Find admin user to update
       const updatedUsers = users.map(user => {
         if (user.email === 'govindabohara726@gmail.com') {
+          // Add password to the existing user object
           return { ...user, email, password };
         }
         return user;
@@ -347,11 +348,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // If the current user is the admin being updated, update their session too
       if (currentUser && currentUser.email === 'govindabohara726@gmail.com') {
-        const { password: _, ...userWithoutPassword } = { 
+        const updatedCurrentUser = { 
           ...currentUser, 
           email 
         };
-        setCurrentUser(userWithoutPassword);
+        setCurrentUser(updatedCurrentUser);
       }
       
       // Update admin emails list if needed
