@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -168,7 +167,17 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-accent/30 to-background/80 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-b py-12 px-4 relative overflow-hidden">
+      {/* Stylish animated background */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950"></div>
+        <div className="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-b from-primary/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/5 to-transparent rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/3 w-1/3 h-1/3 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s' }}></div>
+        <div className="absolute top-2/3 right-1/3 w-1/4 h-1/4 bg-gradient-to-l from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '12s' }}></div>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAwMDAwOSI+PC9yZWN0Pgo8L3N2Zz4=')] opacity-20"></div>
+      </div>
+
       <Link to="/" className="flex items-center space-x-2 mb-8 justify-center animate-fade-in">
         <div className="relative w-12 h-12">
           <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
@@ -180,9 +189,9 @@ const SignUp = () => {
       <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
         {/* IELTS Skills Section */}
         <div className="hidden lg:block lg:col-span-2">
-          <div className="bg-card/80 backdrop-blur-sm rounded-xl p-8 shadow-xl space-y-8 border border-white/10 h-full animate-fade-in">
+          <div className="bg-card/60 backdrop-blur-sm rounded-xl p-8 shadow-xl space-y-8 border border-white/10 h-full animate-fade-in">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-4">
                 <GraduationCap className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-2xl font-bold">Begin Your IELTS Journey</h3>
@@ -238,7 +247,7 @@ const SignUp = () => {
         </div>
         
         {/* Sign Up Form */}
-        <Card className="lg:col-span-3 border-muted/10 bg-card/80 backdrop-blur-sm shadow-xl animate-fade-in">
+        <Card className="lg:col-span-3 border-muted/10 bg-card/60 backdrop-blur-sm shadow-xl animate-fade-in">
           <CardHeader className="space-y-1">
             <div className="mx-auto h-14 w-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2">
               <UserPlus className="h-7 w-7 text-primary" />
