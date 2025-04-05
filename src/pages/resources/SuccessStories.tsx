@@ -17,7 +17,7 @@ const successStories = [
   {
     id: 'story1',
     name: 'Sarah Chen',
-    avatar: 'https://placehold.co/200/png?text=SC',
+    avatar: 'https://randomuser.me/api/portraits/women/32.jpg',
     country: 'China',
     targetScore: 'Band 7.0',
     achievedScore: 'Band 8.0',
@@ -26,13 +26,13 @@ const successStories = [
     challenge: 'Speaking fluency and pronunciation',
     occupation: 'Medical Student',
     destination: 'Australia',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'February 2025'
   },
   {
     id: 'story2',
     name: 'Raj Patel',
-    avatar: 'https://placehold.co/200/png?text=RP',
+    avatar: 'https://randomuser.me/api/portraits/men/54.jpg',
     country: 'India',
     targetScore: 'Band 7.5',
     achievedScore: 'Band 8.5',
@@ -41,13 +41,13 @@ const successStories = [
     challenge: 'Academic writing structure',
     occupation: 'Software Engineer',
     destination: 'Canada',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'January 2025'
   },
   {
     id: 'story3',
     name: 'Maria Rodriguez',
-    avatar: 'https://placehold.co/200/png?text=MR',
+    avatar: 'https://randomuser.me/api/portraits/women/65.jpg',
     country: 'Colombia',
     targetScore: 'Band 6.5',
     achievedScore: 'Band 7.5',
@@ -56,13 +56,13 @@ const successStories = [
     challenge: 'Listening comprehension',
     occupation: 'Marketing Professional',
     destination: 'United Kingdom',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'March 2025'
   },
   {
     id: 'story4',
     name: 'Ahmed Hassan',
-    avatar: 'https://placehold.co/200/png?text=AH',
+    avatar: 'https://randomuser.me/api/portraits/men/36.jpg',
     country: 'Egypt',
     targetScore: 'Band 7.0',
     achievedScore: 'Band 7.5',
@@ -71,13 +71,13 @@ const successStories = [
     challenge: 'Time management in reading',
     occupation: 'Civil Engineer',
     destination: 'New Zealand',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'December 2024'
   },
   {
     id: 'story5',
     name: 'Yuki Tanaka',
-    avatar: 'https://placehold.co/200/png?text=YT',
+    avatar: 'https://randomuser.me/api/portraits/women/79.jpg',
     country: 'Japan',
     targetScore: 'Band 6.5',
     achievedScore: 'Band 7.0',
@@ -86,13 +86,13 @@ const successStories = [
     challenge: 'Grammar and vocabulary',
     occupation: 'Graduate Student',
     destination: 'United States',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'January 2025'
   },
   {
     id: 'story6',
     name: 'Carlos Mendes',
-    avatar: 'https://placehold.co/200/png?text=CM',
+    avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
     country: 'Brazil',
     targetScore: 'Band 7.0',
     achievedScore: 'Band 8.0',
@@ -101,7 +101,7 @@ const successStories = [
     challenge: 'Task 2 essay writing',
     occupation: 'Financial Analyst',
     destination: 'Canada',
-    image: 'https://placehold.co/600x400/png?text=Success+Story',
+    image: 'https://images.unsplash.com/photo-1491841550275-ad7854e35ca6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
     date: 'February 2025'
   }
 ];

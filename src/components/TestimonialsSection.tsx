@@ -43,7 +43,7 @@ const testimonials = [
     country: 'Brazil',
     score: '7.0',
     image: 'https://randomuser.me/api/portraits/men/36.jpg',
-    text: 'As a non-native English speaker, I was worried about the writing section. With Neplia\'s structured approach and personalized feedback, I improved by 1.5 bands!',
+    text: "As a non-native English speaker, I was worried about the writing section. With Neplia's structured approach and personalized feedback, I improved by 1.5 bands!",
     fullStory: "Growing up in Brazil, I learned English mostly through movies and music, so my spoken English was decent but my academic writing was poor. I needed IELTS for a scholarship program in Australia, but my writing scores in practice tests were stuck at 5.5. What made Neplia different was how it broke down the writing task into manageable steps. I especially appreciated the template structures for Task 1 and 2, and the vocabulary suggestions for different essay types. The detailed grammar correction was better than any human teacher I'd worked with – it not only highlighted errors but explained the rules and gave multiple examples of correct usage. After two months of focused practice, my writing improved to 7.0, and my overall band score reached 7.5. I've successfully secured my scholarship and am now preparing to move to Melbourne to study environmental science.",
     storyImage: 'https://images.unsplash.com/photo-1494883759339-0b042055a4ee?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   },
