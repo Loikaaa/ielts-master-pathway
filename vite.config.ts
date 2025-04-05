@@ -7,8 +7,9 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: true, // Listen on all addresses
     port: 8080,
+    open: true, // Automatically open browser on start
   },
   plugins: [
     react(),
@@ -32,5 +33,5 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  base: './', // This makes all asset paths relative, important for cPanel
+  base: '/', // This makes all asset paths absolute, important for serving
 }));

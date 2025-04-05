@@ -19,7 +19,19 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Root element not found");
+// Add console log for debugging
+console.log('Main.tsx executing, attempting to mount React app');
 
-createRoot(rootElement).render(<App />);
+const rootElement = document.getElementById("root");
+if (!rootElement) {
+  console.error("Root element not found - critical mounting error");
+  throw new Error("Root element not found");
+}
+
+console.log('Root element found, mounting React app');
+createRoot(rootElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+console.log('React app mounted');
