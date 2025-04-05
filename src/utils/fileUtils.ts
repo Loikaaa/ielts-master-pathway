@@ -1,3 +1,4 @@
+
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -227,3 +228,4 @@ export const generateInstallationInstructions = (domain: string): string => {
 
 For support, contact support@example.com
 `;
+};
