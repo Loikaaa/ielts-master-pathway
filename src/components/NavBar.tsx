@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Shield
 } from "lucide-react";
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,6 +21,7 @@ const NavBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, isAdmin, logout } = useUser();
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     // Track scrolling to add shadow/background effect
