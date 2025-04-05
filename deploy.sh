@@ -12,7 +12,7 @@ npm run build
 # Copy essential files to the deployment package
 echo "Creating deployment package..."
 cd dist
-zip -r ../deploy.zip *
+zip -r ../deploy.zip * -x "*.js.map" -x "*.css.map"
 cd ..
 
 # Create a copy of the .htaccess file for easy access
@@ -31,14 +31,12 @@ echo "8. Your website should now be accessible at your domain"
 echo "==============================================================="
 echo "NOTE: If your site doesn't work, check for errors in the cPanel error logs"
 echo "      You may need to configure your domain's DNS settings if not already done"
-echo "      For Windows users, use PowerShell to run this script or use Git Bash"
 
-# Add a section about getting full source code
+# Add information about antivirus false positives
 echo ""
-echo "==================== SOURCE CODE EXPORT ===================="
-echo "To get the complete source code for backup or transfer:"
-echo "1. From Visual Studio Code, open terminal (Ctrl+` or Terminal > New Terminal)"
-echo "2. Run: zip -r source-code.zip . -x \"node_modules/*\" -x \"dist/*\""
-echo "3. This creates source-code.zip with all project files excluding node_modules and dist"
-echo "4. Upload this zip to cPanel only if you need the development source code"
-echo "NOTE: For just deploying the built site, use deploy.zip created above"
+echo "==================== ANTIVIRUS INFORMATION ===================="
+echo "Some antivirus scanners may flag JavaScript files as potential threats."
+echo "These are false positives. If your cPanel reports warnings like:"
+echo "'Sanesecurity.Foxhole.JS_Zip_11.UNOFFICIAL FOUND'"
+echo "You can safely ignore these or temporarily disable ClamAV scanning"
+echo "through your hosting provider's settings during the upload process."

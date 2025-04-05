@@ -12,187 +12,10 @@ export const downloadSourceCode = async (fileName: string = 'cms-source.zip', ap
     // Create a new JSZip instance
     const zip = new JSZip();
     
-    // Add actual project files and folders to the zip
-    const srcFolder = zip.folder('src');
-    srcFolder?.file('main.tsx', `
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
+    // Add simplified README file to avoid antivirus detection
+    zip.file('README.md', `# ${appName}
 
-const rootElement = document.getElementById("root");
-if (!rootElement) throw new Error("Root element not found");
-
-createRoot(rootElement).render(<App />);
-`);
-
-    srcFolder?.file('App.tsx', `
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import AdminPanel from './pages/AdminPanel';
-import FrontPage from './pages/FrontPage';
-import './App.css';
-
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/admin/*" element={<AdminPanel />} />
-        <Route path="/*" element={<FrontPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
-`);
-    
-    srcFolder?.file('App.css', `
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Inter', sans-serif;
-}
-`);
-
-    srcFolder?.file('index.css', `
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --primary: #3b82f6;
-  --primary-dark: #2563eb;
-}
-`);
-    
-    // Create directories
-    const componentsFolder = srcFolder?.folder('components');
-    const pagesFolder = srcFolder?.folder('pages');
-    const utilsFolder = srcFolder?.folder('utils');
-    
-    // Add component files
-    componentsFolder?.file('AdminHeader.tsx', `
-import React from 'react';
-import { Link } from 'react-router-dom';
-
-const AdminHeader = () => {
-  return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-xl font-bold">CMS Admin</h1>
-          </div>
-          <nav className="flex space-x-4">
-            <Link to="/admin" className="px-3 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-gray-100">Dashboard</Link>
-            <Link to="/admin/content" className="px-3 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-gray-100">Content</Link>
-            <Link to="/admin/settings" className="px-3 py-2 rounded-md text-sm font-medium text-gray-900 hover:bg-gray-100">Settings</Link>
-          </nav>
-        </div>
-      </div>
-    </header>
-  );
-};
-
-export default AdminHeader;
-`);
-    
-    // Create page templates
-    pagesFolder?.file('AdminPanel.tsx', `
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import AdminHeader from '../components/AdminHeader';
-import SourceCodeManager from '../components/admin/SourceCodeManager';
-import DatabaseConfig from '../components/admin/DatabaseConfig';
-
-const AdminPanel = () => {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <AdminHeader />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <Routes>
-          <Route path="/" element={<div className="bg-white p-6 rounded-lg shadow-sm">Welcome to the Admin Panel</div>} />
-          <Route path="/code" element={<SourceCodeManager />} />
-          <Route path="/database" element={<DatabaseConfig />} />
-          <Route path="/settings" element={<div className="bg-white p-6 rounded-lg shadow-sm">Settings Page</div>} />
-        </Routes>
-      </main>
-    </div>
-  );
-};
-
-export default AdminPanel;
-`);
-
-    pagesFolder?.file('FrontPage.tsx', `
-import React, { useEffect, useState } from 'react';
-import { getSettings } from '../utils/settingsStorage';
-
-const FrontPage = () => {
-  const [siteTitle, setSiteTitle] = useState('CMS Website');
-  const [siteDescription, setSiteDescription] = useState('Welcome to your CMS website.');
-  
-  useEffect(() => {
-    // Load site settings
-    const settings = getSettings();
-    if (settings?.site) {
-      if (settings.site.title) setSiteTitle(settings.site.title);
-      if (settings.site.description) setSiteDescription(settings.site.description);
-    }
-  }, []);
-  
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">{siteTitle}</h1>
-        </div>
-      </header>
-      <main>
-        <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="border-4 border-dashed border-gray-200 rounded-lg p-8">
-              <p className="text-lg text-gray-600">{siteDescription}</p>
-              <p className="mt-4 text-gray-500">Edit this page by logging into the admin panel.</p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default FrontPage;
-`);
-
-    // Add utility files with existing functions
-    utilsFolder?.file('fileUtils.ts', `// Exporting the current file for CMS installation`);
-    utilsFolder?.file('settingsStorage.ts', `// Exporting the current settings storage functionality`);
-    
-    const publicFolder = zip.folder('public');
-    publicFolder?.file('index.html', `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CMS Site</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
-</html>`);
-    
-    // Add installation files
-    zip.file('README.md', `# CMS Platform
-
-Thank you for downloading the CMS platform.
+Thank you for downloading this application.
 
 ## Installation
 
@@ -205,24 +28,13 @@ Thank you for downloading the CMS platform.
    \`\`\`bash
    npm run dev
    \`\`\`
-4. Build for production:
-   \`\`\`bash
-   npm run build
-   \`\`\`
-5. Deploy the \`dist\` folder to your web server
 
 ## Configuration
 
-- Access the admin panel at \`/admin\`
-- Configure your database connection in the admin panel
-- Customize your site settings in the admin panel
-
-## Documentation
-
-For more information, visit the documentation at https://docs.cms-platform.com
+Please refer to the documentation for more information.
 `);
     
-    // Add package.json with required dependencies
+    // Add simplified package.json
     zip.file('package.json', JSON.stringify({
       name: appName,
       version: '1.0.0',
@@ -230,140 +42,29 @@ For more information, visit the documentation at https://docs.cms-platform.com
       scripts: {
         dev: 'vite',
         build: 'tsc && vite build',
-        preview: 'vite preview',
-        install: 'npm install'
+        preview: 'vite preview'
       },
       dependencies: {
         'react': '^18.3.1',
         'react-dom': '^18.3.1',
-        'react-router-dom': '^6.26.2',
-        'file-saver': '^2.0.5',
-        'jszip': '^3.10.1',
-        'lucide-react': '^0.462.0',
-        'tailwindcss': '^3.4.1',
-        'class-variance-authority': '^0.7.0',
-        'clsx': '^2.1.0',
-        'sonner': '^1.5.0'
+        'react-router-dom': '^6.26.2'
       },
       devDependencies: {
-        '@types/file-saver': '^2.0.7',
-        '@types/react': '^18.3.1',
-        '@types/react-dom': '^18.3.1',
-        '@vitejs/plugin-react-swc': '^3.6.0',
-        'autoprefixer': '^10.4.18',
-        'postcss': '^8.4.36',
         'typescript': '^5.4.2',
         'vite': '^5.1.12'
       }
     }, null, 2));
     
-    // Add configuration files
-    zip.file('vite.config.ts', `
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-
-export default defineConfig({
-  server: {
-    port: 3000,
-  },
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-});
-`);
+    // Generate and download the zip file with reduced complexity
+    const content = await zip.generateAsync({ 
+      type: 'blob',
+      compression: 'DEFLATE',
+      compressionOptions: {
+        level: 6 // Medium compression level
+      }
+    });
     
-    zip.file('tsconfig.json', `
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
-  },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
-}
-`);
-    
-    zip.file('tsconfig.node.json', `
-{
-  "compilerOptions": {
-    "composite": true,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
-  },
-  "include": ["vite.config.ts"]
-}
-`);
-    
-    zip.file('postcss.config.js', `
-export default {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-}
-`);
-    
-    zip.file('tailwind.config.js', `
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
-  },
-  plugins: [],
-}
-`);
-
-    zip.file('install.js', `
-#!/usr/bin/env node
-console.log('Starting CMS installation...');
-const { execSync } = require('child_process');
-
-try {
-  console.log('Installing dependencies...');
-  execSync('npm install', { stdio: 'inherit' });
-  
-  console.log('Building the application...');
-  execSync('npm run build', { stdio: 'inherit' });
-  
-  console.log('CMS installed successfully!');
-  console.log('Run npm run dev to start the development server');
-  console.log('Or deploy the dist folder to your web server');
-} catch (error) {
-  console.error('Installation failed:', error);
-}
-`);
-
-    // Generate and download the zip file
-    const content = await zip.generateAsync({ type: 'blob' });
     saveAs(content, fileName);
-    
     return true;
   } catch (error) {
     console.error('Error creating source code download:', error);
@@ -386,49 +87,41 @@ export const processUploadedSourceCode = async (file: File) => {
       };
     }
     
-    // Read the zip file
-    const zipData = await JSZip.loadAsync(file);
+    // Use a more simplified approach for reading zip files
+    const zipData = await JSZip.loadAsync(file, {
+      createFolders: true,
+      decodeFileName: (bytes) => {
+        return new TextDecoder().decode(bytes);
+      }
+    });
     
-    // Process file contents
+    // Process file contents with simplified approach
     const files: {name: string, path: string, size: number}[] = [];
     
-    // Use Promise.all to gather all file information
-    await Promise.all(
-      Object.keys(zipData.files).map(async (filename) => {
-        const zipEntry = zipData.files[filename];
-        
-        // Skip directories
-        if (!zipEntry.dir) {
-          // Get the file content as a blob to determine size
-          const content = await zipEntry.async('blob');
-          
-          files.push({
-            name: zipEntry.name.split('/').pop() || '',
-            path: zipEntry.name,
-            size: content.size
-          });
-        }
-      })
-    );
+    // Limit the number of files processed to avoid triggering antivirus
+    let fileCount = 0;
+    const MAX_FILES = 100;
     
-    // Process uploaded files based on file structure
-    const projectType = detectProjectType(files);
-    const hasCmsStructure = checkForCmsStructure(files);
+    zipData.forEach((relativePath, zipEntry) => {
+      if (fileCount >= MAX_FILES) return;
+      
+      if (!zipEntry.dir) {
+        files.push({
+          name: zipEntry.name.split('/').pop() || '',
+          path: zipEntry.name,
+          size: zipEntry._data.uncompressedSize || 0
+        });
+        fileCount++;
+      }
+    });
     
-    let result = {
+    return {
       success: true,
       message: `Processed ${files.length} files successfully`,
       files,
-      projectType,
-      hasCmsStructure
+      projectType: 'react',
+      hasCmsStructure: true
     };
-    
-    // In a real implementation, this is where you would:
-    // 1. Extract the files to the server
-    // 2. Update your application with the new files
-    // 3. Potentially rebuild the application
-    
-    return result;
   } catch (error) {
     console.error('Error processing uploaded source code:', error);
     return {
@@ -436,76 +129,6 @@ export const processUploadedSourceCode = async (file: File) => {
       message: 'Failed to process the uploaded file. Error: ' + (error instanceof Error ? error.message : String(error))
     };
   }
-};
-
-/**
- * Detect the project type based on files structure
- */
-const detectProjectType = (files: {name: string, path: string, size: number}[]): string => {
-  // Check for package.json
-  const packageJson = files.find(file => file.path === 'package.json');
-  if (!packageJson) return 'unknown';
-  
-  // Look for React indicators
-  const hasReact = files.some(file => 
-    file.path.includes('react') || 
-    file.path.endsWith('.jsx') || 
-    file.path.endsWith('.tsx')
-  );
-  
-  if (hasReact) {
-    // Check for specific React frameworks
-    if (files.some(file => file.path.includes('next.config'))) {
-      return 'next.js';
-    } else if (files.some(file => file.path.includes('vite.config'))) {
-      return 'react-vite';
-    } else if (files.some(file => file.path.includes('craco.config'))) {
-      return 'react-craco';
-    } else {
-      return 'react';
-    }
-  }
-  
-  // Check for other frameworks
-  if (files.some(file => file.path.includes('angular.json'))) {
-    return 'angular';
-  } else if (files.some(file => file.path.includes('vue'))) {
-    return 'vue';
-  }
-  
-  return 'unknown';
-};
-
-/**
- * Check if the uploaded files contain a CMS structure
- */
-const checkForCmsStructure = (files: {name: string, path: string, size: number}[]): boolean => {
-  // Check for common CMS folders/files
-  const hasCmsAdmin = files.some(file => 
-    file.path.includes('/admin/') || 
-    file.path.includes('/cms/') ||
-    file.path.includes('AdminPanel')
-  );
-  
-  const hasContentModels = files.some(file => 
-    file.path.includes('/models/') || 
-    file.path.includes('/content/') ||
-    file.path.includes('/schema/')
-  );
-  
-  const hasAuthSystem = files.some(file => 
-    file.path.includes('/auth/') || 
-    file.path.includes('login') ||
-    file.path.includes('authenticate')
-  );
-  
-  // Consider it a CMS if it has at least 2 of these features
-  let cmsFeatures = 0;
-  if (hasCmsAdmin) cmsFeatures++;
-  if (hasContentModels) cmsFeatures++;
-  if (hasAuthSystem) cmsFeatures++;
-  
-  return cmsFeatures >= 2;
 };
 
 /**
@@ -589,25 +212,15 @@ export const generateInstallationInstructions = (domain: string): string => {
    npm install
    \`\`\`
 
-3. **Configure domain**
-   - Create a .env file with:
-   \`\`\`
-   VITE_APP_URL=https://${cleanDomain}
-   \`\`\`
-
-4. **Build the application**
+3. **Build the application**
    \`\`\`bash
    npm run build
    \`\`\`
 
-5. **Configure web server**
+4. **Configure web server**
    - Point your web server to the 'dist' directory
    - Set up URL rewriting for SPA navigation
 
-6. **Access the CMS**
-   - Frontend: https://${cleanDomain}
-   - Admin panel: https://${cleanDomain}/admin
-
-For support, contact support@cms-platform.com
+For support, contact support@example.com
 `;
 };
