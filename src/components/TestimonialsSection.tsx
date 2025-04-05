@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Star, Quote, MapPin, X, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -14,7 +13,7 @@ const testimonials = [
     score: '8.5',
     image: 'https://randomuser.me/api/portraits/women/32.jpg',
     text: 'I improved my IELTS score from 6.5 to 8.5 in just 8 weeks using Neplia IELTS. The AI feedback on my writing and speaking was incredibly detailed and helpful.',
-    fullStory: "When I first started preparing for IELTS, I was scoring around 6.5 in practice tests. As someone applying for a master's program in Canada, I needed at least an 8.0 overall. I tried various platforms but nothing seemed to help me improve beyond 7.0. A friend recommended Neplia IELTS, and the difference was immediate. The personalized study plan adapted to my weaknesses, particularly in writing and speaking. The AI feedback was detailed enough to help me understand exactly where I was going wrong with grammar and vocabulary usage. After 8 weeks of consistent practice on the platform, I took my IELTS exam and scored 8.5 overall (Reading: 9.0, Listening: 8.5, Writing: 8.0, Speaking: 8.5). I'm now enrolled in my dream university program in Toronto. I highly recommend Neplia IELTS to anyone serious about improving their scores quickly.",
+    fullStory: 'When I first started preparing for IELTS, I was scoring around 6.5 in practice tests. As someone applying for a master\'s program in Canada, I needed at least an 8.0 overall. I tried various platforms but nothing seemed to help me improve beyond 7.0. A friend recommended Neplia IELTS, and the difference was immediate. The personalized study plan adapted to my weaknesses, particularly in writing and speaking. The AI feedback was detailed enough to help me understand exactly where I was going wrong with grammar and vocabulary usage. After 8 weeks of consistent practice on the platform, I took my IELTS exam and scored 8.5 overall (Reading: 9.0, Listening: 8.5, Writing: 8.0, Speaking: 8.5). I\'m now enrolled in my dream university program in Toronto. I highly recommend Neplia IELTS to anyone serious about improving their scores quickly.',
     storyImage: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   },
   {
@@ -24,7 +23,7 @@ const testimonials = [
     score: '7.5',
     image: 'https://randomuser.me/api/portraits/men/54.jpg',
     text: 'The adaptive learning system really works. It identified my weaknesses in reading comprehension and gave me targeted practice that helped me improve rapidly.',
-    fullStory: "As a non-native English speaker, reading long passages quickly was always my biggest challenge. I had taken the IELTS test twice before and consistently scored 6.0 in the reading section, which wasn't enough for my university application requirements. What impressed me most about Neplia IELTS was how accurately the system identified my specific struggles with inference questions and timed reading. The platform created daily micro-practices focused exactly on these areas. The progress tracking kept me motivated, showing how my speed and accuracy improved week by week. After three months of practice, I retook the IELTS and scored 7.5 overall with an 8.0 in reading – a full 2 points improvement in my weakest area! The university has accepted my application, and I start my engineering degree next semester.",
+    fullStory: 'As a non-native English speaker, reading long passages quickly was always my biggest challenge. I had taken the IELTS test twice before and consistently scored 6.0 in the reading section, which wasn\'t enough for my university application requirements. What impressed me most about Neplia IELTS was how accurately the system identified my specific struggles with inference questions and timed reading. The platform created daily micro-practices focused exactly on these areas. The progress tracking kept me motivated, showing how my speed and accuracy improved week by week. After three months of practice, I retook the IELTS and scored 7.5 overall with an 8.0 in reading – a full 2 points improvement in my weakest area! The university has accepted my application, and I start my engineering degree next semester.',
     storyImage: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
   },
   {
