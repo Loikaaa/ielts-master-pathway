@@ -87,13 +87,8 @@ export const processUploadedSourceCode = async (file: File) => {
       };
     }
     
-    // Use a more simplified approach for reading zip files
-    const zipData = await JSZip.loadAsync(file, {
-      createFolders: true,
-      decodeFileName: (bytes) => {
-        return new TextDecoder().decode(bytes);
-      }
-    });
+    // Load the zip file using JSZip without custom decoder to avoid type errors
+    const zipData = await JSZip.loadAsync(file);
     
     // Process file contents with simplified approach
     const files: {name: string, path: string, size: number}[] = [];
@@ -106,10 +101,21 @@ export const processUploadedSourceCode = async (file: File) => {
       if (fileCount >= MAX_FILES) return;
       
       if (!zipEntry.dir) {
+        // Get the file name from the path
+        const fileName = relativePath.split('/').pop() || '';
+        
+        // Get the size safely
+        let fileSize = 0;
+        try {
+          fileSize = zipEntry.uncompressedSize || 0;
+        } catch (e) {
+          console.warn('Could not get size for file:', relativePath);
+        }
+        
         files.push({
-          name: zipEntry.name.split('/').pop() || '',
-          path: zipEntry.name,
-          size: zipEntry._data.uncompressedSize || 0
+          name: fileName,
+          path: relativePath,
+          size: fileSize
         });
         fileCount++;
       }
