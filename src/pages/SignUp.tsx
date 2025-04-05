@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -168,314 +169,355 @@ const SignUp = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b py-12 px-4 relative overflow-hidden">
-      {/* Add NavBar */}
-      <NavBar />
-      
-      {/* Stylish animated background */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950"></div>
-        <div className="absolute top-0 right-0 w-full h-1/2 bg-gradient-to-b from-primary/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/5 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute top-1/4 left-1/3 w-1/3 h-1/3 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '8s' }}></div>
-        <div className="absolute top-2/3 right-1/3 w-1/4 h-1/4 bg-gradient-to-l from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-pulse" style={{ animationDuration: '12s' }}></div>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAwMDAwOSI+PC9yZWN0Pgo8L3N2Zz4=')] opacity-20"></div>
+    <div className="min-h-screen">
+      {/* Fixed NavBar */}
+      <div className="sticky top-0 left-0 right-0 z-50">
+        <NavBar />
       </div>
-
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8 pt-16">
-        {/* IELTS Skills Section */}
-        <div className="hidden lg:block lg:col-span-2">
-          <div className="bg-card/60 backdrop-blur-sm rounded-xl p-8 shadow-xl space-y-8 border border-white/10 h-full animate-fade-in">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center mx-auto mb-4">
-                <GraduationCap className="h-8 w-8 text-primary" />
-              </div>
-              <h3 className="text-2xl font-bold">Begin Your IELTS Journey</h3>
-              <p className="text-muted-foreground mt-2">Prepare for success with our complete IELTS program</p>
+      
+      {/* Main content */}
+      <div className="py-10 px-4 relative">
+        {/* Stylish IELTS-themed background */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          {/* Main gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 dark:from-blue-950 dark:via-sky-950 dark:to-indigo-950"></div>
+          
+          {/* Abstract decorative elements */}
+          <div className="absolute top-0 right-0 w-full h-96 bg-gradient-to-b from-blue-400/5 to-transparent"></div>
+          <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-indigo-400/5 to-transparent"></div>
+          
+          {/* Circular elements representing IELTS materials */}
+          <div className="absolute top-40 left-10 md:left-[10%] w-40 h-40 bg-reading/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-60 right-10 md:right-[20%] w-60 h-60 bg-writing/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-40 left-20 md:left-[15%] w-80 h-80 bg-speaking/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 right-10 md:right-[10%] w-40 h-40 bg-listening/5 rounded-full blur-3xl"></div>
+          
+          {/* IELTS word pattern */}
+          <div className="absolute inset-0 opacity-[0.02] overflow-hidden select-none pointer-events-none">
+            <div className="absolute -rotate-12 top-1/4 left-0 right-0 text-9xl font-black text-foreground whitespace-nowrap" style={{
+              backgroundImage: 'linear-gradient(90deg, transparent 0%, currentColor 25%, currentColor 75%, transparent 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}>
+              READING WRITING LISTENING SPEAKING
             </div>
-            
-            <div className="space-y-6">
-              <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5">
-                <div className="bg-reading/10 p-3 rounded-full">
-                  <BookIcon className="h-5 w-5 text-reading" />
-                </div>
-                <div>
-                  <h4 className="font-medium">Reading</h4>
-                  <p className="text-sm text-muted-foreground">Improve your reading comprehension skills with passages that mirror the actual exam</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5">
-                <div className="bg-writing/10 p-3 rounded-full">
-                  <Pencil className="h-5 w-5 text-writing" />
-                </div>
-                <div>
-                  <h4 className="font-medium">Writing</h4>
-                  <p className="text-sm text-muted-foreground">Master essay writing with expert feedback and structured templates</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5">
-                <div className="bg-listening/10 p-3 rounded-full">
-                  <Headphones className="h-5 w-5 text-listening" />
-                </div>
-                <div>
-                  <h4 className="font-medium">Listening</h4>
-                  <p className="text-sm text-muted-foreground">Train your ear with diverse accents and realistic audio scenarios</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5">
-                <div className="bg-speaking/10 p-3 rounded-full">
-                  <Mic className="h-5 w-5 text-speaking" />
-                </div>
-                <div>
-                  <h4 className="font-medium">Speaking</h4>
-                  <p className="text-sm text-muted-foreground">Practice with AI interviews for fluency and confidence building</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-8 text-center">
-              <p className="text-sm text-muted-foreground">Join thousands of successful test-takers who achieved their target scores with Neplia IELTS</p>
+            <div className="absolute rotate-12 bottom-1/4 left-0 right-0 text-9xl font-black text-foreground whitespace-nowrap" style={{
+              backgroundImage: 'linear-gradient(90deg, transparent 0%, currentColor 25%, currentColor 75%, transparent 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              color: 'transparent',
+            }}>
+              BAND 5 BAND 6 BAND 7 BAND 8 BAND 9
             </div>
           </div>
+          
+          {/* Grid pattern overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCI+CiAgPHJlY3Qgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBmaWxsPSJub25lIiAvPgogIDxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9ImN1cnJlbnRDb2xvciIgZmlsbC1vcGFjaXR5PSIwLjAzIiB4PSIyIiB5PSIyIiAvPgo8L3N2Zz4=')] opacity-30"></div>
+        </div>
+
+        <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8 pt-16">
+          {/* IELTS Skills Section */}
+          <div className="hidden lg:block lg:col-span-2">
+            <div className="bg-white/80 dark:bg-card/60 backdrop-blur-md rounded-xl p-8 shadow-xl space-y-8 border border-white/20 dark:border-white/5 h-full animate-fade-in">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-blue-500 flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <GraduationCap className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-br from-primary to-blue-500 bg-clip-text text-transparent">Begin Your IELTS Journey</h3>
+                <p className="text-muted-foreground mt-2">Prepare for success with our complete IELTS program</p>
+              </div>
+              
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-reading/0 to-reading/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="bg-reading/10 p-3 rounded-full relative z-10">
+                    <BookIcon className="h-5 w-5 text-reading" />
+                  </div>
+                  <div className="relative z-10">
+                    <h4 className="font-medium">Reading</h4>
+                    <p className="text-sm text-muted-foreground">Improve your reading comprehension skills with passages that mirror the actual exam</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-writing/0 to-writing/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="bg-writing/10 p-3 rounded-full relative z-10">
+                    <Pencil className="h-5 w-5 text-writing" />
+                  </div>
+                  <div className="relative z-10">
+                    <h4 className="font-medium">Writing</h4>
+                    <p className="text-sm text-muted-foreground">Master essay writing with expert feedback and structured templates</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-listening/0 to-listening/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="bg-listening/10 p-3 rounded-full relative z-10">
+                    <Headphones className="h-5 w-5 text-listening" />
+                  </div>
+                  <div className="relative z-10">
+                    <h4 className="font-medium">Listening</h4>
+                    <p className="text-sm text-muted-foreground">Train your ear with diverse accents and realistic audio scenarios</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 hover:bg-primary/5 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-speaking/0 to-speaking/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="bg-speaking/10 p-3 rounded-full relative z-10">
+                    <Mic className="h-5 w-5 text-speaking" />
+                  </div>
+                  <div className="relative z-10">
+                    <h4 className="font-medium">Speaking</h4>
+                    <p className="text-sm text-muted-foreground">Practice with AI interviews for fluency and confidence building</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-8 text-center">
+                <p className="text-sm text-muted-foreground">Join thousands of successful test-takers who achieved their target scores with Neplia IELTS</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Sign Up Form */}
+          <Card className="lg:col-span-3 border-muted/10 bg-white/90 dark:bg-card/80 backdrop-blur-md shadow-xl animate-fade-in relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-600/10 to-blue-600/10 rounded-bl-full"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-emerald-600/10 to-blue-600/10 rounded-tr-full"></div>
+            
+            <CardHeader className="space-y-1">
+              <div className="mx-auto h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 flex items-center justify-center mb-2 shadow-lg">
+                <UserPlus className="h-7 w-7 text-white" />
+              </div>
+              <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
+              <CardDescription className="text-center">
+                Start your IELTS preparation journey today
+              </CardDescription>
+            </CardHeader>
+            
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="firstName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>First Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Last Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Doe" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" placeholder="your.email@example.com" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input type="password" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Globe className="mr-2 h-4 w-4 text-primary" />
+                          Country
+                        </FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary">
+                              <SelectValue placeholder={isLoadingCountry ? "Detecting your country..." : "Select your country"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="max-h-[200px]">
+                            {countries.map((country) => (
+                              <SelectItem key={country.code} value={country.code}>
+                                {country.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isLoadingCountry && (
+                          <p className="text-xs text-muted-foreground flex items-center mt-1">
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Detecting your location...
+                          </p>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="relative my-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <Separator className="w-full" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-white/90 dark:bg-card px-2 text-muted-foreground">IELTS Information</span>
+                    </div>
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="testType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>IELTS Test Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary">
+                              <SelectValue placeholder="Select test type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="academic">Academic</SelectItem>
+                            <SelectItem value="general">General Training</SelectItem>
+                            <SelectItem value="undecided">Not Sure Yet</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="targetScore"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Target Band Score</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary">
+                              <SelectValue placeholder="Select target score" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="6">Band 6</SelectItem>
+                            <SelectItem value="6.5">Band 6.5</SelectItem>
+                            <SelectItem value="7">Band 7</SelectItem>
+                            <SelectItem value="7.5">Band 7.5</SelectItem>
+                            <SelectItem value="8+">Band 8+</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="examDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center">
+                          <Calendar className="mr-2 h-4 w-4 text-primary" />
+                          Planned Exam Date
+                        </FormLabel>
+                        <FormControl>
+                          <Input type="date" className="bg-white/50 dark:bg-background/30 backdrop-blur-sm border-muted/30 focus:border-primary" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                
+                <CardFooter className="flex flex-col">
+                  <Button 
+                    className="w-full h-11 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white shadow-md"
+                    type="submit" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Create Account
+                      </>
+                    )}
+                  </Button>
+                  <div className="text-center text-sm mt-4">
+                    Already have an account?{' '}
+                    <Link to="/signin" className="text-primary font-medium hover:underline">
+                      Sign in
+                    </Link>
+                  </div>
+                </CardFooter>
+              </form>
+            </Form>
+          </Card>
         </div>
         
-        {/* Sign Up Form */}
-        <Card className="lg:col-span-3 border-muted/10 bg-card/60 backdrop-blur-sm shadow-xl animate-fade-in">
-          <CardHeader className="space-y-1">
-            <div className="mx-auto h-14 w-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center mb-2">
-              <UserPlus className="h-7 w-7 text-primary" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-center">Create your account</CardTitle>
-            <CardDescription className="text-center">
-              Start your IELTS preparation journey today
-            </CardDescription>
-          </CardHeader>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John" className="bg-background/50" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Doe" className="bg-background/50" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" placeholder="your.email@example.com" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" className="bg-background/50" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="confirmPassword"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Confirm Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" className="bg-background/50" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center">
-                        <Globe className="mr-2 h-4 w-4 text-primary" />
-                        Country
-                      </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full bg-background/50">
-                            <SelectValue placeholder={isLoadingCountry ? "Detecting your country..." : "Select your country"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="max-h-[200px]">
-                          {countries.map((country) => (
-                            <SelectItem key={country.code} value={country.code}>
-                              {country.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {isLoadingCountry && (
-                        <p className="text-xs text-muted-foreground flex items-center mt-1">
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                          Detecting your location...
-                        </p>
-                      )}
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <Separator className="w-full" />
-                  </div>
-                  <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">IELTS Information</span>
-                  </div>
-                </div>
-                
-                <FormField
-                  control={form.control}
-                  name="testType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>IELTS Test Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-background/50">
-                            <SelectValue placeholder="Select test type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="academic">Academic</SelectItem>
-                          <SelectItem value="general">General Training</SelectItem>
-                          <SelectItem value="undecided">Not Sure Yet</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="targetScore"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Target Band Score</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-background/50">
-                            <SelectValue placeholder="Select target score" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="6">Band 6</SelectItem>
-                          <SelectItem value="6.5">Band 6.5</SelectItem>
-                          <SelectItem value="7">Band 7</SelectItem>
-                          <SelectItem value="7.5">Band 7.5</SelectItem>
-                          <SelectItem value="8+">Band 8+</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="examDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center">
-                        <Calendar className="mr-2 h-4 w-4 text-primary" />
-                        Planned Exam Date
-                      </FormLabel>
-                      <FormControl>
-                        <Input type="date" className="bg-background/50" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              
-              <CardFooter className="flex flex-col">
-                <Button 
-                  className="w-full h-11 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 text-white shadow-md"
-                  type="submit" 
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Creating Account...
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="mr-2 h-4 w-4" />
-                      Create Account
-                    </>
-                  )}
-                </Button>
-                <div className="text-center text-sm mt-4">
-                  Already have an account?{' '}
-                  <Link to="/signin" className="text-primary font-medium hover:underline">
-                    Sign in
-                  </Link>
-                </div>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-      </div>
-      
-      <div className="mt-8 text-center text-sm text-muted-foreground animate-fade-in">
-        <p>© {new Date().getFullYear()} Neplia IELTS. All rights reserved.</p>
+        <div className="mt-8 text-center text-sm text-muted-foreground animate-fade-in">
+          <p>© {new Date().getFullYear()} Neplia IELTS. All rights reserved.</p>
+        </div>
       </div>
     </div>
   );
