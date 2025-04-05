@@ -4,6 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Calendar, Clock, User, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { useToast } from "@/components/ui/use-toast";
+import { useUser } from '@/contexts/UserContext';
 
 interface BlogPostProps {
   post: {
@@ -24,6 +26,8 @@ interface BlogPostProps {
 
 const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { currentUser } = useUser();
   
   // Calculate read time if not provided
   const readTime = post.readTime || 
@@ -32,8 +36,21 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
   // Ensure we have a valid post ID for linking
   const postId = post.id || `post-${Date.now()}`;
   
-  const handleReadMore = (e) => {
+  const handleReadMore = (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    // Track user interaction with the blog post if user is logged in
+    if (currentUser) {
+      console.log(`User ${currentUser.email} clicked on blog post ${post.id}`);
+      // Here you would typically send this data to a backend API
+      // For now, we'll just show a toast notification
+      toast({
+        title: "Blog post accessed",
+        description: `You're now viewing "${post.title}"`,
+        duration: 3000,
+      });
+    }
+    
     navigate(`/resources/blog/${postId}`);
   };
 

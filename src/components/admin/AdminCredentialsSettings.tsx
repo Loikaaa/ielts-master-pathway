@@ -1,9 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Shield, Save, Loader2, Mail, Lock } from 'lucide-react';
+import { Shield, Save, Loader2, Mail, Lock, EyeIcon, EyeOffIcon } from 'lucide-react';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -25,8 +25,11 @@ type CredentialsFormValues = z.infer<typeof credentialsSchema>;
 
 const AdminCredentialsSettings = () => {
   const { toast } = useToast();
-  const { updateAdminCredentials, currentUser } = useUser();
+  const { updateAdminCredentials, currentUser, users } = useUser();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [adminUserCount, setAdminUserCount] = useState(0);
 
   const form = useForm<CredentialsFormValues>({
     resolver: zodResolver(credentialsSchema),
@@ -37,9 +40,18 @@ const AdminCredentialsSettings = () => {
     },
   });
 
+  useEffect(() => {
+    // Count admin users for display
+    const adminCount = users.filter(user => user.isAdmin === true).length;
+    setAdminUserCount(adminCount);
+  }, [users]);
+
   const onSubmit = async (values: CredentialsFormValues) => {
     setIsSubmitting(true);
     try {
+      // Log admin credential update attempt
+      console.log(`Attempting to update admin credentials for ${values.email}`);
+      
       // Update admin credentials
       const success = updateAdminCredentials(values.email, values.password);
 
@@ -53,6 +65,9 @@ const AdminCredentialsSettings = () => {
           password: '',
           confirmPassword: '',
         });
+        
+        // Log successful credential update (this would normally go to a backend)
+        console.log(`Admin credentials updated successfully: ${values.email}`);
       } else {
         toast({
           title: "Update failed",
@@ -72,6 +87,14 @@ const AdminCredentialsSettings = () => {
     }
   };
 
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -81,6 +104,11 @@ const AdminCredentialsSettings = () => {
         </div>
         <CardDescription>
           Update the administrator login credentials. This will change the login details for the main admin account.
+          <div className="mt-2 text-xs p-2 bg-muted/50 rounded-md">
+            <p className="font-medium">System Status</p>
+            <p>Total admin users: {adminUserCount}</p>
+            <p>Last updated: {new Date().toLocaleString()}</p>
+          </div>
         </CardDescription>
       </CardHeader>
       
@@ -117,7 +145,21 @@ const AdminCredentialsSettings = () => {
                     New Password
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        {...field}
+                        className="pr-10" 
+                      />
+                      <button 
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={toggleShowPassword}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormDescription>
                     Password must be at least 6 characters
@@ -137,7 +179,21 @@ const AdminCredentialsSettings = () => {
                     Confirm Password
                   </FormLabel>
                   <FormControl>
-                    <Input type="password" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"} 
+                        {...field}
+                        className="pr-10" 
+                      />
+                      <button 
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={toggleShowConfirmPassword}
+                        tabIndex={-1}
+                      >
+                        {showConfirmPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -10,26 +10,59 @@ import Footer from '@/components/Footer';
 import NavBar from '@/components/NavBar';
 import { detectUserCountry } from '@/utils/countryDetection';
 import { useUser } from '@/contexts/UserContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userCountry, setUserCountry] = useState<string>('');
-  const { login } = useUser();
+  const { login, users } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  
+  // Track login attempts in localStorage
+  useEffect(() => {
+    const storedAttempts = localStorage.getItem('login_attempts');
+    if (storedAttempts) {
+      setLoginAttempts(parseInt(storedAttempts, 10));
+    }
+    
+    // Clear login attempts after 12 hours
+    const attemptTimestamp = localStorage.getItem('login_attempt_timestamp');
+    if (attemptTimestamp) {
+      const lastAttempt = new Date(parseInt(attemptTimestamp, 10));
+      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+      
+      if (lastAttempt < twelveHoursAgo) {
+        localStorage.removeItem('login_attempts');
+        localStorage.removeItem('login_attempt_timestamp');
+        setLoginAttempts(0);
+      }
+    }
+  }, []);
   
   useEffect(() => {
     const fetchCountry = async () => {
       const country = await detectUserCountry();
       setUserCountry(country);
+      
+      // Log the country detection for analytics
+      console.log('User country detected:', country);
     };
     
     fetchCountry();
   }, []);
+  
+  const updateLoginAttempts = () => {
+    const newAttempts = loginAttempts + 1;
+    setLoginAttempts(newAttempts);
+    localStorage.setItem('login_attempts', newAttempts.toString());
+    localStorage.setItem('login_attempt_timestamp', Date.now().toString());
+  };
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,16 +70,37 @@ const SignIn = () => {
     setError('');
     
     try {
+      console.log(`Attempting login for ${email}. Registered users:`, users.length);
+      
+      // Add small delay to simulate backend request
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       const success = await login(email, password);
       
       if (success) {
+        // Reset login attempts on successful login
+        localStorage.removeItem('login_attempts');
+        localStorage.removeItem('login_attempt_timestamp');
+        
         toast({
           title: "Sign in successful!",
           description: "Welcome back to your IELTS preparation journey.",
         });
+        
+        // Track successful login in analytics
+        console.log(`User ${email} logged in successfully from ${userCountry}`);
+        
         navigate('/dashboard');
       } else {
-        setError('Invalid email or password. Please try again.');
+        updateLoginAttempts();
+        
+        // Show different messages based on number of attempts
+        if (loginAttempts >= 5) {
+          setError('Too many failed attempts. Please try again later or reset your password.');
+        } else {
+          setError('Invalid email or password. Please try again.');
+        }
+        
         toast({
           title: "Sign in failed",
           description: "Invalid email or password. Please try again.",
@@ -54,6 +108,7 @@ const SignIn = () => {
         });
       }
     } catch (error) {
+      updateLoginAttempts();
       setError('An error occurred. Please try again later.');
       toast({
         title: "Sign in failed",
@@ -63,6 +118,10 @@ const SignIn = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const toggleShowPassword = () => {
+    setShowPassword(prev => !prev);
   };
 
   return (
@@ -105,6 +164,12 @@ const SignIn = () => {
                 {error}
               </div>
             )}
+            {loginAttempts > 2 && (
+              <div className="bg-amber-50 text-amber-800 p-3 rounded-md text-sm">
+                <p className="font-medium">Multiple login attempts detected</p>
+                <p className="text-xs mt-1">For security reasons, your account may be temporarily locked after too many failed attempts.</p>
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -115,7 +180,7 @@ const SignIn = () => {
                   required 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={isLoading}
+                  disabled={isLoading || loginAttempts >= 10}
                 />
               </div>
               <div className="space-y-2">
@@ -125,26 +190,39 @@ const SignIn = () => {
                     Forgot password?
                   </Link>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="••••••••" 
-                  required 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    placeholder="••••••••" 
+                    required 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={isLoading || loginAttempts >= 10}
+                    className="pr-10"
+                  />
+                  <button 
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={toggleShowPassword}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOffIcon size={18} /> : <EyeIcon size={18} />}
+                  </button>
+                </div>
               </div>
               <Button 
                 type="submit" 
                 className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300"
-                disabled={isLoading}
+                disabled={isLoading || loginAttempts >= 10}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Signing in...
                   </>
+                ) : loginAttempts >= 10 ? (
+                  "Account Locked - Try Later"
                 ) : (
                   "Sign In"
                 )}
