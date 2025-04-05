@@ -20,6 +20,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/components/ui/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { cn } from '@/lib/utils';
+import NavBar from '@/components/NavBar';
 
 // Define form validation schema
 const signupSchema = z.object({
@@ -168,6 +169,9 @@ const SignUp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b py-12 px-4 relative overflow-hidden">
+      {/* Add NavBar */}
+      <NavBar />
+      
       {/* Stylish animated background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-blue-50 to-indigo-50 dark:from-blue-950 dark:to-indigo-950"></div>
@@ -178,15 +182,7 @@ const SignUp = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1IiBoZWlnaHQ9IjUiPgo8cmVjdCB3aWR0aD0iNSIgaGVpZ2h0PSI1IiBmaWxsPSIjZmZmIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMwMDAwMDAwOSI+PC9yZWN0Pgo8L3N2Zz4=')] opacity-20"></div>
       </div>
 
-      <Link to="/" className="flex items-center space-x-2 mb-8 justify-center animate-fade-in">
-        <div className="relative w-12 h-12">
-          <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
-          <Book className="h-12 w-12 text-primary relative z-10" />
-        </div>
-        <span className="font-bold text-2xl bg-gradient-to-r from-indigo-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">Neplia IELTS</span>
-      </Link>
-      
-      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8 pt-16">
         {/* IELTS Skills Section */}
         <div className="hidden lg:block lg:col-span-2">
           <div className="bg-card/60 backdrop-blur-sm rounded-xl p-8 shadow-xl space-y-8 border border-white/10 h-full animate-fade-in">
