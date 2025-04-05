@@ -1,4 +1,3 @@
-
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 
@@ -104,13 +103,12 @@ export const processUploadedSourceCode = async (file: File) => {
         // Get the file name from the path
         const fileName = relativePath.split('/').pop() || '';
         
-        // Get the size safely
+        // Get the size safely - JSZipObject doesn't have uncompressedSize directly accessible
+        // We'll get file size information from the internal _data object if available, or default to 0
         let fileSize = 0;
-        try {
-          fileSize = zipEntry.uncompressedSize || 0;
-        } catch (e) {
-          console.warn('Could not get size for file:', relativePath);
-        }
+        
+        // Using optional chaining to safely access properties
+        fileSize = zipEntry._data?.compressedSize || 0;
         
         files.push({
           name: fileName,
@@ -229,4 +227,3 @@ export const generateInstallationInstructions = (domain: string): string => {
 
 For support, contact support@example.com
 `;
-};
