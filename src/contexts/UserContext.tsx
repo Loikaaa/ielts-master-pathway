@@ -217,6 +217,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     try {
       // First try to get detailed info
       const response = await fetch('https://ipapi.co/json/');
+      if (!response.ok) {
+        throw new Error('Failed to fetch IP info');
+      }
       const data = await response.json();
       
       if (data && data.ip) {
@@ -229,6 +232,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       
       // Fallback to just getting the IP
       const ipOnlyResponse = await fetch('https://api.ipify.org?format=json');
+      if (!ipOnlyResponse.ok) {
+        throw new Error('Failed to fetch IP');
+      }
       const ipData = await ipOnlyResponse.json();
       
       return {
@@ -288,7 +294,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         created: new Date(),
-        lastLogin: null,
+        lastLogin: new Date(),
         ipAddress: ipInfo.ip,
         country: ipInfo.country,
         countryCode: ipInfo.countryCode,
