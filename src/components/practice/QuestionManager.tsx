@@ -10,14 +10,14 @@ import SpeakingQuestionView from './SpeakingQuestionView';
 import ListeningQuestionView from './ListeningQuestionView';
 import ResultsView from './ResultsView';
 import { useToast } from '@/components/ui/use-toast';
-import { Clock, AlertTriangle, AlertCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Clock, AlertTriangle, AlertCircle, Loader2, ChevronLeft, ChevronRight, Star, Award, Info, BookOpen, Pencil, Mic, Headphones } from 'lucide-react';
 import { useQuestions } from '@/contexts/QuestionsContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface QuestionManagerProps {
   audioPermissionGranted?: boolean;
 }
 
-// Type guards to narrow down question types
 const isReadingQuestion = (question: Question): question is ReadingQuestion => 
   question.skillType === 'reading';
 
@@ -44,6 +44,21 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const [loadError, setLoadError] = useState<string | null>(null);
   const { toast } = useToast();
   const { questions: contextQuestions, loading: contextLoading } = useQuestions();
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
+
+  const getSkillColor = (skillType: string | undefined) => {
+    switch (skillType) {
+      case 'reading': return 'reading';
+      case 'writing': return 'writing';
+      case 'speaking': return 'speaking';
+      case 'listening': return 'listening';
+      default: return 'primary';
+    }
+  };
 
   useEffect(() => {
     if (contextLoading) {
@@ -225,7 +240,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   if (isLoading || contextLoading) {
     return (
       <div className="container mx-auto p-4 mt-4">
-        <Card>
+        <Card className="bg-white/90 backdrop-blur-sm border border-primary/20 shadow-lg">
           <CardContent className="p-6 text-center">
             <div className="flex justify-center mb-4">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -241,7 +256,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   if (loadError || !skillType || questions.length === 0) {
     return (
       <div className="container mx-auto p-4 mt-4">
-        <Card>
+        <Card className="bg-white/90 backdrop-blur-sm border border-primary/20 shadow-lg">
           <CardContent className="p-6 text-center">
             <div className="flex justify-center mb-4">
               <AlertCircle className="h-8 w-8 text-destructive" />
@@ -254,7 +269,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
                 ? `We couldn't find any ${skillType} questions${practiceId ? ` with ID ${practiceId}` : ''}. Try creating some in the admin panel.`
                 : 'No skill type specified. Please select a practice type.'}
             </p>
-            <Button onClick={backToDashboard}>
+            <Button onClick={backToDashboard} className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary/90 transition-all duration-300">
               <ChevronLeft className="h-4 w-4 mr-2" /> Back to Practice
             </Button>
           </CardContent>
@@ -281,19 +296,33 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
 
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+  const skillColor = getSkillColor(skillType);
 
   return (
-    <div className="container mx-auto p-4">
+    <motion.div 
+      className="container mx-auto p-4"
+      initial="hidden"
+      animate="visible"
+      variants={fadeInUp}
+    >
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold">
-            {skillType.charAt(0).toUpperCase() + skillType.slice(1)} Practice
-          </h2>
+          <div className="flex items-center">
+            <div className={`h-8 w-8 rounded-full bg-${skillColor} flex items-center justify-center mr-3 shadow-md`}>
+              {skillType === 'reading' && <BookOpen className="h-4 w-4 text-white" />}
+              {skillType === 'writing' && <Pencil className="h-4 w-4 text-white" />}
+              {skillType === 'speaking' && <Mic className="h-4 w-4 text-white" />}
+              {skillType === 'listening' && <Headphones className="h-4 w-4 text-white" />}
+            </div>
+            <h2 className={`text-2xl font-bold text-${skillColor}`}>
+              {skillType.charAt(0).toUpperCase() + skillType.slice(1)} Practice
+            </h2>
+          </div>
           
           {timeRemaining !== null && (
-            <div className="flex items-center bg-muted px-3 py-1 rounded-md">
-              <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
-              <span className={`${timeRemaining < 300 ? 'text-destructive font-bold' : ''}`}>
+            <div className={`flex items-center bg-${skillColor}/10 px-4 py-2 rounded-full border border-${skillColor}/20 shadow-sm`}>
+              <Clock className={`h-4 w-4 mr-2 text-${skillColor}`} />
+              <span className={`${timeRemaining < 300 ? 'text-destructive font-bold animate-pulse' : `text-${skillColor} font-medium`}`}>
                 Time: {formatTime(timeRemaining)}
               </span>
             </div>
@@ -309,43 +338,54 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
           </span>
         </div>
         
-        <Progress value={progress} className="h-2" />
+        <Progress value={progress} className={`h-2 bg-muted [&>div]:bg-${skillColor}`} />
       </div>
 
-      <Card className="mb-6">
+      <Card className={`mb-6 overflow-hidden border-${skillColor}/20 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm`}>
+        <div className={`h-1 w-full bg-${skillColor}`}></div>
         <CardContent className="p-0">
-          {isReadingQuestion(currentQuestion) && (
-            <ReadingQuestionView 
-              question={currentQuestion} 
-              onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]} 
-            />
-          )}
-          
-          {isWritingQuestion(currentQuestion) && (
-            <WritingQuestionView 
-              question={currentQuestion} 
-              onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]} 
-            />
-          )}
-          
-          {isSpeakingQuestion(currentQuestion) && (
-            <SpeakingQuestionView 
-              question={currentQuestion} 
-              onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]}
-              audioPermissionGranted={audioPermissionGranted}
-            />
-          )}
-          
-          {isListeningQuestion(currentQuestion) && (
-            <ListeningQuestionView 
-              question={currentQuestion} 
-              onAnswer={handleAnswer} 
-              answer={answers[currentQuestion.id]} 
-            />
-          )}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+            >
+              {isReadingQuestion(currentQuestion) && (
+                <ReadingQuestionView 
+                  question={currentQuestion} 
+                  onAnswer={handleAnswer} 
+                  answer={answers[currentQuestion.id]} 
+                />
+              )}
+              
+              {isWritingQuestion(currentQuestion) && (
+                <WritingQuestionView 
+                  question={currentQuestion} 
+                  onAnswer={handleAnswer} 
+                  answer={answers[currentQuestion.id]} 
+                />
+              )}
+              
+              {isSpeakingQuestion(currentQuestion) && (
+                <SpeakingQuestionView 
+                  question={currentQuestion} 
+                  onAnswer={handleAnswer} 
+                  answer={answers[currentQuestion.id]}
+                  audioPermissionGranted={audioPermissionGranted}
+                />
+              )}
+              
+              {isListeningQuestion(currentQuestion) && (
+                <ListeningQuestionView 
+                  question={currentQuestion} 
+                  onAnswer={handleAnswer} 
+                  answer={answers[currentQuestion.id]} 
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </CardContent>
       </Card>
 
@@ -354,21 +394,38 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
           variant="outline"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
+          className={`border-${skillColor}/30 hover:bg-${skillColor}/10 hover:text-${skillColor} transition-all`}
         >
           <ChevronLeft className="h-4 w-4 mr-2" /> Previous
         </Button>
         
         {currentQuestionIndex < questions.length - 1 ? (
-          <Button onClick={handleNext}>
+          <Button 
+            onClick={handleNext} 
+            className={`bg-${skillColor} hover:bg-${skillColor}/90 transition-all`}
+          >
             Next <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         ) : (
-          <Button onClick={handleSubmit} variant="default">
+          <Button 
+            onClick={handleSubmit} 
+            variant="default" 
+            className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary hover:to-primary/90 transition-all duration-300"
+          >
             Submit <ChevronRight className="h-4 w-4 ml-2" />
           </Button>
         )}
       </div>
-    </div>
+
+      <div className="fixed bottom-4 right-4 opacity-10 hover:opacity-30 transition-opacity">
+        <div className={`bg-${skillColor}/20 p-3 rounded-full`}>
+          {skillType === 'reading' && <Book className={`h-8 w-8 text-${skillColor}`} />}
+          {skillType === 'writing' && <Pencil className={`h-8 w-8 text-${skillColor}`} />}
+          {skillType === 'speaking' && <Mic className={`h-8 w-8 text-${skillColor}`} />}
+          {skillType === 'listening' && <Headphones className={`h-8 w-8 text-${skillColor}`} />}
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
