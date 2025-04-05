@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -28,6 +27,7 @@ import { UserProgressProvider } from "./contexts/UserProgressContext";
 import { UserProvider, useUser } from "./contexts/UserContext";
 import MaintenancePage from "./pages/MaintenancePage";
 import { isMaintenanceMode, getSettings, getAnalyticsConfig } from "./utils/settingsStorage";
+import BackendControl from "./components/BackendControl";
 
 const queryClient = new QueryClient();
 
@@ -37,24 +37,28 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log('AdminRoute: Current user:', currentUser);
-    console.log('AdminRoute: Is admin:', isAdmin);
-  }, [currentUser, isAdmin]);
+    console.log('AdminRoute check:');
+    console.log('- Current user:', currentUser);
+    console.log('- Is admin:', isAdmin);
+    console.log('- Current path:', location.pathname);
+    
+    if (!currentUser) {
+      console.log('- Status: Not logged in, will redirect to signin');
+    } else if (!isAdmin) {
+      console.log('- Status: Not admin, will redirect to dashboard');
+    } else {
+      console.log('- Status: Authorized admin, rendering content');
+    }
+  }, [currentUser, isAdmin, location]);
 
   if (!currentUser) {
-    // If not logged in, redirect to sign in
-    console.log('AdminRoute: Not logged in, redirecting to signin');
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   if (!isAdmin) {
-    console.log('AdminRoute: User is not an admin, redirecting to dashboard');
-    // If logged in but not admin, redirect to dashboard
     return <Navigate to="/dashboard" replace />;
   }
 
-  // User is admin, render the children
-  console.log('AdminRoute: User is admin, rendering children');
   return <>{children}</>;
 };
 
@@ -127,14 +131,12 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/exam-content" element={<ExamContent />} />
       
-      {/* Admin routes with protection - renamed route from admin-dashboard to admin */}
       <Route path="/admin" element={
         <AdminRoute>
           <AdminDashboard />
         </AdminRoute>
       } />
       
-      {/* Add redirect for the old admin-dashboard path */}
       <Route path="/admin-dashboard" element={<Navigate to="/admin" replace />} />
       
       <Route path="/admin-blog-manager" element={
@@ -143,7 +145,12 @@ const AppRoutes = () => {
         </AdminRoute>
       } />
       
-      {/* Catch all route */}
+      <Route path="/admin-backend" element={
+        <AdminRoute>
+          <BackendControl />
+        </AdminRoute>
+      } />
+      
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

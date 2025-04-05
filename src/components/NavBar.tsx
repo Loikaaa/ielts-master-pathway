@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from '@/contexts/UserContext';
@@ -20,6 +19,15 @@ const NavBar = () => {
   const location = useLocation();
   const { currentUser, isAdmin, logout } = useUser();
   
+  useEffect(() => {
+    if (currentUser) {
+      console.log('NavBar: User logged in:', currentUser.email);
+      console.log('NavBar: Is admin:', isAdmin);
+    } else {
+      console.log('NavBar: No user logged in');
+    }
+  }, [currentUser, isAdmin]);
+  
   const handleGoBack = () => {
     navigate(-1);
   };
@@ -34,7 +42,6 @@ const NavBar = () => {
     navigate('/');
   };
 
-  // Check if we're on the home page to hide navigation arrows
   const isHomePage = location.pathname === '/';
 
   return (
@@ -72,7 +79,6 @@ const NavBar = () => {
           </Link>
         </div>
         
-        {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-6">
           <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors">
             Home
@@ -95,6 +101,14 @@ const NavBar = () => {
                     My Dashboard
                   </Link>
                 </Button>
+                {isAdmin && (
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/admin">
+                      <Shield className="h-4 w-4 mr-2" />
+                      Admin
+                    </Link>
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={handleLogout}>
                   <LogIn className="h-4 w-4 mr-2" />
                   Logout
@@ -119,7 +133,6 @@ const NavBar = () => {
           </div>
         </div>
         
-        {/* Mobile Menu Button */}
         <button 
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -128,7 +141,6 @@ const NavBar = () => {
         </button>
       </div>
       
-      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-background border-b animate-fade-in">
           <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">

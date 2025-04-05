@@ -45,6 +45,7 @@ interface UserProviderProps {
   children: ReactNode;
 }
 
+// List of admin emails
 const ADMIN_EMAILS = ['admin@neplia.com', 'hhjkad@gmail.com'];
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
@@ -52,18 +53,26 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [users, setUsers] = useState<User[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  // Initialize user data from localStorage
   useEffect(() => {
     try {
+      // Load users from localStorage
       const storedUsers = localStorage.getItem('neplia_users');
       if (storedUsers) {
         setUsers(JSON.parse(storedUsers));
+      } else {
+        // If no users exist, create an admin user
+        console.log('No users found, creating default admin user');
+        createDefaultAdminUser();
       }
       
+      // Load current user from localStorage
       const storedCurrentUser = localStorage.getItem('neplia_current_user');
       if (storedCurrentUser) {
         const parsedUser = JSON.parse(storedCurrentUser);
         setCurrentUser(parsedUser);
         
+        // Check if user is admin
         const isUserAdmin = parsedUser?.isAdmin === true || ADMIN_EMAILS.includes(parsedUser?.email);
         console.log('User admin status:', isUserAdmin, 'Email:', parsedUser?.email);
         setIsAdmin(isUserAdmin);
@@ -73,12 +82,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   }, []);
 
+  // Persist users to localStorage when they change
   useEffect(() => {
     if (users.length > 0) {
       localStorage.setItem('neplia_users', JSON.stringify(users));
     }
   }, [users]);
 
+  // Persist current user to localStorage when it changes
   useEffect(() => {
     if (currentUser) {
       localStorage.setItem('neplia_current_user', JSON.stringify(currentUser));
@@ -86,16 +97,45 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       localStorage.removeItem('neplia_current_user');
     }
   }, [currentUser]);
+  
+  // Create default admin user if no users exist
+  const createDefaultAdminUser = () => {
+    const adminUser = {
+      id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      firstName: 'Admin',
+      lastName: 'User',
+      email: 'admin@neplia.com',
+      password: 'admin123',
+      testType: 'General',
+      targetScore: '8.0',
+      examDate: '2023-12-31',
+      created: new Date(),
+      isAdmin: true,
+      ipAddress: 'localhost',
+      country: 'System',
+      countryCode: 'SYS',
+      lastLogin: new Date()
+    };
+    
+    setUsers([adminUser]);
+    localStorage.setItem('neplia_users', JSON.stringify([adminUser]));
+    console.log('Default admin user created');
+  };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('UserContext: Attempting login for:', email);
       const storedUsers = localStorage.getItem('neplia_users');
-      if (!storedUsers) return false;
+      if (!storedUsers) {
+        console.log('UserContext: No users found in storage');
+        return false;
+      }
       
       const users: (User & { password: string })[] = JSON.parse(storedUsers);
       const user = users.find(u => u.email === email && u.password === password);
       
       if (user) {
+        console.log('UserContext: User found:', user.email);
         const ipInfo = await fetchUserIPInfo();
         
         const updatedUser = {
@@ -106,6 +146,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           lastLogin: new Date()
         };
         
+        // Update user data in users array
         const updatedUsers = users.map(u => 
           u.id === updatedUser.id 
             ? { ...u, ipAddress: ipInfo.ip, country: ipInfo.country, countryCode: ipInfo.countryCode, lastLogin: new Date() } 
@@ -114,15 +155,19 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         setUsers(updatedUsers);
         localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
         
+        // Remove password from user object before storing in state
         const { password, ...userWithoutPassword } = updatedUser;
         setCurrentUser(userWithoutPassword);
         
+        // Check if user is admin
         const isUserAdmin = user.isAdmin === true || ADMIN_EMAILS.includes(email);
-        console.log('Login successful, admin status:', isUserAdmin, 'Email:', email, 'IP:', ipInfo.ip, 'Country:', ipInfo.country);
+        console.log('UserContext: Login successful, admin status:', isUserAdmin);
         setIsAdmin(isUserAdmin);
         
         return true;
       }
+      
+      console.log('UserContext: Invalid credentials');
       return false;
     } catch (error) {
       console.error('Login error:', error);

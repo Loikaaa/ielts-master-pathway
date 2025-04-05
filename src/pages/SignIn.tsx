@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, LogIn, Mail, Lock, Loader2 } from 'lucide-react';
+import { Book, LogIn, Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,6 +37,8 @@ const SignIn = () => {
 
   // Extract the destination from location state (if present)
   const from = location.state?.from?.pathname || '/dashboard';
+  
+  console.log('SignIn: Attempted redirect from:', from);
 
   // Initialize form
   const form = useForm<SigninFormValues>({
@@ -47,6 +50,7 @@ const SignIn = () => {
   });
 
   const onSubmit = async (values: SigninFormValues) => {
+    console.log('SignIn: Attempting login with:', values.email);
     setIsSubmitting(true);
     try {
       // Call login function from UserContext
@@ -59,21 +63,28 @@ const SignIn = () => {
           description: "Welcome back to Neplia IELTS.",
         });
         
+        console.log('SignIn: Login successful, isAdmin:', isAdmin);
+        console.log('SignIn: Redirect destination:', from);
+        
         // If the user is an admin and being redirected from an admin page, send them there
         // Otherwise, go to dashboard
         if (isAdmin && from.includes('/admin')) {
-          navigate('/admin');
+          console.log('SignIn: Redirecting to admin page:', from);
+          navigate(from);
         } else if (isAdmin) {
           // If they're admin but not coming from admin page, ask if they want to go to admin
           toast({
             title: "Admin account detected",
             description: "You can access the admin dashboard from the navigation menu.",
           });
+          console.log('SignIn: Redirecting admin to dashboard');
           navigate('/dashboard');
         } else {
+          console.log('SignIn: Redirecting regular user to dashboard');
           navigate('/dashboard');
         }
       } else {
+        console.log('SignIn: Login failed - invalid credentials');
         toast({
           title: "Login failed",
           description: "Invalid email or password.",
@@ -161,6 +172,20 @@ const SignIn = () => {
                     Sign In with Email
                   </>
                 )}
+              </Button>
+              
+              {/* Admin login helper - adding back with a more discreet approach */}
+              <Button variant="ghost" 
+                className="w-full text-xs text-muted-foreground" 
+                type="button" 
+                onClick={() => {
+                  form.setValue('email', 'admin@neplia.com');
+                  form.setValue('password', 'admin123');
+                  console.log('SignIn: Admin credentials filled');
+                }}
+              >
+                <ShieldCheck className="mr-2 h-3 w-3" />
+                Admin Demo
               </Button>
               
               <div className="relative">
