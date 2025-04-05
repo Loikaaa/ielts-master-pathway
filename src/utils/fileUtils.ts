@@ -97,28 +97,30 @@ export const processUploadedSourceCode = async (file: File) => {
     let fileCount = 0;
     const MAX_FILES = 100;
     
-    zipData.forEach((relativePath, zipEntry) => {
-      if (fileCount >= MAX_FILES) return;
-      
-      if (!zipEntry.dir) {
-        // Get the file name from the path
-        const fileName = relativePath.split('/').pop() || '';
-        
-        // Get the size safely - JSZipObject doesn't have uncompressedSize directly accessible
-        // We'll get file size information from the internal _data object if available, or default to 0
-        let fileSize = 0;
-        
-        // Using optional chaining to safely access properties
-        fileSize = zipEntry._data?.compressedSize || 0;
-        
-        files.push({
-          name: fileName,
-          path: relativePath,
-          size: fileSize
-        });
-        fileCount++;
-      }
-    });
+    // Process each file in the zip
+    const processFiles = await Promise.all(
+      Object.values(zipData.files)
+        .filter(zipEntry => !zipEntry.dir && fileCount < MAX_FILES)
+        .map(async (zipEntry) => {
+          // Get the file name from the path
+          const fileName = zipEntry.name.split('/').pop() || '';
+          
+          // Instead of accessing _data property directly, we'll just use a default size
+          // JSZip doesn't expose file size in its public API in a straightforward way
+          let fileSize = 0;
+          
+          // Increment file counter
+          fileCount++;
+          
+          return {
+            name: fileName,
+            path: zipEntry.name,
+            size: fileSize
+          };
+        })
+    );
+    
+    files.push(...processFiles);
     
     return {
       success: true,
