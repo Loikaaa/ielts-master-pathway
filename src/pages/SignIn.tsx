@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { Book, LogIn, Mail, Lock, Loader2, ShieldCheck } from 'lucide-react';
+import { Book, LogIn, Mail, Lock, Loader2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -162,19 +161,6 @@ const SignIn = () => {
                     Sign In with Email
                   </>
                 )}
-              </Button>
-              
-              {/* Admin login shortcut */}
-              <Button variant="outline" 
-                className="w-full border-primary/30 bg-primary/5" 
-                type="button" 
-                onClick={() => {
-                  form.setValue('email', 'admin@neplia.com');
-                  form.setValue('password', 'admin123');
-                }}
-              >
-                <ShieldCheck className="mr-2 h-4 w-4 text-primary" />
-                Fill Admin Credentials
               </Button>
               
               <div className="relative">
