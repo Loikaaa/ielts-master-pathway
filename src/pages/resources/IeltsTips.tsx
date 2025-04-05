@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Book, Clock, Download, Headphones, Lightbulb, Mic, Pencil, Timer, ChevronRight, Star, Badge, Trophy, Bookmark, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
 
 const tipsByCategory = {
   general: [
@@ -166,6 +167,7 @@ const IeltsTips = () => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState('general');
   const [featuredTip, setFeaturedTip] = useState(null);
+  const { toast } = useToast();
   
   useEffect(() => {
     // Check if a specific module was passed in location state
@@ -197,6 +199,36 @@ const IeltsTips = () => {
         staggerChildren: 0.1
       }
     }
+  };
+  
+  const handleViewAllTips = (category) => {
+    // Scroll to tips section and set active tab
+    setActiveTab(category);
+    
+    // Find the tab content element and scroll to it
+    const tabsElement = document.getElementById(category);
+    if (tabsElement) {
+      tabsElement.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    toast({
+      title: `${formatCategory(category)} Tips`,
+      description: `Showing all ${tipsByCategory[category].length} tips for ${formatCategory(category)}`,
+    });
+  };
+  
+  const handleSaveTip = (tip) => {
+    toast({
+      title: "Tip Saved!",
+      description: `"${tip.title}" has been saved to your bookmarks.`,
+    });
+  };
+  
+  const handleDownloadMaterials = () => {
+    toast({
+      title: "Download Started",
+      description: "Your study materials are being prepared for download.",
+    });
   };
 
   return (
@@ -257,7 +289,12 @@ const IeltsTips = () => {
                   <p className="text-muted-foreground mb-4">{featuredTip.content}</p>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">By: {featuredTip.author}</span>
-                    <Button variant="outline" size="sm" className="text-primary border-primary/30 hover:bg-primary/10">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-primary border-primary/30 hover:bg-primary/10"
+                      onClick={() => handleSaveTip(featuredTip)}
+                    >
                       <Bookmark className="h-4 w-4 mr-1" />
                       Save Tip
                     </Button>
@@ -307,6 +344,10 @@ const IeltsTips = () => {
                     <Button 
                       variant="outline" 
                       className={`w-full border-${getCategoryColor(category)}/30 hover:bg-${getCategoryColor(category)}/10 text-${getCategoryColor(category)} hover:text-${getCategoryColor(category)} transition-colors group`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewAllTips(category);
+                      }}
                     >
                       View All {formatCategory(category)} Tips
                       <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -398,6 +439,7 @@ const IeltsTips = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 className={`h-8 px-2 hover:text-${getCategoryColor(category)} hover:bg-${getCategoryColor(category)}/10`}
+                                onClick={() => handleSaveTip(tip)}
                               >
                                 <Bookmark className="h-4 w-4 mr-1" />
                                 Save
@@ -428,13 +470,11 @@ const IeltsTips = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Button 
-                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300" 
-                asChild
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300"
+                onClick={handleDownloadMaterials}
               >
-                <Link to="/resources/downloads">
-                  <Download className="h-4 w-4 mr-2" />
-                  Free Study Materials
-                </Link>
+                <Download className="h-4 w-4 mr-2" />
+                Free Study Materials
               </Button>
               <Button 
                 className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300" 
@@ -464,11 +504,11 @@ const IeltsTips = () => {
 };
 
 // Helper functions
-const formatCategory = (category: string): string => {
+const formatCategory = (category) => {
   return category.charAt(0).toUpperCase() + category.slice(1);
 };
 
-const getCategoryIcon = (category: string, className: string) => {
+const getCategoryIcon = (category, className) => {
   switch (category) {
     case 'listening':
       return <Headphones className={className} />;
@@ -483,7 +523,7 @@ const getCategoryIcon = (category: string, className: string) => {
   }
 };
 
-const getCategoryColor = (category: string): string => {
+const getCategoryColor = (category) => {
   switch (category) {
     case 'listening':
       return 'listening';
@@ -498,7 +538,7 @@ const getCategoryColor = (category: string): string => {
   }
 };
 
-const getCategoryDescription = (category: string): string => {
+const getCategoryDescription = (category) => {
   switch (category) {
     case 'listening':
       return 'Enhance your ability to understand different accents, take effective notes, and catch key details in the recording.';

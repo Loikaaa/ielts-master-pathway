@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Clock, User, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 interface BlogPostProps {
@@ -23,16 +23,23 @@ interface BlogPostProps {
 }
 
 const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
+  const navigate = useNavigate();
+  
   // Calculate read time if not provided
   const readTime = post.readTime || 
     (post.content ? `${Math.max(3, Math.ceil(post.content.length / 1000))} min read` : '5 min read');
 
   // Ensure we have a valid post ID for linking
   const postId = post.id || `post-${Date.now()}`;
+  
+  const handleReadMore = (e) => {
+    e.preventDefault();
+    navigate(`/resources/blog/${postId}`);
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col group">
-      <Link to={`/resources/blog/${postId}`} className="flex-grow flex flex-col">
+      <div className="flex-grow flex flex-col">
         <div className="relative h-48 overflow-hidden">
           <img 
             src={post.coverImage || 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'} 
@@ -65,7 +72,7 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
             ))}
           </div>
         </CardContent>
-      </Link>
+      </div>
       
       <CardFooter className="border-t pt-4 flex justify-between items-center">
         <div className="flex items-center">
@@ -82,6 +89,15 @@ const BlogPostCard: React.FC<BlogPostProps> = ({ post }) => {
             <span>{readTime}</span>
           </div>
         </div>
+      </CardFooter>
+      <CardFooter className="pt-0">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-center text-primary hover:text-primary/80 hover:bg-primary/5"
+          onClick={handleReadMore}
+        >
+          Read More <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
       </CardFooter>
     </Card>
   );

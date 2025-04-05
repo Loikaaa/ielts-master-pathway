@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Star, Quote, MapPin, X, Share2 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -70,7 +69,7 @@ const testimonials = [
 ];
 
 const TestimonialsSection = () => {
-  const [selectedStory, setSelectedStory] = useState<null | typeof testimonials[0]>(null);
+  const [selectedStory, setSelectedStory] = useState<typeof testimonials[0] | null>(null);
   const { toast } = useToast();
 
   const handleShareStory = () => {
@@ -193,59 +192,63 @@ const TestimonialsSection = () => {
       {/* Full Story Dialog */}
       <Dialog open={!!selectedStory} onOpenChange={(open) => !open && setSelectedStory(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl flex items-center gap-2">
-              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-              Success Story: {selectedStory?.name} from {selectedStory?.country}
-            </DialogTitle>
-            <DialogDescription>
-              Achieved an IELTS score of <span className="font-bold text-primary">{selectedStory?.score}</span>
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="mt-4 space-y-6">
-            {selectedStory?.storyImage && (
-              <div className="rounded-lg overflow-hidden h-64 w-full">
-                <img 
-                  src={selectedStory.storyImage} 
-                  alt={`${selectedStory.name}'s IELTS journey`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-            
-            <div className="flex items-start gap-4">
-              <img 
-                src={selectedStory?.image} 
-                alt={selectedStory?.name}
-                className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/20 flex-shrink-0 mt-1"
-              />
-              <div>
-                <h3 className="text-xl font-semibold">{selectedStory?.name}</h3>
-                <p className="text-muted-foreground">
-                  {selectedStory?.country} • Band Score: {selectedStory?.score}
-                </p>
-                <p className="mt-4 text-lg leading-relaxed">
-                  {selectedStory?.fullStory}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex justify-between pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={handleShareStory}
-                className="flex items-center gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                Share This Story
-              </Button>
+          {selectedStory && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl flex items-center gap-2">
+                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  Success Story: {selectedStory.name} from {selectedStory.country}
+                </DialogTitle>
+                <DialogDescription>
+                  Achieved an IELTS score of <span className="font-bold text-primary">{selectedStory.score}</span>
+                </DialogDescription>
+              </DialogHeader>
               
-              <DialogClose asChild>
-                <Button variant="default">Close</Button>
-              </DialogClose>
-            </div>
-          </div>
+              <div className="mt-4 space-y-6">
+                {selectedStory.storyImage && (
+                  <div className="rounded-lg overflow-hidden h-64 w-full">
+                    <img 
+                      src={selectedStory.storyImage} 
+                      alt={`${selectedStory.name}'s IELTS journey`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex items-start gap-4">
+                  <img 
+                    src={selectedStory.image} 
+                    alt={selectedStory.name}
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/20 flex-shrink-0 mt-1"
+                  />
+                  <div>
+                    <h3 className="text-xl font-semibold">{selectedStory.name}</h3>
+                    <p className="text-muted-foreground">
+                      {selectedStory.country} • Band Score: {selectedStory.score}
+                    </p>
+                    <p className="mt-4 text-lg leading-relaxed">
+                      {selectedStory.fullStory}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-between pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleShareStory}
+                    className="flex items-center gap-2"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    Share This Story
+                  </Button>
+                  
+                  <DialogClose asChild>
+                    <Button variant="default">Close</Button>
+                  </DialogClose>
+                </div>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </section>
