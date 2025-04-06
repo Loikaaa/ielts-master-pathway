@@ -332,126 +332,161 @@ const NavBar = () => {
         </button>
       </div>
       
-      {/* Mobile Navigation Menu with Enhanced Design */}
+      {/* Mobile Navigation Menu with Improved Design */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-gradient-to-b from-background/98 to-background/95 backdrop-blur-md animate-in slide-in-from-top duration-300">
-          <div className="container h-[calc(100vh-61px)] flex flex-col overflow-hidden">
-            {/* Main navigation grid */}
-            <div className="px-2 py-6 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar">
-              {/* Main Menu Cards */}
+        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/98 backdrop-blur-lg animate-in fade-in duration-200">
+          <div className="h-[calc(100vh-61px)] flex flex-col overflow-y-auto custom-scrollbar">
+            {/* Main navigation sections */}
+            <div className="grid grid-cols-2 gap-4 p-4">
               <Link 
                 to="/" 
-                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl shadow-sm border border-primary/10 hover:border-primary/30 transition-all duration-300"
+                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
+                style={{
+                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
+                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
+                }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary mb-3">
-                  <Home className="h-6 w-6" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 mb-3">
+                  <Home className="h-6 w-6 text-primary" />
                 </div>
                 <span className="font-medium">Home</span>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full blur-xl"></div>
               </Link>
               
               <Link 
                 to="/practice" 
-                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl shadow-sm border border-secondary/10 hover:border-secondary/30 transition-all duration-300"
+                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
+                style={{
+                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
+                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
+                }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-secondary/10 text-secondary mb-3">
-                  <BookOpen className="h-6 w-6" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-secondary/10 to-secondary/5 mb-3">
+                  <BookOpen className="h-6 w-6 text-secondary" />
                 </div>
                 <span className="font-medium">Practice</span>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-secondary/5 rounded-full blur-xl"></div>
               </Link>
               
               <Link 
                 to="/community" 
-                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-xl shadow-sm border border-blue-500/10 hover:border-blue-500/30 transition-all duration-300"
+                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
+                style={{
+                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
+                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
+                }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500 mb-3">
-                  <Users className="h-6 w-6" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-400/10 to-blue-500/5 mb-3">
+                  <Users className="h-6 w-6 text-blue-500" />
                 </div>
                 <span className="font-medium">Community</span>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-blue-500/5 rounded-full blur-xl"></div>
               </Link>
               
               <Link 
                 to="/resources" 
-                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-500/5 to-purple-500/10 rounded-xl shadow-sm border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
+                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
+                style={{
+                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
+                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
+                }}
               >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/10 text-purple-500 mb-3">
-                  <Library className="h-6 w-6" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-400/10 to-purple-500/5 mb-3">
+                  <Library className="h-6 w-6 text-purple-500" />
                 </div>
                 <span className="font-medium">Resources</span>
+                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-purple-500/5 rounded-full blur-xl"></div>
               </Link>
             </div>
             
-            {/* IELTS Skills section with enhanced design */}
-            <div className="px-4 mt-2 mb-4">
-              <div className="relative py-4 mb-3">
-                <h3 className="font-semibold text-lg text-center">IELTS Skills</h3>
-                <div className="absolute left-0 right-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+            {/* IELTS Skills section */}
+            <div className="px-4 mt-4">
+              <div className="relative py-4 mb-3 flex items-center justify-center">
+                <div className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+                <h3 className="font-semibold text-lg relative bg-background px-4 z-10">IELTS Skills</h3>
               </div>
               
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <Link 
                   to="/practice?skill=reading" 
-                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-reading/20 hover:border-reading/40 transition-all duration-300"
+                  className="group p-4 rounded-xl shadow-sm flex flex-col"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(236,72,153,0.05) 0%, rgba(236,72,153,0.1) 100%)",
+                    border: "1px solid rgba(236,72,153,0.1)"
+                  }}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-reading/10 text-reading group-hover:scale-110 transition-transform">
-                      <BookMarked className="h-4 w-4" />
+                  <div className="flex items-center mb-2">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-pink-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
+                      <BookMarked className="h-5 w-5 text-pink-500" />
                     </div>
-                    <span className="font-medium text-reading">Reading</span>
+                    <span className="font-medium text-pink-500">Reading</span>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground pl-12">
                     Improve comprehension skills
                   </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=writing" 
-                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-writing/20 hover:border-writing/40 transition-all duration-300"
+                  className="group p-4 rounded-xl shadow-sm flex flex-col"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(16,185,129,0.1) 100%)",
+                    border: "1px solid rgba(16,185,129,0.1)"
+                  }}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-writing/10 text-writing group-hover:scale-110 transition-transform">
-                      <BookOpen className="h-4 w-4" />
+                  <div className="flex items-center mb-2">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
+                      <BookOpen className="h-5 w-5 text-emerald-500" />
                     </div>
-                    <span className="font-medium text-writing">Writing</span>
+                    <span className="font-medium text-emerald-500">Writing</span>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground pl-12">
                     Master essay techniques
                   </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=speaking" 
-                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-speaking/20 hover:border-speaking/40 transition-all duration-300"
+                  className="group p-4 rounded-xl shadow-sm flex flex-col"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(99,102,241,0.1) 100%)",
+                    border: "1px solid rgba(99,102,241,0.1)"
+                  }}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-speaking/10 text-speaking group-hover:scale-110 transition-transform">
-                      <Globe className="h-4 w-4" />
+                  <div className="flex items-center mb-2">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
+                      <Globe className="h-5 w-5 text-indigo-500" />
                     </div>
-                    <span className="font-medium text-speaking">Speaking</span>
+                    <span className="font-medium text-indigo-500">Speaking</span>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground pl-12">
                     Practice pronunciation
                   </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=listening" 
-                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-listening/20 hover:border-listening/40 transition-all duration-300"
+                  className="group p-4 rounded-xl shadow-sm flex flex-col"
                   onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(245,158,11,0.1) 100%)",
+                    border: "1px solid rgba(245,158,11,0.1)"
+                  }}
                 >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-listening/10 text-listening group-hover:scale-110 transition-transform">
-                      <Sparkles className="h-4 w-4" />
+                  <div className="flex items-center mb-2">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-amber-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
+                      <Sparkles className="h-5 w-5 text-amber-500" />
                     </div>
-                    <span className="font-medium text-listening">Listening</span>
+                    <span className="font-medium text-amber-500">Listening</span>
                   </div>
-                  <p className="text-xs text-muted-foreground line-clamp-2">
+                  <p className="text-xs text-muted-foreground pl-12">
                     Train with diverse accents
                   </p>
                 </Link>
@@ -460,45 +495,66 @@ const NavBar = () => {
             
             {/* User Dashboard section */}
             {currentUser && (
-              <Link 
-                to="/dashboard" 
-                className="mx-4 p-4 mb-4 bg-gradient-to-r from-indigo-500/5 to-primary/5 rounded-xl shadow-sm border border-primary/20 hover:border-primary/30 flex items-center gap-3 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-grow">
-                  <span className="font-medium text-sm">My Dashboard</span>
-                  <p className="text-xs text-muted-foreground">Track your progress</p>
-                </div>
-              </Link>
+              <div className="px-4 mt-6">
+                <Link 
+                  to="/dashboard" 
+                  className="relative overflow-hidden p-4 rounded-xl shadow-sm flex items-center gap-3 transition-all duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
+                    boxShadow: "3px 3px 6px #d9d9d9, -3px -3px 6px #ffffff"
+                  }}
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <User className="h-5 w-5 text-primary" />
+                  </div>
+                  <div className="flex-grow">
+                    <span className="font-medium text-sm">My Dashboard</span>
+                    <p className="text-xs text-muted-foreground">Track your progress</p>
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/5 rounded-full blur-xl"></div>
+                </Link>
+              </div>
             )}
             
-            {/* Admin panel link with enhanced design */}
+            {/* Admin panel link */}
             {isAdmin && currentUser && (
-              <Link 
-                to="/admin" 
-                className="mx-4 p-4 mb-4 bg-gradient-to-r from-amber-100 to-amber-50 rounded-xl shadow-sm border border-amber-200 flex items-center gap-3 transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-amber-600" />
-                </div>
-                <div className="flex-grow">
-                  <span className="font-medium text-amber-800 text-sm">Admin Panel</span>
-                  <p className="text-xs text-amber-700/70">Manage your site</p>
-                </div>
-              </Link>
+              <div className="px-4 mt-4">
+                <Link 
+                  to="/admin" 
+                  className="relative overflow-hidden p-4 rounded-xl shadow-sm flex items-center gap-3 transition-all duration-300"
+                  onClick={() => setIsMenuOpen(false)}
+                  style={{
+                    background: "linear-gradient(145deg, #fff8e6, #fffdf0)",
+                    boxShadow: "3px 3px 6px #e6e0cf, -3px -3px 6px #fffff7"
+                  }}
+                >
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                    <Shield className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div className="flex-grow">
+                    <span className="font-medium text-amber-800 text-sm">Admin Panel</span>
+                    <p className="text-xs text-amber-700/70">Manage your site</p>
+                  </div>
+                  <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-amber-500/5 rounded-full blur-xl"></div>
+                </Link>
+              </div>
             )}
             
-            {/* Auth buttons with beautiful design */}
-            <div className="mt-auto p-4 border-t border-border/30">
+            {/* Auth buttons */}
+            <div className="px-4 mt-auto sticky bottom-0 pt-4 pb-6 bg-background/90 backdrop-blur-sm">
+              <div className="relative py-4 mb-2 flex items-center justify-center">
+                <div className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+                <div className="font-medium text-sm relative bg-background px-4 z-10 text-muted-foreground">
+                  {currentUser ? 'Account' : 'Get Started'}
+                </div>
+              </div>
+              
               <div className="grid grid-cols-2 gap-3">
                 {currentUser ? (
                   <Button 
                     variant="outline" 
-                    className="w-full h-12 rounded-xl shadow-sm border-rose-200 hover:border-rose-300 bg-gradient-to-b from-rose-50 to-white text-rose-600 hover:text-rose-700" 
+                    className="h-12 rounded-xl flex items-center justify-center border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700" 
                     onClick={handleLogout}
                   >
                     <LogIn className="h-4 w-4 mr-2" />
@@ -508,7 +564,7 @@ const NavBar = () => {
                   <>
                     <Button 
                       variant="outline" 
-                      className="w-full h-12 rounded-xl shadow-sm flex items-center justify-center gap-2" 
+                      className="h-12 rounded-xl flex items-center justify-center gap-2" 
                       asChild
                     >
                       <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
@@ -518,7 +574,7 @@ const NavBar = () => {
                     </Button>
                     
                     <Button 
-                      className="w-full h-12 rounded-xl shadow-sm bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300" 
+                      className="h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300 shadow-md" 
                       asChild
                     >
                       <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
