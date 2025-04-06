@@ -15,7 +15,10 @@ import {
   Home,
   BookOpen,
   Users,
-  Library
+  Library,
+  Sparkles,
+  Globe,
+  BookMarked
 } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -36,6 +39,19 @@ const NavBar = () => {
   const location = useLocation();
   const { currentUser, isAdmin, logout } = useUser();
   const isMobile = useIsMobile();
+  
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMenuOpen]);
   
   useEffect(() => {
     // Track scrolling to add shadow/background effect
@@ -101,7 +117,7 @@ const NavBar = () => {
               <div className="flex items-center justify-center h-10 w-10 rounded-md bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white shadow-md">
                 <span className="font-bold text-xl">N</span>
               </div>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-white"></div>
+              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
             </div>
             <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">IELTS</span>
           </Link>
@@ -308,144 +324,211 @@ const NavBar = () => {
         )}
         
         <button 
-          className="md:hidden"
+          className="md:hidden relative z-20 w-10 h-10 flex items-center justify-center rounded-full bg-primary/5 hover:bg-primary/10 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
       
+      {/* Mobile Navigation Menu with Enhanced Design */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/95 backdrop-blur-sm animate-in slide-in-from-top-5 duration-300">
-          <div className="container mx-auto px-4 py-6 flex flex-col space-y-6 h-[calc(100vh-61px)] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-gradient-to-b from-background/98 to-background/95 backdrop-blur-md animate-in slide-in-from-top duration-300">
+          <div className="container h-[calc(100vh-61px)] flex flex-col overflow-hidden">
+            {/* Main navigation grid */}
+            <div className="px-2 py-6 grid grid-cols-2 gap-3 overflow-y-auto custom-scrollbar">
+              {/* Main Menu Cards */}
               <Link 
                 to="/" 
-                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl shadow-sm border border-primary/10 hover:border-primary/30 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Home className="h-6 w-6 mb-2 text-primary" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-primary/10 text-primary mb-3">
+                  <Home className="h-6 w-6" />
+                </div>
                 <span className="font-medium">Home</span>
               </Link>
               
               <Link 
                 to="/practice" 
-                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-xl shadow-sm border border-secondary/10 hover:border-secondary/30 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <BookOpen className="h-6 w-6 mb-2 text-primary" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-secondary/10 text-secondary mb-3">
+                  <BookOpen className="h-6 w-6" />
+                </div>
                 <span className="font-medium">Practice</span>
               </Link>
               
               <Link 
                 to="/community" 
-                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-blue-500/5 to-blue-500/10 rounded-xl shadow-sm border border-blue-500/10 hover:border-blue-500/30 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Users className="h-6 w-6 mb-2 text-primary" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-blue-500/10 text-blue-500 mb-3">
+                  <Users className="h-6 w-6" />
+                </div>
                 <span className="font-medium">Community</span>
               </Link>
               
               <Link 
                 to="/resources" 
-                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                className="flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-500/5 to-purple-500/10 rounded-xl shadow-sm border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Library className="h-6 w-6 mb-2 text-primary" />
+                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-purple-500/10 text-purple-500 mb-3">
+                  <Library className="h-6 w-6" />
+                </div>
                 <span className="font-medium">Resources</span>
               </Link>
             </div>
             
-            <div className="mt-2 space-y-3">
-              <h3 className="font-medium text-lg px-2">IELTS Skills</h3>
+            {/* IELTS Skills section with enhanced design */}
+            <div className="px-4 mt-2 mb-4">
+              <div className="relative py-4 mb-3">
+                <h3 className="font-semibold text-lg text-center">IELTS Skills</h3>
+                <div className="absolute left-0 right-0 bottom-0 h-0.5 bg-gradient-to-r from-transparent via-border to-transparent"></div>
+              </div>
+              
               <div className="grid grid-cols-2 gap-3">
                 <Link 
                   to="/practice?skill=reading" 
-                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-reading/20 hover:border-reading/40 transition-colors"
+                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-reading/20 hover:border-reading/40 transition-all duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="font-medium text-reading">Reading</span>
-                  <span className="text-xs text-muted-foreground line-clamp-2">Improve comprehension skills</span>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-reading/10 text-reading group-hover:scale-110 transition-transform">
+                      <BookMarked className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium text-reading">Reading</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    Improve comprehension skills
+                  </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=writing" 
-                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-writing/20 hover:border-writing/40 transition-colors"
+                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-writing/20 hover:border-writing/40 transition-all duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="font-medium text-writing">Writing</span>
-                  <span className="text-xs text-muted-foreground line-clamp-2">Master essay techniques</span>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-writing/10 text-writing group-hover:scale-110 transition-transform">
+                      <BookOpen className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium text-writing">Writing</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    Master essay techniques
+                  </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=speaking" 
-                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-speaking/20 hover:border-speaking/40 transition-colors"
+                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-speaking/20 hover:border-speaking/40 transition-all duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="font-medium text-speaking">Speaking</span>
-                  <span className="text-xs text-muted-foreground line-clamp-2">Practice pronunciation</span>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-speaking/10 text-speaking group-hover:scale-110 transition-transform">
+                      <Globe className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium text-speaking">Speaking</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    Practice pronunciation
+                  </p>
                 </Link>
                 
                 <Link 
                   to="/practice?skill=listening" 
-                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-listening/20 hover:border-listening/40 transition-colors"
+                  className="group p-4 bg-white/5 rounded-xl shadow-sm border border-listening/20 hover:border-listening/40 transition-all duration-300"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  <span className="font-medium text-listening">Listening</span>
-                  <span className="text-xs text-muted-foreground line-clamp-2">Train with diverse accents</span>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-listening/10 text-listening group-hover:scale-110 transition-transform">
+                      <Sparkles className="h-4 w-4" />
+                    </div>
+                    <span className="font-medium text-listening">Listening</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    Train with diverse accents
+                  </p>
                 </Link>
               </div>
             </div>
             
+            {/* User Dashboard section */}
             {currentUser && (
               <Link 
                 to="/dashboard" 
-                className="flex items-center justify-center p-4 mt-2 bg-primary/10 rounded-lg text-primary border border-primary/20"
+                className="mx-4 p-4 mb-4 bg-gradient-to-r from-indigo-500/5 to-primary/5 rounded-xl shadow-sm border border-primary/20 hover:border-primary/30 flex items-center gap-3 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <User className="h-5 w-5 mr-2" />
-                <span className="font-medium">My Dashboard</span>
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-grow">
+                  <span className="font-medium text-sm">My Dashboard</span>
+                  <p className="text-xs text-muted-foreground">Track your progress</p>
+                </div>
               </Link>
             )}
             
+            {/* Admin panel link with enhanced design */}
             {isAdmin && currentUser && (
               <Link 
                 to="/admin" 
-                className="flex items-center justify-center p-4 bg-amber-50 text-amber-800 rounded-lg border border-amber-200"
+                className="mx-4 p-4 mb-4 bg-gradient-to-r from-amber-100 to-amber-50 rounded-xl shadow-sm border border-amber-200 flex items-center gap-3 transition-all duration-300"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Shield className="h-5 w-5 mr-2 text-amber-600" />
-                <span className="font-medium">Admin Panel</span>
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Shield className="h-5 w-5 text-amber-600" />
+                </div>
+                <div className="flex-grow">
+                  <span className="font-medium text-amber-800 text-sm">Admin Panel</span>
+                  <p className="text-xs text-amber-700/70">Manage your site</p>
+                </div>
               </Link>
             )}
             
-            <div className="mt-auto grid grid-cols-2 gap-4">
-              {currentUser ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={handleLogout}
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              ) : (
-                <>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                      <LogIn className="h-4 w-4 mr-2" />
-                      Sign In
-                    </Link>
+            {/* Auth buttons with beautiful design */}
+            <div className="mt-auto p-4 border-t border-border/30">
+              <div className="grid grid-cols-2 gap-3">
+                {currentUser ? (
+                  <Button 
+                    variant="outline" 
+                    className="w-full h-12 rounded-xl shadow-sm border-rose-200 hover:border-rose-300 bg-gradient-to-b from-rose-50 to-white text-rose-600 hover:text-rose-700" 
+                    onClick={handleLogout}
+                  >
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Logout
                   </Button>
-                  <Button className="w-full" asChild>
-                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      Sign Up
-                    </Link>
-                  </Button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full h-12 rounded-xl shadow-sm flex items-center justify-center gap-2" 
+                      asChild
+                    >
+                      <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                        <LogIn className="h-4 w-4" />
+                        <span>Sign In</span>
+                      </Link>
+                    </Button>
+                    
+                    <Button 
+                      className="w-full h-12 rounded-xl shadow-sm bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300" 
+                      asChild
+                    >
+                      <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        <span>Sign Up</span>
+                      </Link>
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>

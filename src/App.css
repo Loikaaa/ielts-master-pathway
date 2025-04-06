@@ -127,3 +127,48 @@ body {
 .auth-bg {
   background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(147, 51, 234, 0.05) 100%);
 }
+
+/* Custom scrollbar styles */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(99, 102, 241, 0.3);
+  border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(99, 102, 241, 0.5);
+}
+
+/* Enhanced mobile menu animations */
+@keyframes menu-item-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-menu-item {
+  animation: menu-item-appear 0.3s ease-out forwards;
+}
+
+/* Staggered appearance for menu items */
+.mobile-menu-item:nth-child(1) { animation-delay: 0.05s; }
+.mobile-menu-item:nth-child(2) { animation-delay: 0.1s; }
+.mobile-menu-item:nth-child(3) { animation-delay: 0.15s; }
+.mobile-menu-item:nth-child(4) { animation-delay: 0.2s; }
