@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -221,46 +222,49 @@ const Practice = () => {
                     const displayTitle = getQuestionDisplayTitle(question);
                     
                     return (
-                      <Card key={idx} className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30`}>
-                        <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
-                        <CardHeader className="pb-2">
-                          <div className="flex justify-between items-start">
-                            <CardTitle className="text-lg flex items-center">
-                              <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
-                              {displayTitle.substring(0, 25)}
-                              {displayTitle.length > 25 && '...'}
-                            </CardTitle>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <Bookmark className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <CardDescription className="mt-1">
-                            {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Test
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="text-sm">
-                          <div className="flex items-center mb-2">
-                            <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-                            <span className="text-muted-foreground">
-                              {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
-                            </span>
-                          </div>
-                          <div className="flex items-center">
-                            <Trophy className="h-4 w-4 text-amber-500 mr-1" />
-                            <span className="text-muted-foreground">Difficulty: Medium</span>
-                          </div>
-                        </CardContent>
-                        <CardFooter className="pt-0">
-                          <Button 
-                            asChild 
-                            className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
-                          >
-                            <Link to={`/practice/session/${question.skillType}/${question.id}`}>
+                      <Link 
+                        key={idx} 
+                        to={`/practice/session/${question.skillType}/${question.id}`}
+                        className="block"
+                      >
+                        <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30 hover:border-${skillType?.color || 'primary'} cursor-pointer`}>
+                          <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg flex items-center">
+                                <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
+                                {displayTitle.substring(0, 25)}
+                                {displayTitle.length > 25 && '...'}
+                              </CardTitle>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Bookmark className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <CardDescription className="mt-1">
+                              {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Test
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="text-sm">
+                            <div className="flex items-center mb-2">
+                              <Clock className="h-4 w-4 text-muted-foreground mr-1" />
+                              <span className="text-muted-foreground">
+                                {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Trophy className="h-4 w-4 text-amber-500 mr-1" />
+                              <span className="text-muted-foreground">Difficulty: {question.difficulty || 'Medium'}</span>
+                            </div>
+                          </CardContent>
+                          <CardFooter className="pt-0">
+                            <Button 
+                              className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
+                            >
                               Start Practice
-                            </Link>
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </Link>
                     );
                   })}
                 </div>
@@ -273,46 +277,49 @@ const Practice = () => {
                       const displayTitle = getQuestionDisplayTitle(question);
                       
                       return (
-                        <Card key={idx} className={`overflow-hidden hover:shadow-lg transition-all border-${skill.color}/30`}>
-                          <div className={`h-2 w-full bg-${skill.color}`}></div>
-                          <CardHeader className="pb-2">
-                            <div className="flex justify-between items-start">
-                              <CardTitle className="text-lg flex items-center">
-                                <skill.icon className={`h-5 w-5 mr-2 text-${skill.color}`} />
-                                {displayTitle.substring(0, 25)}
-                                {displayTitle.length > 25 && '...'}
-                              </CardTitle>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <Bookmark className="h-4 w-4" />
-                              </Button>
-                            </div>
-                            <CardDescription className="mt-1">
-                              {skill.name} Test
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent className="text-sm">
-                            <div className="flex items-center mb-2">
-                              <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-                              <span className="text-muted-foreground">
-                                {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <Trophy className="h-4 w-4 text-amber-500 mr-1" />
-                              <span className="text-muted-foreground">Difficulty: Medium</span>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="pt-0">
-                            <Button 
-                              asChild 
-                              className={`w-full bg-${skill.color}/90 hover:bg-${skill.color}`}
-                            >
-                              <Link to={`/practice/session/${skill.id}/${question.id}`}>
+                        <Link 
+                          key={idx} 
+                          to={`/practice/session/${question.skillType}/${question.id}`}
+                          className="block"
+                        >
+                          <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skill.color}/30 hover:border-${skill.color} cursor-pointer`}>
+                            <div className={`h-2 w-full bg-${skill.color}`}></div>
+                            <CardHeader className="pb-2">
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg flex items-center">
+                                  <skill.icon className={`h-5 w-5 mr-2 text-${skill.color}`} />
+                                  {displayTitle.substring(0, 25)}
+                                  {displayTitle.length > 25 && '...'}
+                                </CardTitle>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <Bookmark className="h-4 w-4" />
+                                </Button>
+                              </div>
+                              <CardDescription className="mt-1">
+                                {skill.name} Test
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent className="text-sm">
+                              <div className="flex items-center mb-2">
+                                <Clock className="h-4 w-4 text-muted-foreground mr-1" />
+                                <span className="text-muted-foreground">
+                                  {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
+                                </span>
+                              </div>
+                              <div className="flex items-center">
+                                <Trophy className="h-4 w-4 text-amber-500 mr-1" />
+                                <span className="text-muted-foreground">Difficulty: {question.difficulty || 'Medium'}</span>
+                              </div>
+                            </CardContent>
+                            <CardFooter className="pt-0">
+                              <Button 
+                                className={`w-full bg-${skill.color}/90 hover:bg-${skill.color}`}
+                              >
                                 Start Practice
-                              </Link>
-                            </Button>
-                          </CardFooter>
-                        </Card>
+                              </Button>
+                            </CardFooter>
+                          </Card>
+                        </Link>
                       );
                     })}
                   </div>

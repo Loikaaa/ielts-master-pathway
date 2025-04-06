@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -95,7 +96,17 @@ const PracticeSession = () => {
                   `Speaking Part ${(specificQuestion as any).partNumber}` :
                   `Listening Section ${(specificQuestion as any).sectionNumber}`
         });
+      } else {
+        console.log("Could not find question with ID:", practiceId);
+        toast({
+          title: "Test Not Found",
+          description: `Could not find the requested test. Please select another test.`,
+          variant: "destructive",
+        });
+        navigate('/practice');
       }
+    } else if (!practiceId && skillType) {
+      setCurrentTest(getTestDetails());
     }
   }, [skillType, navigate, toast, questions, loading, practiceId]);
 
@@ -257,7 +268,9 @@ const PracticeSession = () => {
               <div className="flex items-center gap-4">
                 {currentTest.icon}
                 <div>
-                  <CardTitle className="text-2xl">{currentTest.title}</CardTitle>
+                  <CardTitle className="text-2xl">
+                    {currentTest.title || currentTest.title}
+                  </CardTitle>
                   <CardDescription className="text-base mt-1">{currentTest.description}</CardDescription>
                 </div>
               </div>
