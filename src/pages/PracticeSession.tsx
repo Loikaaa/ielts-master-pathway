@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 import QuestionManager from '@/components/practice/QuestionManager';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
-import { Clock, AlertCircle, Loader2, Volume2, Mic, BookOpen, Pencil } from 'lucide-react';
+import { Clock, AlertCircle, Loader2, Volume2, Mic, BookOpen, Pencil, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useQuestions } from '@/contexts/QuestionsContext';
@@ -21,6 +21,7 @@ const PracticeSession = () => {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [testStarted, setTestStarted] = useState(false);
   const [currentTest, setCurrentTest] = useState<any>(null);
+  const [showAllQuestions, setShowAllQuestions] = useState(false);
 
   const testTypeConfig = {
     reading: {
@@ -258,6 +259,10 @@ const PracticeSession = () => {
     );
   }
 
+  const handleShowAllQuestions = () => {
+    setShowAllQuestions(true);
+  };
+
   if (!testStarted && currentTest) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -301,13 +306,46 @@ const PracticeSession = () => {
                   {skillType === 'listening' && <li>Make sure your audio is turned on and working</li>}
                 </ul>
               </div>
+
+              {!showAllQuestions && skillType === 'reading' && (
+                <div className="mt-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleShowAllQuestions}
+                    className="w-full justify-between"
+                  >
+                    Show All 40 Questions <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              
+              {showAllQuestions && skillType === 'reading' && (
+                <div className="border p-4 rounded-md mt-4 max-h-[300px] overflow-y-auto">
+                  <h4 className="font-medium mb-3">All 40 Questions Preview:</h4>
+                  <div className="space-y-3">
+                    {Array.from({ length: 40 }, (_, i) => (
+                      <div key={i} className="flex items-center text-sm">
+                        <span className="font-medium w-8">{i + 1}.</span>
+                        <span className="text-muted-foreground">
+                          {i < 12 ? `Question about paragraph ${String.fromCharCode(65 + (i % 8))}` : 
+                           i < 25 ? `Question about main ideas in the text` :
+                           `Detailed question about specific information`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="bg-gray-50 border-t p-4 flex justify-between">
               <Button variant="outline" onClick={() => navigate('/practice')}>
                 Back to Practice
               </Button>
-              <Button onClick={startTest} className={`bg-${currentTest.color}-600 hover:bg-${currentTest.color}-700`}>
-                Start Test
+              <Button 
+                onClick={startTest} 
+                className={`bg-${currentTest.color}-600 hover:bg-${currentTest.color}-700`}
+              >
+                Practice Now <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </CardFooter>
           </Card>

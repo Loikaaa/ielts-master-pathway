@@ -122,217 +122,253 @@ Understanding and addressing the impacts of climate change on biodiversity requi
         questionText: 'Krill are described in the passage as a _____ species in the Southern Ocean food web.',
         questionType: 'summary-completion',
         correctAnswer: 'cornerstone'
-      }
-    ]
-  },
-  {
-    id: 'reading-2',
-    skillType: 'reading',
-    difficulty: 'medium',
-    points: 10,
-    timeLimit: 3600, // 60 minutes for reading section
-    passageTitle: 'The Evolution of Urban Planning',
-    passageText: `Urban planning has undergone significant transformations throughout history, reflecting changing societal needs, technological capabilities, and ideological frameworks. From ancient civilizations to modern metropolises, the principles and practices guiding city development have evolved in response to diverse challenges and aspirations.
-
-Ancient urban planning often centered around religious and defensive considerations. In Mesopotamia, cities like Ur featured ziggurats at their core, with residential areas radiating outward. Egyptian cities similarly organized around temples, while Greek city-states incorporated agoras as central public spaces for civic engagement. The Romans advanced urban planning considerably, implementing grid systems, aqueducts, and public facilities in towns throughout their empire. Their planning emphasized functionality, public health, and civic pride, aspects still relevant in contemporary approaches.
-
-The medieval period witnessed a shift toward organic urban development, with cities growing incrementally around castles, cathedrals, and marketplaces. Narrow, winding streets characterized European medieval towns, formed not through deliberate planning but in response to immediate needs and topographical constraints. This organic approach contrasted with the structured layouts found in some Islamic and Chinese cities of the same era, where geometric principles and cosmological beliefs influenced urban form.
-
-Renaissance planners reintroduced classical ideals, emphasizing symmetry, proportion, and visual harmony. Cities like Palmanova in Italy exemplified this approach with their radial street patterns and geometric fortifications. The Baroque period further elaborated these principles, as seen in the grand boulevards and monumental squares of Paris and Rome, which facilitated both aesthetic experiences and political control.
-
-The Industrial Revolution marked a critical juncture in urban planning history. Rapid urbanization generated unprecedented challenges—overcrowding, pollution, and inadequate infrastructure plagued industrial cities. Reformers like Ebenezer Howard proposed new models such as the Garden City, which aimed to combine urban amenities with rural environments. This period also saw the emergence of zoning regulations, separating residential, commercial, and industrial areas to mitigate conflicts between land uses.
-
-The early 20th century witnessed the rise of modernist planning, championed by figures like Le Corbusier and the International Congress of Modern Architecture (CIAM). Modernists advocated for rational, functional cities with distinct zones, high-rise buildings set in open spaces, and comprehensive transportation networks. This approach reached its zenith in planned cities like Brasília and Chandigarh, where entire urban environments were designed from scratch according to modernist principles.
-
-However, by the 1960s, critiques of modernist planning gained traction. Jane Jacobs's seminal work "The Death and Life of Great American Cities" challenged prevailing orthodoxies, arguing that the vitality of urban areas stemmed from diversity, mixed uses, and organic street life—precisely the elements modernist planning often eliminated. Her ideas helped spark a movement toward more participatory and context-sensitive approaches.
-
-The late 20th century saw planning increasingly engage with environmental concerns, social equity, and cultural preservation. Concepts like sustainable development, transit-oriented design, and historic conservation gained prominence. Simultaneously, globalization intensified competition among cities, prompting many to use planning and iconic architecture as tools for economic development and branding.
-
-Today's urban planning embraces complexity and interdisciplinary approaches. The smart city movement leverages technology to enhance urban management and services, while tactical urbanism encourages small-scale, citizen-led interventions. Planning now frequently incorporates resilience strategies to address climate change and other shocks. Additionally, there is growing recognition of planning's role in either perpetuating or remedying social inequalities, leading to greater emphasis on inclusive processes and equitable outcomes.
-
-As urbanization continues globally, with over half the world's population now living in cities, effective urban planning becomes increasingly crucial. Contemporary planners face the challenge of creating environments that are simultaneously efficient, sustainable, resilient, and equitable—balancing immediate needs with long-term vision. While approaches vary across different cultural and political contexts, the fundamental goal of enhancing quality of life through thoughtful spatial organization remains constant, connecting today's practice with the earliest urban planning efforts thousands of years ago.`,
-    questions: [
-      {
-        id: 'reading-2-q1',
-        questionText: 'According to the passage, ancient urban planning often centered around:',
-        questionType: 'multiple-choice',
-        options: ['Economic considerations', 'Military strategy', 'Religious and defensive considerations', 'Entertainment venues'],
-        correctAnswer: 'Religious and defensive considerations'
       },
+      // Additional questions to make a total of 40
       {
-        id: 'reading-2-q2',
-        questionText: 'The passage describes medieval European town development as:',
+        id: 'reading-1-q13',
+        questionText: 'Which of the following is NOT mentioned as a climate-related stressor affecting marine biodiversity?',
         questionType: 'multiple-choice',
         options: [
-          'Highly structured and planned',
-          'Organic and incremental',
-          'Based on Renaissance ideals',
-          'Focused on transportation networks'
+          'Ocean warming',
+          'Acidification',
+          'Deoxygenation',
+          'Eutrophication'
         ],
-        correctAnswer: 'Organic and incremental'
+        correctAnswer: 'Eutrophication'
       },
       {
-        id: 'reading-2-q3',
-        questionText: 'Who proposed the Garden City model mentioned in the passage?',
-        questionType: 'multiple-choice',
-        options: [
-          'Jane Jacobs',
-          'Le Corbusier',
-          'Ebenezer Howard',
-          'The Romans'
-        ],
-        correctAnswer: 'Ebenezer Howard'
+        id: 'reading-1-q14',
+        questionText: 'According to the passage, what percentage of Earth\'s species is expected to go extinct due to climate change?',
+        questionType: 'true-false-not-given',
+        correctAnswer: 'Not Given'
       },
       {
-        id: 'reading-2-q4',
-        questionText: 'According to the passage, modernist planning was characterized by:',
-        questionType: 'multiple-choice',
-        options: [
-          'Organic street patterns',
-          'Mixed-use development',
-          'Distinct zones and high-rise buildings in open spaces',
-          'Medieval architectural styles'
-        ],
-        correctAnswer: 'Distinct zones and high-rise buildings in open spaces'
-      }
-    ]
-  },
-  
-  // New IELTS-style reading questions with different question types
-  {
-    id: 'reading-3',
-    skillType: 'reading',
-    difficulty: 'hard',
-    points: 10,
-    timeLimit: 3600, // 60 minutes for reading section
-    passageTitle: 'The Origins and Impacts of Social Media',
-    passageText: `The evolution of social media represents one of the most significant technological and social transformations of the early 21st century. What began as simple platforms for digital connection has evolved into complex ecosystems that profoundly influence nearly every aspect of human society, from personal relationships to global politics.
-
-The roots of social media can be traced to the late 1990s and early 2000s with platforms like Six Degrees and Friendster, which pioneered the concept of digital social networks based on real-world connections. However, it was the launch of Facebook in 2004, initially as a Harvard-exclusive network, that marked the beginning of social media's exponential growth. The platform's expansion to other universities and eventually to the general public established a template that countless other platforms would follow. By introducing features like the News Feed in 2006, Facebook fundamentally changed how people consumed information online, shifting from active searching to passive consumption of algorithmically curated content.
-
-During the same period, Twitter emerged with its distinctive format of short-form content, originally limited to 140 characters. This constraint, initially implemented due to SMS compatibility requirements, inadvertently created a new form of communication that valued brevity and immediacy. Twitter's simple but powerful mechanism of following others without requiring reciprocation differentiated it from Facebook's mutual friendship model and enabled it to become a powerful platform for real-time news dissemination and public discourse.
-
-The launch of the iPhone in 2007 and the subsequent smartphone revolution dramatically accelerated social media adoption by making these platforms constantly accessible. Mobile access transformed social media from occasional desktop activities to persistent, integrated aspects of daily life. This shift enabled entirely new platforms like Instagram (2010) and Snapchat (2011) to emerge with mobile-first experiences centered around visual communication rather than text.
-
-The business models underpinning major social media platforms have predominantly relied on advertising revenue, generated through the collection and analysis of user data. This has led to increasingly sophisticated algorithms designed to maximize engagement by personalizing content. While these algorithms have enabled more relevant content delivery, they have also contributed to what researchers call "filter bubbles" and "echo chambers," where users primarily encounter information that aligns with their existing beliefs and preferences.
-
-The psychological and social impacts of social media have been the subject of extensive research and debate. Studies have documented correlations between social media use and issues including anxiety, depression, and diminished attention spans, particularly among younger users. However, the same platforms have also been credited with reducing isolation for marginalized groups, enabling new forms of community building, and facilitating social movements from the Arab Spring to #MeToo.
-
-In education, social media has created both challenges and opportunities. While educators express concern about shortened attention spans and the distractions posed by constant connectivity, these platforms have also enabled collaborative learning, global classroom connections, and access to educational content for students in remote or underserved regions. Many educational institutions have embraced social media as communication and teaching tools, recognizing their potential to engage students through familiar interfaces.
-
-The political implications of social media have perhaps been the most significant and controversial. These platforms have democratized public discourse by removing traditional gatekeepers and enabling anyone with internet access to potentially reach global audiences. This democratization has amplified previously marginalized voices and facilitated rapid information sharing during crises. However, the same features have enabled the spread of misinformation and disinformation, with documented impacts on elections worldwide and public health responses to the COVID-19 pandemic.
-
-Regulatory approaches to social media have varied significantly across different countries and jurisdictions. The European Union has implemented some of the most comprehensive regulations through the General Data Protection Regulation (GDPR) and the Digital Services Act, focusing on data privacy, algorithmic transparency, and platform responsibility for content moderation. In contrast, the United States has relied primarily on Section 230 of the Communications Decency Act, which largely shields platforms from liability for user-generated content. Meanwhile, countries like China have implemented extensive restrictions and monitoring systems, demonstrating an entirely different approach to social media governance.
-
-As social media continues to evolve, emerging technologies like virtual reality, augmented reality, and artificial intelligence promise to further transform these platforms. The concept of the "metaverse" represents a potential future where social interactions occur in immersive digital environments, potentially deepening both the benefits and challenges of social media. Similarly, advances in AI-generated content raise new questions about authenticity and trust in digital spaces.
-
-Understanding the complex and multifaceted impacts of social media requires nuanced analysis beyond simplistic narratives of either utopian progress or dystopian decline. These platforms have simultaneously connected and divided, informed and misinformed, empowered and exploited. As society continues to adapt to these powerful technologies, the challenge lies in maximizing their benefits while developing effective safeguards against their most harmful effects.`,
-    questions: [
-      // Multiple Choice
-      {
-        id: 'reading-3-q1',
-        questionText: "According to the passage, Facebook's introduction of the News Feed in 2006:",
-        questionType: 'multiple-choice',
-        options: [
-          'reduced the popularity of the platform',
-          'shifted users from passive consumption to active searching',
-          'changed how people consumed information online',
-          'was initially restricted to Harvard students only'
-        ],
-        correctAnswer: 'changed how people consumed information online'
-      },
-      // True/False/Not Given
-      {
-        id: 'reading-3-q2',
-        questionText: "The passage states that Twitter's 140-character limit was originally implemented due to SMS compatibility requirements.",
+        id: 'reading-1-q15',
+        questionText: 'The passage suggests that species with high genetic diversity may adapt more successfully to climate change.',
         questionType: 'true-false-not-given',
         correctAnswer: 'True'
       },
       {
-        id: 'reading-3-q3',
-        questionText: "According to the passage, social media has had a universally negative impact on education.",
+        id: 'reading-1-q16',
+        questionText: 'According to the passage, the frequency of mass bleaching events at the Great Barrier Reef has:',
+        questionType: 'multiple-choice',
+        options: [
+          'Remained stable since 1998',
+          'Decreased over the past decade',
+          'Increased in recent years',
+          'Disappeared entirely'
+        ],
+        correctAnswer: 'Increased in recent years'
+      },
+      {
+        id: 'reading-1-q17',
+        questionText: 'Phenotypic plasticity is defined in the passage as:',
+        questionType: 'summary-completion',
+        correctAnswer: 'the ability to modify their development, physiology, or behavior in response to environmental changes'
+      },
+      {
+        id: 'reading-1-q18',
+        questionText: 'The passage mentions that areas with high _____ diversity may provide microrefugia where species can persist.',
+        questionType: 'summary-completion',
+        correctAnswer: 'topographic'
+      },
+      {
+        id: 'reading-1-q19',
+        questionText: 'According to the passage, which species is specifically mentioned as showing upward shifts in distribution?',
+        questionType: 'multiple-choice',
+        options: [
+          'Polar bears',
+          'Krill',
+          'Alpine ibex',
+          'Migratory birds'
+        ],
+        correctAnswer: 'Alpine ibex'
+      },
+      {
+        id: 'reading-1-q20',
+        questionText: 'The passage states that understanding climate change impacts requires collaboration among:',
+        questionType: 'summary-completion',
+        correctAnswer: 'climatologists, ecologists, conservation biologists, and policymakers'
+      },
+      {
+        id: 'reading-1-q21',
+        questionText: 'According to the passage, coral reefs are often referred to as:',
+        questionType: 'multiple-choice',
+        options: [
+          'Ocean gardens',
+          'Rainforests of the sea',
+          'Marine sanctuaries',
+          'Biodiversity hotspots'
+        ],
+        correctAnswer: 'Rainforests of the sea'
+      },
+      {
+        id: 'reading-1-q22',
+        questionText: 'The passage states that preserving connectivity between habitats has become a priority in conservation.',
+        questionType: 'true-false-not-given',
+        correctAnswer: 'True'
+      },
+      {
+        id: 'reading-1-q23',
+        questionText: 'The passage mentions that shifting phenology can lead to:',
+        questionType: 'multiple-choice',
+        options: [
+          'Increased species diversity',
+          'Enhanced ecosystem resilience',
+          'Mismatches in ecological interactions',
+          'Greater genetic diversity'
+        ],
+        correctAnswer: 'Mismatches in ecological interactions'
+      },
+      {
+        id: 'reading-1-q24',
+        questionText: 'According to the passage, coral symbionts expelled during bleaching are:',
+        questionType: 'summary-completion',
+        correctAnswer: 'algae'
+      },
+      {
+        id: 'reading-1-q25',
+        questionText: 'The passage claims that the only way to preserve biodiversity is to reduce greenhouse gas emissions.',
         questionType: 'true-false-not-given',
         correctAnswer: 'False'
       },
       {
-        id: 'reading-3-q4',
-        questionText: "The author believes that virtual reality will eventually replace traditional social media platforms.",
-        questionType: 'true-false-not-given',
-        correctAnswer: 'Not Given'
-      },
-      // Yes/No/Not Given
-      {
-        id: 'reading-3-q5',
-        questionText: "The author supports stricter government regulation of social media platforms.",
-        questionType: 'yes-no-not-given',
-        correctAnswer: 'Not Given'
-      },
-      // Matching Information
-      {
-        id: 'reading-3-q6',
-        questionText: "In which paragraph does the author discuss how social media has affected political discourse?",
-        questionType: 'matching-information',
-        paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
-        correctAnswer: 'H'
-      },
-      {
-        id: 'reading-3-q7',
-        questionText: "Which paragraph mentions the psychological impacts of social media use?",
-        questionType: 'matching-information',
-        paragraphRefs: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'],
-        correctAnswer: 'F'
-      },
-      // Matching Headings
-      {
-        id: 'reading-3-q8',
-        questionText: "Choose the most suitable heading for paragraph E:",
-        questionType: 'matching-headings',
+        id: 'reading-1-q26',
+        questionText: 'According to the passage, which of the following is NOT mentioned as a response of species to climate change?',
+        questionType: 'multiple-choice',
         options: [
-          'Revenue Generation and Algorithmic Design',
-          'The Problem of Online Privacy',
-          'How Social Media Companies Make Money',
-          'Filter Bubbles: A Growing Concern'
+          'Adaptation',
+          'Migration',
+          'Extinction',
+          'Hibernation'
         ],
-        correctAnswer: 'Revenue Generation and Algorithmic Design'
+        correctAnswer: 'Hibernation'
       },
-      // Matching Features
       {
-        id: 'reading-3-q9',
-        questionText: "Which of the following is a characteristic of Twitter mentioned in the passage?",
-        questionType: 'matching-features',
-        features: [
-          'Required mutual friendships',
-          'Initially designed for desktop use',
-          'Allowed following without reciprocation',
-          'Focused primarily on visual content'
+        id: 'reading-1-q27',
+        questionText: 'The passage suggests that robust _____ programs are necessary to track ecosystem changes.',
+        questionType: 'summary-completion',
+        correctAnswer: 'monitoring'
+      },
+      {
+        id: 'reading-1-q28',
+        questionText: 'The passage states that the Intergovernmental Panel on Climate Change has documented evidence of ecological impacts across:',
+        questionType: 'summary-completion',
+        correctAnswer: 'terrestrial, freshwater, and marine environments'
+      },
+      {
+        id: 'reading-1-q29',
+        questionText: 'According to the passage, polar regions are warming:',
+        questionType: 'multiple-choice',
+        options: [
+          'At the same rate as the global average',
+          'Slower than the global average',
+          'Faster than the global average',
+          'Only in summer months'
         ],
-        correctAnswer: 'Allowed following without reciprocation'
+        correctAnswer: 'Faster than the global average'
       },
-      // Matching Sentence Endings
       {
-        id: 'reading-3-q10',
-        questionText: 'Complete the sentence: "The smartphone revolution transformed social media by..."',
-        questionType: 'matching-sentence-endings',
-        sentenceEndings: [
-          'making these platforms constantly accessible.',
-          'reducing the time people spent online.',
-          'eliminating the need for text-based communication.',
-          'creating more privacy for users.'
+        id: 'reading-1-q30',
+        questionText: 'The passage suggests that satellite measurements of Arctic sea ice began in:',
+        questionType: 'summary-completion',
+        correctAnswer: '1979'
+      },
+      {
+        id: 'reading-1-q31',
+        questionText: 'According to the passage, assisted migration involves:',
+        questionType: 'multiple-choice',
+        options: [
+          'Helping species adapt in their current habitat',
+          'Creating artificial environments for endangered species',
+          'Deliberately moving species to potentially suitable areas',
+          'Training species to migrate naturally'
         ],
-        correctAnswer: 'making these platforms constantly accessible.'
-      },
-      // Sentence Completion
-      {
-        id: 'reading-3-q11',
-        questionText: "According to the passage, social media platforms have simultaneously _____, _____, and _____.",
-        questionType: 'sentence-completion',
-        correctAnswer: 'connected and divided, informed and misinformed, empowered and exploited'
+        correctAnswer: 'Deliberately moving species to potentially suitable areas'
       },
       {
-        id: 'reading-3-q12',
-        questionText: "The passage mentions that the concept of the _____ represents a potential future where social interactions occur in immersive digital environments.",
-        questionType: 'sentence-completion',
-        correctAnswer: 'metaverse'
+        id: 'reading-1-q32',
+        questionText: 'The passage explicitly states that integrated conservation approaches should combine reducing greenhouse gas emissions with:',
+        questionType: 'summary-completion',
+        correctAnswer: 'strategies to help species adapt'
+      },
+      {
+        id: 'reading-1-q33',
+        questionText: 'According to the passage, migratory birds are:',
+        questionType: 'multiple-choice',
+        options: [
+          'Unaffected by climate change',
+          'Becoming completely extinct',
+          'Adjusting their departure and arrival times',
+          'Abandoning migration entirely'
+        ],
+        correctAnswer: 'Adjusting their departure and arrival times'
+      },
+      {
+        id: 'reading-1-q34',
+        questionText: 'The passage claims that climate change is causing many plant species to flower:',
+        questionType: 'summary-completion',
+        correctAnswer: 'earlier in spring'
+      },
+      {
+        id: 'reading-1-q35',
+        questionText: 'According to the passage, the Alpine ibex has shown clear _____ shifts in its distribution over recent decades.',
+        questionType: 'summary-completion',
+        correctAnswer: 'upward'
+      },
+      {
+        id: 'reading-1-q36',
+        questionText: 'The passage states that Antarctica\'s changing sea ice conditions affect:',
+        questionType: 'multiple-choice',
+        options: [
+          'Coral reef formation',
+          'Krill populations',
+          'Carbon sequestration',
+          'Mountain species migration'
+        ],
+        correctAnswer: 'Krill populations'
+      },
+      {
+        id: 'reading-1-q37',
+        questionText: 'The passage mentions that climate change is causing ecosystem changes at a(n) _____ rate.',
+        questionType: 'summary-completion',
+        correctAnswer: 'unprecedented'
+      },
+      {
+        id: 'reading-1-q38',
+        questionText: 'According to the passage, which of these species depends on krill in the Southern Ocean food web?',
+        questionType: 'multiple-choice',
+        options: [
+          'Alpine ibex',
+          'Corals',
+          'Penguins',
+          'Migratory birds'
+        ],
+        correctAnswer: 'Penguins'
+      },
+      {
+        id: 'reading-1-q39',
+        questionText: 'The passage suggests that the future of Earth\'s biodiversity depends on:',
+        questionType: 'multiple-choice',
+        options: [
+          'Completely stopping climate change',
+          'Integrated conservation approaches',
+          'Exclusive focus on greenhouse gas emissions',
+          'Abandoning traditional conservation methods entirely'
+        ],
+        correctAnswer: 'Integrated conservation approaches'
+      },
+      {
+        id: 'reading-1-q40',
+        questionText: 'The passage concludes by suggesting that preservation of Earth\'s biodiversity in a changing climate is:',
+        questionType: 'multiple-choice',
+        options: [
+          'Impossible given current trends',
+          'Only possible through assisted migration',
+          'Guaranteed if emissions are reduced',
+          'Possible with integrated approaches'
+        ],
+        correctAnswer: 'Possible with integrated approaches'
       }
     ]
   },
