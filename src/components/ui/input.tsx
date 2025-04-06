@@ -6,10 +6,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   icon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   error?: string;
+  description?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, icon, rightIcon, error, ...props }, ref) => {
+  ({ className, type, icon, rightIcon, error, description, ...props }, ref) => {
     return (
       <div className="relative">
         {icon && (
@@ -36,6 +37,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         {error && (
           <p className="text-destructive text-xs mt-1">{error}</p>
+        )}
+        {description && !error && (
+          <p className="text-muted-foreground text-xs mt-1">{description}</p>
         )}
       </div>
     )

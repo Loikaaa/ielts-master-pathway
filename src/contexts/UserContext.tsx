@@ -1,26 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-export interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  testType: string;
-  targetScore: string;
-  examDate: string;
-  created: Date;
-  isAdmin?: boolean; 
-  ipAddress?: string;
-  country?: string;
-  countryCode?: string;
-  lastLogin?: Date;
-}
+import { OAuthResponse, User } from '@/types/user';
 
 interface UserContextType {
   currentUser: User | null;
   users: User[];
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithOAuth: (provider: 'google' | 'facebook') => Promise<boolean>;
   signup: (userData: Omit<User, 'id' | 'created'> & { password: string }) => Promise<boolean>;
+  signupWithOAuth: (provider: 'google' | 'facebook', country: string) => Promise<boolean>;
   logout: () => void;
   isAdmin: boolean;
   setUserAsAdmin: (userId: string) => void;
@@ -32,7 +19,9 @@ const UserContext = createContext<UserContextType>({
   currentUser: null,
   users: [],
   login: async () => false,
+  loginWithOAuth: async () => false,
   signup: async () => false,
+  signupWithOAuth: async () => false,
   logout: () => {},
   isAdmin: false,
   setUserAsAdmin: () => {},
@@ -367,12 +356,159 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     }
   };
 
+  const simulateOAuthResponse = async (provider: 'google' | 'facebook'): Promise<OAuthResponse> => {
+    // In a real implementation, this would come from the OAuth provider
+    const randomId = `${provider}-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 9)}`;
+    
+    // Generate pseudo-random user data for demo purposes
+    const names = provider === 'google' 
+      ? [['James', 'Smith'], ['Mary', 'Johnson'], ['Robert', 'Williams'], ['Patricia', 'Brown']]
+      : [['Michael', 'Jones'], ['Linda', 'Garcia'], ['William', 'Miller'], ['Elizabeth', 'Davis']];
+    
+    const randomNameIndex = Math.floor(Math.random() * names.length);
+    const [firstName, lastName] = names[randomNameIndex];
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@${provider === 'google' ? 'gmail.com' : 'facebook.com'}`;
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    return {
+      provider,
+      id: randomId,
+      email,
+      firstName,
+      lastName,
+      profileImage: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=random`
+    };
+  };
+
+  const loginWithOAuth = async (provider: 'google' | 'facebook'): Promise<boolean> => {
+    try {
+      console.log(`UserContext: Attempting ${provider} login`);
+      
+      // Simulate OAuth response from provider
+      const oauthResponse = await simulateOAuthResponse(provider);
+      
+      // Check if user with this OAuth ID exists
+      const storedUsers = localStorage.getItem('neplia_users');
+      if (!storedUsers) {
+        console.log('UserContext: No users found in storage');
+        return false;
+      }
+      
+      const users: User[] = JSON.parse(storedUsers);
+      const user = users.find(u => 
+        (u.oauthProvider === provider && u.oauthId === oauthResponse.id) || 
+        u.email === oauthResponse.email
+      );
+      
+      if (user) {
+        console.log('UserContext: OAuth user found:', user.email);
+        const ipInfo = await fetchUserIPInfo();
+        
+        const updatedUser = {
+          ...user,
+          ipAddress: ipInfo.ip,
+          country: ipInfo.country,
+          countryCode: ipInfo.countryCode,
+          lastLogin: new Date(),
+          // If user was found by email but not OAuth (merged account)
+          oauthProvider: user.oauthProvider || provider,
+          oauthId: user.oauthId || oauthResponse.id
+        };
+        
+        // Update user data in users array
+        const updatedUsers = users.map(u => 
+          u.id === updatedUser.id ? updatedUser : u
+        );
+        setUsers(updatedUsers);
+        localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
+        
+        setCurrentUser(updatedUser);
+        
+        // Check if user is admin
+        const isUserAdmin = user.isAdmin === true || ADMIN_EMAILS.includes(user.email);
+        console.log('UserContext: Login successful, admin status:', isUserAdmin);
+        setIsAdmin(isUserAdmin);
+        
+        return true;
+      }
+      
+      console.log('UserContext: No matching OAuth user found');
+      return false;
+    } catch (error) {
+      console.error('OAuth login error:', error);
+      return false;
+    }
+  };
+
+  const signupWithOAuth = async (provider: 'google' | 'facebook', country: string): Promise<boolean> => {
+    try {
+      // Simulate OAuth response from provider
+      const oauthResponse = await simulateOAuthResponse(provider);
+      
+      // Check if user already exists
+      const storedUsers = localStorage.getItem('neplia_users');
+      const users: User[] = storedUsers ? JSON.parse(storedUsers) : [];
+      
+      const existingUser = users.find(u => 
+        (u.oauthProvider === provider && u.oauthId === oauthResponse.id) || 
+        u.email === oauthResponse.email
+      );
+      
+      if (existingUser) {
+        console.log('OAuth user already exists');
+        return false;
+      }
+      
+      const ipInfo = await fetchUserIPInfo();
+      const isUserAdmin = ADMIN_EMAILS.includes(oauthResponse.email);
+      
+      const newUser: User = {
+        id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        email: oauthResponse.email,
+        firstName: oauthResponse.firstName || '',
+        lastName: oauthResponse.lastName || '',
+        role: 'student',
+        profileImage: oauthResponse.profileImage,
+        joinDate: new Date().toISOString(),
+        created: new Date(),
+        lastLogin: new Date(),
+        oauthProvider: provider,
+        oauthId: oauthResponse.id,
+        ipAddress: ipInfo.ip,
+        country: ipInfo.country || country,
+        countryCode: ipInfo.countryCode,
+        isAdmin: isUserAdmin,
+        testType: 'General',
+        targetScore: '7.0',
+        examDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      };
+      
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+      localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
+      
+      setCurrentUser(newUser);
+      setIsAdmin(isUserAdmin);
+      
+      console.log('OAuth signup successful, admin status:', isUserAdmin, 'Email:', oauthResponse.email);
+      
+      return true;
+    } catch (error) {
+      console.error('OAuth signup error:', error);
+      return false;
+    }
+  };
+
   return (
     <UserContext.Provider value={{ 
       currentUser, 
       users, 
       login, 
+      loginWithOAuth,
       signup, 
+      signupWithOAuth,
       logout, 
       isAdmin,
       setUserAsAdmin,

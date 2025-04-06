@@ -11,12 +11,13 @@ import NavBar from '@/components/NavBar';
 import { detectUserCountry } from '@/utils/countryDetection';
 import { useUser } from '@/contexts/UserContext';
 import { Loader2 } from 'lucide-react';
+import OAuthButtons from '@/components/OAuthButtons';
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userCountry, setUserCountry] = useState<string>('');
-  const { signup } = useUser();
+  const { signup, signupWithOAuth } = useUser();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -78,6 +79,45 @@ const SignUp = () => {
     }
   };
 
+  const handleOAuthSignup = async (provider: 'google' | 'facebook') => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      console.log(`Attempting ${provider} signup`);
+      
+      // Default country info
+      const countryInfo = userCountry || 'Unknown';
+      
+      // Simulate OAuth signup
+      const success = await signupWithOAuth(provider, countryInfo);
+      
+      if (success) {
+        toast({
+          title: "Account created!",
+          description: `Welcome to your IELTS preparation journey. Your account was created with ${provider}.`,
+        });
+        navigate('/onboarding');
+      } else {
+        setError(`Failed to create account with ${provider}. You may already have an account.`);
+        toast({
+          title: "Sign up failed",
+          description: `Failed to create account with ${provider}. Please try again or use email signup.`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again later.');
+      toast({
+        title: "Sign up failed",
+        description: "An error occurred during sign up. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
@@ -118,6 +158,22 @@ const SignUp = () => {
                 {error}
               </div>
             )}
+            
+            <OAuthButtons
+              onOAuthLogin={handleOAuthSignup}
+              isLoading={isLoading}
+              className="mb-4"
+            />
+            
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-muted-foreground">or sign up with email</span>
+              </div>
+            </div>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

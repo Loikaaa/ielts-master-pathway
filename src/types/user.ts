@@ -41,6 +41,8 @@ export interface User {
     emailUpdates: boolean;
     darkMode: boolean;
   };
+  oauthProvider?: 'google' | 'facebook';
+  oauthId?: string;
 }
 
 export interface AdminCredentials {
@@ -61,4 +63,13 @@ export interface UserActivity {
   timestamp: Date;
   details?: string;
   metadata?: Record<string, any>;
+}
+
+export interface OAuthResponse {
+  provider: 'google' | 'facebook';
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  profileImage?: string;
 }

@@ -11,12 +11,13 @@ import NavBar from '@/components/NavBar';
 import { detectUserCountry } from '@/utils/countryDetection';
 import { useUser } from '@/contexts/UserContext';
 import { Loader2, EyeIcon, EyeOffIcon } from 'lucide-react';
+import OAuthButtons from '@/components/OAuthButtons';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userCountry, setUserCountry] = useState<string>('');
-  const { login, users } = useUser();
+  const { login, loginWithOAuth, users } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -120,6 +121,52 @@ const SignIn = () => {
     }
   };
 
+  const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      console.log(`Attempting ${provider} login`);
+      
+      // Simulate OAuth login since we're using local storage
+      const success = await loginWithOAuth(provider);
+      
+      if (success) {
+        toast({
+          title: "Sign in successful!",
+          description: `Welcome back! You've signed in with ${provider}.`,
+        });
+        
+        // Reset login attempts on successful login
+        localStorage.removeItem('login_attempts');
+        localStorage.removeItem('login_attempt_timestamp');
+        
+        // Track successful login in analytics
+        console.log(`User logged in successfully with ${provider} from ${userCountry}`);
+        
+        navigate('/dashboard');
+      } else {
+        updateLoginAttempts();
+        setError(`Could not authenticate with ${provider}. Please try again.`);
+        toast({
+          title: "Sign in failed",
+          description: `Could not authenticate with ${provider}. Please try again.`,
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      updateLoginAttempts();
+      setError(`An error occurred during ${provider} authentication.`);
+      toast({
+        title: "Sign in failed",
+        description: `An error occurred during ${provider} authentication. Please try again later.`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleShowPassword = () => {
     setShowPassword(prev => !prev);
   };
@@ -170,6 +217,22 @@ const SignIn = () => {
                 <p className="text-xs mt-1">For security reasons, your account may be temporarily locked after too many failed attempts.</p>
               </div>
             )}
+            
+            <OAuthButtons
+              onOAuthLogin={handleOAuthLogin}
+              isLoading={isLoading}
+              className="mb-4"
+            />
+            
+            <div className="relative my-2">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-muted-foreground">or continue with email</span>
+              </div>
+            </div>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
