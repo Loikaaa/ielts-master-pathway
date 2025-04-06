@@ -26,18 +26,18 @@ const HeroSection = () => {
           <p className="text-xl text-muted-foreground mb-8 animate-slide-up">
             The world's most advanced IELTS preparation platform that combines adaptive learning with expert guidance for guaranteed results.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
-            <Button size="lg" className="gap-2" asChild>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:justify-center sm:gap-4 animate-slide-up" style={{ animationDelay: "100ms" }}>
+            <Button size="lg" className="gap-2 shadow-sm" asChild>
               <Link to="/signup">
                 Start Free Trial <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" className="shadow-sm" asChild>
               <Link to="/onboarding">
                 Take Placement Test
               </Link>
             </Button>
-            <Button size="lg" variant="ghost" asChild>
+            <Button size="lg" variant="ghost" className="col-span-2 mt-2 sm:mt-0 shadow-sm" asChild>
               <Link to="/exam-content">
                 <BookOpen className="h-4 w-4 mr-2" />
                 Exam Guide
