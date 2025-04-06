@@ -6,10 +6,11 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutColumns } from 'lucide-react';
+import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/contexts/UserContext';
 import { useQuestions } from '@/contexts/QuestionsContext';
+import { Question, ReadingQuestion, ListeningQuestion } from '@/types/questions';
 
 const Practice = () => {
   const { currentUser } = useUser();
@@ -76,24 +77,24 @@ const Practice = () => {
     }
   ];
   
-  const filterQuestions = (skillType) => {
+  const filterQuestions = (skillType: string) => {
     if (skillType === 'all') {
       return questions.slice(0, 6);
     }
     return questions.filter(q => q.skillType === skillType).slice(0, 6);
   };
   
-  const getQuestionDisplayTitle = (question: any) => {
-    if (question.skillType === 'reading' && question.passageTitle) {
+  const getQuestionDisplayTitle = (question: Question) => {
+    if (question.skillType === 'reading' && 'passageTitle' in question) {
       return question.passageTitle;
     }
-    if (question.skillType === 'writing' && question.taskType) {
+    if (question.skillType === 'writing' && 'taskType' in question) {
       return `Writing Task ${question.taskType.charAt(5)}`;
     }
-    if (question.skillType === 'speaking' && question.partNumber) {
+    if (question.skillType === 'speaking' && 'partNumber' in question) {
       return `Speaking Part ${question.partNumber}`;
     }
-    if (question.skillType === 'listening' && question.sectionNumber) {
+    if (question.skillType === 'listening' && 'sectionNumber' in question) {
       return `Listening Section ${question.sectionNumber}`;
     }
     return 'Practice Test';
@@ -107,7 +108,18 @@ const Practice = () => {
   // Group tests by type (Exams and Practice Tests)
   const groupedTests = {
     exams: questions.filter(q => q.isFullExam === true),
-    practices: questions.filter(q => !q.isFullExam)
+    practices: questions.filter(q => q.isFullExam !== true)
+  };
+  
+  // Helper function to safely get question count for reading and listening questions
+  const getQuestionCount = (question: Question): number => {
+    if (question.skillType === 'reading' && 'questions' in question) {
+      return (question as ReadingQuestion).questions.length;
+    }
+    if (question.skillType === 'listening' && 'questions' in question) {
+      return (question as ListeningQuestion).questions.length;
+    }
+    return 0;
   };
   
   return (
@@ -150,7 +162,7 @@ const Practice = () => {
                   onClick={() => setViewMode(viewMode === 'grid' ? 'columns' : 'grid')}
                   className="h-10 w-10"
                 >
-                  <LayoutColumns className="h-5 w-5" />
+                  <LayoutIcon className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -226,7 +238,7 @@ const Practice = () => {
                   size="sm"
                   onClick={() => setViewMode('columns')}
                 >
-                  <LayoutColumns className="h-4 w-4 mr-2" />
+                  <LayoutIcon className="h-4 w-4 mr-2" />
                   Two Columns
                 </Button>
                 <Button 
@@ -302,7 +314,9 @@ const Practice = () => {
                                 <div className="flex items-center">
                                   <Trophy className="h-4 w-4 text-amber-500 mr-1" />
                                   <span className="text-muted-foreground">
-                                    {exam.questions ? `${exam.questions.length} questions` : '40 questions'}
+                                    {getQuestionCount(exam) > 0 
+                                      ? `${getQuestionCount(exam)} questions` 
+                                      : '40 questions'}
                                   </span>
                                 </div>
                               </CardContent>

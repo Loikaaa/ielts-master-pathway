@@ -5,6 +5,7 @@ export interface BaseQuestion {
   difficulty: 'easy' | 'medium' | 'hard';
   points: number;
   timeLimit?: number; // in seconds
+  isFullExam?: boolean; // Added property to identify full exams
 }
 
 export interface ReadingQuestion extends BaseQuestion {
