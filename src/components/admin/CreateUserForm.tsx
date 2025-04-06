@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/components/ui/use-toast';
 import { useUser } from '@/contexts/UserContext';
 import { UserPlus, Shield, Globe, Loader2 } from 'lucide-react';
+import { User } from '@/types/user';
 
 // Define form validation schema
 const createUserSchema = z.object({
@@ -22,7 +23,7 @@ const createUserSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   isAdmin: z.boolean().default(false),
   testType: z.string().min(1, 'Please select a test type'),
-  targetScore: z.string().min(1, 'Please select a target score'), // Changed from number to string
+  targetScore: z.string().min(1, 'Please select a target score'),
   examDate: z.string().optional(),
   country: z.string().optional(),
 });
@@ -110,7 +111,7 @@ const CreateUserForm = () => {
         countryCode: values.country || '',
         isAdmin: values.isAdmin,
         // Add the missing required properties
-        role: 'student',
+        role: values.isAdmin ? 'admin' : 'student', // Set proper role based on isAdmin
         joinDate: new Date().toISOString(),
       });
 

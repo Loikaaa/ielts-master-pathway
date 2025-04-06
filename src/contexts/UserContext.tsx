@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { OAuthResponse, User } from '@/types/user';
 
@@ -90,7 +91,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   
   // Create default admin user if no users exist
   const createDefaultAdminUser = () => {
-    const adminUsers = [
+    const adminUsers: User[] = [
       {
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         firstName: 'Admin',
@@ -100,14 +101,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         testType: 'General',
         targetScore: '8.0',
         examDate: '2023-12-31',
-        created: new Date().toISOString(), // Convert Date to string
+        created: new Date().toISOString(),
         isAdmin: true,
         ipAddress: 'localhost',
         country: 'System',
         countryCode: 'SYS',
-        lastLogin: new Date().toISOString(), // Convert Date to string
-        role: 'admin', // Add required role
-        joinDate: new Date().toISOString(), // Add required joinDate
+        lastLogin: new Date().toISOString(),
+        role: 'admin', // Explicitly set role to admin
+        joinDate: new Date().toISOString(),
       },
       {
         id: `user-${Date.now()+1}-${Math.random().toString(36).substr(2, 9)}`,
@@ -118,14 +119,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         testType: 'General',
         targetScore: '8.0',
         examDate: '2025-12-31',
-        created: new Date().toISOString(), // Convert Date to string
+        created: new Date().toISOString(),
         isAdmin: true,
         ipAddress: 'Default',
         country: 'Nepal',
         countryCode: 'NP',
-        lastLogin: new Date().toISOString(), // Convert Date to string
-        role: 'admin', // Add required role
-        joinDate: new Date().toISOString(), // Add required joinDate
+        lastLogin: new Date().toISOString(),
+        role: 'admin', // Explicitly set role to admin
+        joinDate: new Date().toISOString(),
       }
     ];
     
@@ -150,7 +151,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.log('UserContext: User found:', user.email);
         const ipInfo = await fetchUserIPInfo();
         
-        const updatedUser = {
+        const updatedUser: User = {
           ...user,
           ipAddress: ipInfo.ip,
           country: ipInfo.country,
@@ -164,7 +165,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             ? { ...u, ipAddress: ipInfo.ip, country: ipInfo.country, countryCode: ipInfo.countryCode, lastLogin: new Date().toISOString() } 
             : u
         );
-        setUsers(updatedUsers);
+        setUsers(updatedUsers as User[]);
         localStorage.setItem('neplia_users', JSON.stringify(updatedUsers));
         
         // Remove password from user object before storing in state
@@ -201,8 +202,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        created: new Date().toISOString(), // Convert Date to string
-        lastLogin: new Date().toISOString(), // Convert Date to string
+        created: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
         ipAddress: ipInfo.ip,
         country: ipInfo.country || userData.country,
         countryCode: ipInfo.countryCode || userData.countryCode,
@@ -273,7 +274,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const setUserAsAdmin = (userId: string) => {
     const updatedUsers = users.map(user => {
       if (user.id === userId) {
-        return { ...user, isAdmin: true };
+        return { ...user, isAdmin: true, role: 'admin' as const };
       }
       return user;
     });
@@ -281,7 +282,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     setUsers(updatedUsers);
     
     if (currentUser && currentUser.id === userId) {
-      setCurrentUser({ ...currentUser, isAdmin: true });
+      setCurrentUser({ ...currentUser, isAdmin: true, role: 'admin' as const });
       setIsAdmin(true);
     }
   };
@@ -301,16 +302,18 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       };
 
       const isUserAdmin = userData.isAdmin === true || ADMIN_EMAILS.includes(userData.email);
+      const role = userData.role || (isUserAdmin ? 'admin' : 'student') as 'admin' | 'student' | 'teacher';
 
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        created: new Date().toISOString(), // Convert Date to string
-        lastLogin: new Date().toISOString(), // Convert Date to string
+        created: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
         ipAddress: ipInfo.ip,
         country: ipInfo.country,
         countryCode: ipInfo.countryCode,
-        isAdmin: isUserAdmin
+        isAdmin: isUserAdmin,
+        role: role
       };
 
       const updatedUsers = [...users, newUser];
@@ -410,12 +413,12 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         console.log('UserContext: OAuth user found:', user.email);
         const ipInfo = await fetchUserIPInfo();
         
-        const updatedUser = {
+        const updatedUser: User = {
           ...user,
           ipAddress: ipInfo.ip,
           country: ipInfo.country,
           countryCode: ipInfo.countryCode,
-          lastLogin: new Date().toISOString(), // Convert Date to string
+          lastLogin: new Date().toISOString(),
           // If user was found by email but not OAuth (merged account)
           oauthProvider: user.oauthProvider || provider,
           oauthId: user.oauthId || oauthResponse.id
@@ -473,11 +476,11 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         email: oauthResponse.email,
         firstName: oauthResponse.firstName || '',
         lastName: oauthResponse.lastName || '',
-        role: 'student',
+        role: isUserAdmin ? 'admin' : 'student',
         profileImage: oauthResponse.profileImage,
         joinDate: new Date().toISOString(),
-        created: new Date().toISOString(), // Convert Date to string
-        lastLogin: new Date().toISOString(), // Convert Date to string
+        created: new Date().toISOString(),
+        lastLogin: new Date().toISOString(),
         oauthProvider: provider,
         oauthId: oauthResponse.id,
         ipAddress: ipInfo.ip,

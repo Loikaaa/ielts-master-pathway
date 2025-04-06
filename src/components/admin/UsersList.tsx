@@ -94,7 +94,6 @@ const UsersList = () => {
   const handleSaveUser = () => {
     if (!selectedUser) return;
     
-    // Handle admin status change
     if (editedUser.isAdmin && !selectedUser.isAdmin) {
       setUserAsAdmin(selectedUser.id);
       toast({
@@ -106,7 +105,6 @@ const UsersList = () => {
         title: "Admin Rights Removed",
         description: `${editedUser.firstName} ${editedUser.lastName} is no longer an administrator.`
       });
-      // In a real app, we would have a removeAdmin function
     }
     
     setIsEditDialogOpen(false);
@@ -134,14 +132,15 @@ const UsersList = () => {
     });
   };
 
-  const formatDate = (dateValue: string | Date | undefined) => {
+  const formatDate = (dateValue: string | undefined) => {
     if (!dateValue) return 'Unknown';
     
-    if (typeof dateValue === 'string') {
+    try {
       return format(new Date(dateValue), 'PPP');
+    } catch (error) {
+      console.error("Date formatting error:", error);
+      return 'Invalid date';
     }
-    
-    return format(dateValue, 'PPP');
   };
 
   return (
@@ -235,7 +234,6 @@ const UsersList = () => {
           </TableBody>
         </Table>
 
-        {/* Enhanced Edit User Dialog with Tabs */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
