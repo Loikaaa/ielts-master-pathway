@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -12,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
+import EventRegistration from '@/components/community/EventRegistration';
 import { 
   MessageSquare, 
   Users, 
@@ -29,14 +29,37 @@ import {
   Sparkles,
   PlusCircle,
   User,
-  Flag
+  Flag,
+  CalendarCheck
 } from 'lucide-react';
+
+interface EventRegistration {
+  userId: string;
+  eventId: string;
+  registeredOn: string;
+  status: 'confirmed' | 'pending' | 'canceled';
+  userEmail?: string;
+  userName?: string;
+}
 
 const Community = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('discussions');
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [showRegistrationDialog, setShowRegistrationDialog] = useState(false);
+  const [eventRegistrations, setEventRegistrations] = useState<EventRegistration[]>([]);
   
-  // Mock data for community sections
+  useEffect(() => {
+    try {
+      const storedRegistrations = localStorage.getItem('neplia_event_registrations');
+      if (storedRegistrations) {
+        setEventRegistrations(JSON.parse(storedRegistrations));
+      }
+    } catch (error) {
+      console.error('Error loading event registrations:', error);
+    }
+  }, []);
+
   const discussions = [
     {
       id: 1,
@@ -116,7 +139,7 @@ const Community = () => {
   
   const events = [
     {
-      id: 1,
+      id: "1",
       title: "Free Mock Speaking Test Workshop",
       date: "April 10, 2025",
       time: "18:00 - 20:00 GMT",
@@ -127,7 +150,7 @@ const Community = () => {
       image: "https://images.unsplash.com/photo-1543269865-cbf427effbad?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
     },
     {
-      id: 2,
+      id: "2",
       title: "Writing Task 1: Data Analysis Masterclass",
       date: "April 15, 2025",
       time: "14:00 - 15:30 GMT",
@@ -138,7 +161,7 @@ const Community = () => {
       image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
     },
     {
-      id: 3,
+      id: "3",
       title: "IELTS Success Stories: Q&A Panel",
       date: "April 20, 2025",
       time: "17:00 - 18:30 GMT",
@@ -150,7 +173,14 @@ const Community = () => {
     }
   ];
   
-  // Animation variants
+  useEffect(() => {
+    try {
+      localStorage.setItem('neplia_community_events', JSON.stringify(events));
+    } catch (error) {
+      console.error('Error saving events to localStorage:', error);
+    }
+  }, []);
+  
   const container = {
     hidden: { opacity: 0 },
     show: {
@@ -180,11 +210,50 @@ const Community = () => {
     });
   };
   
-  const handleRegisterEvent = () => {
+  const handleOpenEventRegistration = (event: any) => {
+    setSelectedEvent(event);
+    setShowRegistrationDialog(true);
+  };
+  
+  const handleRegisterEvent = (eventId: string, userData: { name: string; email: string; agreeToTerms: boolean }) => {
+    const existingRegistration = eventRegistrations.find(
+      reg => reg.eventId === eventId && reg.userEmail === userData.email
+    );
+    
+    if (existingRegistration) {
+      toast({
+        title: "Already Registered",
+        description: "You are already registered for this event. Check your email for details.",
+      });
+      return;
+    }
+    
+    const newRegistration: EventRegistration = {
+      userId: `user-${Date.now()}`,
+      eventId: eventId,
+      userEmail: userData.email,
+      userName: userData.name,
+      registeredOn: new Date().toISOString().split('T')[0],
+      status: 'pending'
+    };
+    
+    const updatedRegistrations = [...eventRegistrations, newRegistration];
+    setEventRegistrations(updatedRegistrations);
+    
+    try {
+      localStorage.setItem('neplia_event_registrations', JSON.stringify(updatedRegistrations));
+    } catch (error) {
+      console.error('Error saving registration:', error);
+    }
+    
     toast({
       title: "Registration Successful!",
-      description: "You've been registered for the event. A confirmation email has been sent.",
+      description: "Your registration request has been submitted. Check your email for confirmation details.",
     });
+  };
+
+  const checkIfRegistered = (eventId: string) => {
+    return eventRegistrations.some(reg => reg.eventId === eventId);
   };
 
   return (
@@ -192,7 +261,6 @@ const Community = () => {
       <NavBar />
       <main className="flex-grow pt-20 pb-12">
         <div className="container mx-auto px-4">
-          {/* Community Header */}
           <div className="relative mb-8 rounded-xl overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/40 z-10"></div>
             <img 
@@ -220,7 +288,6 @@ const Community = () => {
             </div>
           </div>
           
-          {/* Community Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <motion.div 
               className="bg-card rounded-lg p-4 text-center shadow-sm border border-primary/10"
@@ -268,7 +335,6 @@ const Community = () => {
             </motion.div>
           </div>
           
-          {/* Main Tabs */}
           <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <TabsList className="bg-muted/50">
@@ -298,7 +364,6 @@ const Community = () => {
               </div>
             </div>
             
-            {/* Discussions Tab */}
             <TabsContent value="discussions">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Recent Discussions</h2>
@@ -372,7 +437,6 @@ const Community = () => {
               </div>
             </TabsContent>
             
-            {/* Study Groups Tab */}
             <TabsContent value="studyGroups">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Active Study Groups</h2>
@@ -447,7 +511,6 @@ const Community = () => {
               </div>
             </TabsContent>
             
-            {/* Events Tab */}
             <TabsContent value="events">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold">Upcoming Events</h2>
@@ -458,63 +521,78 @@ const Community = () => {
               </div>
               
               <div className="space-y-6">
-                {events.map((event) => (
-                  <motion.div 
-                    key={event.id}
-                    whileHover={{ y: -5 }}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Card className="overflow-hidden">
-                      <div className="md:flex">
-                        <div className="md:w-1/3 h-48 md:h-auto overflow-hidden">
-                          <img 
-                            src={event.image} 
-                            alt={event.title} 
-                            className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
-                          />
-                        </div>
-                        <div className="md:w-2/3 flex flex-col">
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-xl">{event.title}</CardTitle>
-                                <CardDescription className="flex items-center mt-1">
-                                  <User className="h-4 w-4 mr-1" />
-                                  Hosted by {event.host}
-                                </CardDescription>
+                {events.map((event) => {
+                  const isRegistered = checkIfRegistered(event.id);
+                  
+                  return (
+                    <motion.div 
+                      key={event.id}
+                      whileHover={{ y: -5 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Card className="overflow-hidden">
+                        <div className="md:flex">
+                          <div className="md:w-1/3 h-48 md:h-auto overflow-hidden">
+                            <img 
+                              src={event.image} 
+                              alt={event.title} 
+                              className="w-full h-full object-cover transition-transform hover:scale-105 duration-500"
+                            />
+                          </div>
+                          <div className="md:w-2/3 flex flex-col">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-xl">{event.title}</CardTitle>
+                                  <CardDescription className="flex items-center mt-1">
+                                    <User className="h-4 w-4 mr-1" />
+                                    Hosted by {event.host}
+                                  </CardDescription>
+                                </div>
+                                <Badge className="bg-primary">{event.type}</Badge>
                               </div>
-                              <Badge className="bg-primary">{event.type}</Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent className="flex-grow">
-                            <div className="flex items-center text-sm mb-2">
-                              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                              <span>{event.date}</span>
-                              <Clock className="h-4 w-4 mx-2 text-muted-foreground" />
-                              <span>{event.time}</span>
-                            </div>
-                            <p className="text-muted-foreground mb-4">{event.description}</p>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <Users className="h-4 w-4 mr-1" />
-                              <span>{event.participants} participants registered</span>
-                            </div>
-                          </CardContent>
-                          <CardFooter className="border-t pt-4">
-                            <Button onClick={handleRegisterEvent} className="bg-primary">
-                              Register Now
-                            </Button>
-                            <Button variant="outline" className="ml-2">
-                              <Calendar className="h-4 w-4 mr-2" />
-                              Add to Calendar
-                            </Button>
-                          </CardFooter>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                              <div className="flex items-center text-sm mb-2">
+                                <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                                <span>{event.date}</span>
+                                <Clock className="h-4 w-4 mx-2 text-muted-foreground" />
+                                <span>{event.time}</span>
+                              </div>
+                              <p className="text-muted-foreground mb-4">{event.description}</p>
+                              <div className="flex items-center text-sm text-muted-foreground">
+                                <Users className="h-4 w-4 mr-1" />
+                                <span>{event.participants} participants registered</span>
+                              </div>
+                            </CardContent>
+                            <CardFooter className="border-t pt-4">
+                              {isRegistered ? (
+                                <Button disabled className="bg-green-600 hover:bg-green-700">
+                                  <CalendarCheck className="h-4 w-4 mr-2" />
+                                  Registration Pending
+                                </Button>
+                              ) : (
+                                <Button 
+                                  onClick={() => handleOpenEventRegistration(event)} 
+                                  className="bg-primary"
+                                >
+                                  <CalendarCheck className="h-4 w-4 mr-2" />
+                                  Register Now
+                                </Button>
+                              )}
+                              <Button variant="outline" className="ml-2">
+                                <Calendar className="h-4 w-4 mr-2" />
+                                Add to Calendar
+                              </Button>
+                            </CardFooter>
+                          </div>
                         </div>
-                      </div>
-                    </Card>
-                  </motion.div>
-                ))}
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </div>
               
               <div className="mt-6 text-center">
@@ -525,7 +603,6 @@ const Community = () => {
             </TabsContent>
           </Tabs>
           
-          {/* Community Activity Feed */}
           <div className="mt-12 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Latest Community Activity</h2>
@@ -638,7 +715,6 @@ const Community = () => {
             </div>
           </div>
           
-          {/* Quick Reply Box */}
           <div className="mt-12">
             <Card>
               <CardHeader>
@@ -665,6 +741,15 @@ const Community = () => {
         </div>
       </main>
       <Footer />
+      
+      {selectedEvent && (
+        <EventRegistration
+          isOpen={showRegistrationDialog}
+          onClose={() => setShowRegistrationDialog(false)}
+          event={selectedEvent}
+          onRegister={handleRegisterEvent}
+        />
+      )}
     </div>
   );
 };

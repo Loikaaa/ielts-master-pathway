@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,9 +10,11 @@ import {
   TrendingUp,
   Award,
   Globe,
-  BookOpen 
+  BookOpen,
+  CalendarCheck
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useToast } from '@/components/ui/use-toast';
 
 interface IPost {
   id: string;
@@ -39,25 +40,38 @@ interface IStudyPartner {
   online: boolean;
 }
 
+interface IEventRegistration {
+  userId: string;
+  eventId: string;
+  registeredOn: string;
+  status: 'confirmed' | 'pending' | 'canceled';
+  userEmail?: string;
+  userName?: string;
+}
+
 interface IEvent {
   id: string;
   title: string;
   date: string;
   type: string;
   attendees: number;
+  registrations?: IEventRegistration[];
 }
 
 const AdminCommunityTab = () => {
+  const { toast } = useToast();
   const [communityPosts, setCommunityPosts] = useState<IPost[]>([]);
   const [studyPartners, setStudyPartners] = useState<IStudyPartner[]>([]);
   const [events, setEvents] = useState<IEvent[]>([]);
   const [activeTab, setActiveTab] = useState('discussions');
+  const [eventRegistrations, setEventRegistrations] = useState<IEventRegistration[]>([]);
   
   useEffect(() => {
     try {
       const storedPosts = localStorage.getItem('neplia_community_posts');
       const storedPartners = localStorage.getItem('neplia_study_partners');
       const storedEvents = localStorage.getItem('neplia_community_events');
+      const storedRegistrations = localStorage.getItem('neplia_event_registrations');
       
       if (storedPosts) {
         setCommunityPosts(JSON.parse(storedPosts));
@@ -70,10 +84,52 @@ const AdminCommunityTab = () => {
       if (storedEvents) {
         setEvents(JSON.parse(storedEvents));
       }
+      
+      if (storedRegistrations) {
+        setEventRegistrations(JSON.parse(storedRegistrations));
+      }
     } catch (error) {
       console.error('Error loading community data:', error);
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('neplia_event_registrations', JSON.stringify(eventRegistrations));
+    } catch (error) {
+      console.error('Error saving event registrations:', error);
+    }
+  }, [eventRegistrations]);
+
+  const approveRegistration = (eventId: string, userId: string) => {
+    setEventRegistrations(prev => 
+      prev.map(reg => 
+        reg.eventId === eventId && reg.userId === userId 
+          ? { ...reg, status: 'confirmed' } 
+          : reg
+      )
+    );
+    
+    toast({
+      title: "Registration Approved",
+      description: "The user has been successfully registered for the event.",
+    });
+  };
+
+  const cancelRegistration = (eventId: string, userId: string) => {
+    setEventRegistrations(prev => 
+      prev.map(reg => 
+        reg.eventId === eventId && reg.userId === userId 
+          ? { ...reg, status: 'canceled' } 
+          : reg
+      )
+    );
+    
+    toast({
+      title: "Registration Canceled",
+      description: "The user registration has been canceled.",
+    });
+  };
 
   return (
     <section className="space-y-6">
@@ -174,6 +230,14 @@ const AdminCommunityTab = () => {
           Events
         </Button>
         <Button 
+          variant={activeTab === 'registrations' ? 'default' : 'outline'} 
+          onClick={() => setActiveTab('registrations')}
+          className={`rounded-full ${activeTab === 'registrations' ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+        >
+          <CalendarCheck className="mr-2 h-4 w-4" />
+          Event Registrations
+        </Button>
+        <Button 
           variant={activeTab === 'analytics' ? 'default' : 'outline'} 
           onClick={() => setActiveTab('analytics')}
           className={`rounded-full ${activeTab === 'analytics' ? 'bg-emerald-600 hover:bg-emerald-700' : ''}`}
@@ -196,6 +260,7 @@ const AdminCommunityTab = () => {
           activeTab === 'discussions' ? 'bg-indigo-50' : 
           activeTab === 'partners' ? 'bg-purple-50' : 
           activeTab === 'events' ? 'bg-amber-50' : 
+          activeTab === 'registrations' ? 'bg-blue-50' :
           activeTab === 'analytics' ? 'bg-emerald-50' : 
           'bg-rose-50'
         }`}>
@@ -203,12 +268,14 @@ const AdminCommunityTab = () => {
             activeTab === 'discussions' ? 'text-indigo-700' : 
             activeTab === 'partners' ? 'text-purple-700' : 
             activeTab === 'events' ? 'text-amber-700' : 
+            activeTab === 'registrations' ? 'text-blue-700' :
             activeTab === 'analytics' ? 'text-emerald-700' : 
             'text-rose-700'
           }`}>
             {activeTab === 'discussions' && 'Community Discussions'}
             {activeTab === 'partners' && 'Active Study Partners'}
             {activeTab === 'events' && 'Upcoming Events'}
+            {activeTab === 'registrations' && 'Event Registrations'}
             {activeTab === 'analytics' && 'Community Analytics'}
             {activeTab === 'users' && 'Community Members'}
           </CardTitle>
@@ -216,6 +283,7 @@ const AdminCommunityTab = () => {
             {activeTab === 'discussions' && 'Manage and moderate discussion threads and posts'}
             {activeTab === 'partners' && 'View and manage study partner connections'}
             {activeTab === 'events' && 'Upcoming virtual study sessions and workshops'}
+            {activeTab === 'registrations' && 'Manage event registrations and attendance'}
             {activeTab === 'analytics' && 'Community engagement and growth metrics'}
             {activeTab === 'users' && 'Manage community members and permissions'}
           </CardDescription>
@@ -349,6 +417,98 @@ const AdminCommunityTab = () => {
                           <Calendar className="h-10 w-10 mx-auto mb-2 text-amber-200" />
                           <p>No upcoming events</p>
                           <Button variant="outline" size="sm" className="mt-4 border-amber-200 text-amber-600 hover:bg-amber-50">Schedule Event</Button>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'registrations' && (
+            <div className="space-y-6">
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className={`bg-blue-50 text-blue-700`}>
+                    <tr>
+                      <th className="text-left p-3 font-medium">Event</th>
+                      <th className="text-left p-3 font-medium">User</th>
+                      <th className="text-left p-3 font-medium">Registered On</th>
+                      <th className="text-left p-3 font-medium">Status</th>
+                      <th className="text-left p-3 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {eventRegistrations.length > 0 ? (
+                      eventRegistrations.map((registration) => {
+                        const event = events.find(e => e.id === registration.eventId);
+                        return (
+                          <tr key={`${registration.eventId}-${registration.userId}`} className="hover:bg-muted/20">
+                            <td className="p-3 font-medium">{event?.title || 'Unknown Event'}</td>
+                            <td className="p-3">{registration.userName || registration.userEmail || registration.userId}</td>
+                            <td className="p-3">{registration.registeredOn}</td>
+                            <td className="p-3">
+                              <div className={`text-xs px-2 py-1 rounded-full inline-block ${
+                                registration.status === 'confirmed' 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : registration.status === 'pending'
+                                  ? 'bg-amber-100 text-amber-700'
+                                  : 'bg-red-100 text-red-700'
+                              }`}>
+                                {registration.status.charAt(0).toUpperCase() + registration.status.slice(1)}
+                              </div>
+                            </td>
+                            <td className="p-3 space-x-2">
+                              {registration.status === 'pending' && (
+                                <>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="border-green-200 text-green-600 hover:bg-green-50"
+                                    onClick={() => approveRegistration(registration.eventId, registration.userId)}
+                                  >
+                                    Approve
+                                  </Button>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="border-red-200 text-red-600 hover:bg-red-50"
+                                    onClick={() => cancelRegistration(registration.eventId, registration.userId)}
+                                  >
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              {registration.status === 'confirmed' && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="border-red-200 text-red-600 hover:bg-red-50"
+                                  onClick={() => cancelRegistration(registration.eventId, registration.userId)}
+                                >
+                                  Cancel
+                                </Button>
+                              )}
+                              {registration.status === 'canceled' && (
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="border-green-200 text-green-600 hover:bg-green-50"
+                                  onClick={() => approveRegistration(registration.eventId, registration.userId)}
+                                >
+                                  Reapprove
+                                </Button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                          <CalendarCheck className="h-10 w-10 mx-auto mb-2 text-blue-200" />
+                          <p>No event registrations yet</p>
                         </td>
                       </tr>
                     )}
