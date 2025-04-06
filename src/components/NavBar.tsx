@@ -11,9 +11,23 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Shield
+  Shield,
+  Home,
+  BookOpen,
+  Users,
+  Library
 } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -93,59 +107,205 @@ const NavBar = () => {
           </Link>
         </div>
         
-        <div className="hidden md:flex items-center space-x-6">
-          <Link to="/" className="text-foreground/80 hover:text-foreground transition-colors">
-            Home
-          </Link>
-          <Link to="/practice" className="text-foreground/80 hover:text-foreground transition-colors">
-            Practice
-          </Link>
-          <Link to="/community" className="text-foreground/80 hover:text-foreground transition-colors">
-            Community
-          </Link>
-          <Link to="/resources" className="text-foreground/80 hover:text-foreground transition-colors">
-            Resources
-          </Link>
-          <div className="flex space-x-2">
-            {currentUser ? (
-              <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/dashboard">
-                    <User className="h-4 w-4 mr-2" />
-                    My Dashboard
+        {!isMobile && (
+          <div className="hidden md:flex items-center space-x-2">
+            <NavigationMenu>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <Link to="/" className={cn(navigationMenuTriggerStyle(), "group")}>
+                    <Home className="h-4 w-4 mr-2" />
+                    Home
                   </Link>
-                </Button>
-                {isAdmin && (
-                  <Button variant="outline" size="sm" asChild className="bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100">
-                    <Link to="/admin">
-                      <Shield className="h-4 w-4 mr-2 text-amber-600" />
-                      Admin
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
+                    <BookOpen className="h-4 w-4 mr-2" />
+                    Practice
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid gap-3 p-4 w-[400px] grid-cols-2">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/practice"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-primary/20 to-primary/5 p-6 no-underline outline-none focus:shadow-md"
+                          >
+                            <div className="mb-2 mt-4 text-lg font-medium">
+                              IELTS Practice
+                            </div>
+                            <p className="text-sm leading-tight text-muted-foreground">
+                              Prepare for your exam with our comprehensive practice materials.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/practice?skill=reading" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none text-reading">Reading</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Improve comprehension and scanning skills
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/practice?skill=writing" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none text-writing">Writing</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Master essay writing and task achievement
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/practice?skill=speaking" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none text-speaking">Speaking</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Practice fluency and pronunciation
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/practice?skill=listening" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none text-listening">Listening</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Train with diverse accents and exercises
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
+                    <Users className="h-4 w-4 mr-2" />
+                    Community
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/community" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">Discussion Board</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Join conversations with other IELTS test-takers
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/community" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">Study Groups</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Find study partners and prepare together
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>
+                    <Library className="h-4 w-4 mr-2" />
+                    Resources
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/resources/blog" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">Blog</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Expert advice and study strategies
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/resources/faq" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">FAQ</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Answers to common questions
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/resources/success-stories" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">Success Stories</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Read about others' achievements
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link to="/resources/ielts-tips" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                            <div className="text-sm font-medium leading-none">IELTS Tips</div>
+                            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                              Strategic advice for exam day
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+            
+            <div className="flex space-x-2 ml-4">
+              {currentUser ? (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/dashboard">
+                      <User className="h-4 w-4 mr-2" />
+                      My Dashboard
                     </Link>
                   </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to="/signin">
+                  {isAdmin && (
+                    <Button variant="outline" size="sm" asChild className="bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100">
+                      <Link to="/admin">
+                        <Shield className="h-4 w-4 mr-2 text-amber-600" />
+                        Admin
+                      </Link>
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" onClick={handleLogout}>
                     <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Link>
-                </Button>
-                <Button size="sm" asChild>
-                  <Link to="/signup">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Sign Up
-                  </Link>
-                </Button>
-              </>
-            )}
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/signin">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Link>
+                  </Button>
+                  <Button size="sm" asChild>
+                    <Link to="/signup">
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         
         <button 
           className="md:hidden"
@@ -157,76 +317,136 @@ const NavBar = () => {
       </div>
       
       {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-background border-b animate-fade-in">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
-            <Link 
-              to="/" 
-              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Home
-            </Link>
+        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/95 backdrop-blur-sm animate-in slide-in-from-top-5 duration-300">
+          <div className="container mx-auto px-4 py-6 flex flex-col space-y-6 h-[calc(100vh-61px)] overflow-y-auto">
+            <div className="grid grid-cols-2 gap-4">
+              <Link 
+                to="/" 
+                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Home className="h-6 w-6 mb-2 text-primary" />
+                <span className="font-medium">Home</span>
+              </Link>
+              
+              <Link 
+                to="/practice" 
+                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <BookOpen className="h-6 w-6 mb-2 text-primary" />
+                <span className="font-medium">Practice</span>
+              </Link>
+              
+              <Link 
+                to="/community" 
+                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Users className="h-6 w-6 mb-2 text-primary" />
+                <span className="font-medium">Community</span>
+              </Link>
+              
+              <Link 
+                to="/resources" 
+                className="flex flex-col items-center justify-center p-4 bg-accent/50 rounded-xl shadow-sm border border-border/50 hover:bg-accent transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Library className="h-6 w-6 mb-2 text-primary" />
+                <span className="font-medium">Resources</span>
+              </Link>
+            </div>
+            
+            <div className="mt-2 space-y-3">
+              <h3 className="font-medium text-lg px-2">IELTS Skills</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <Link 
+                  to="/practice?skill=reading" 
+                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-reading/20 hover:border-reading/40 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="font-medium text-reading">Reading</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2">Improve comprehension skills</span>
+                </Link>
+                
+                <Link 
+                  to="/practice?skill=writing" 
+                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-writing/20 hover:border-writing/40 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="font-medium text-writing">Writing</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2">Master essay techniques</span>
+                </Link>
+                
+                <Link 
+                  to="/practice?skill=speaking" 
+                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-speaking/20 hover:border-speaking/40 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="font-medium text-speaking">Speaking</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2">Practice pronunciation</span>
+                </Link>
+                
+                <Link 
+                  to="/practice?skill=listening" 
+                  className="flex flex-col p-3 bg-accent/30 rounded-lg shadow-sm border border-listening/20 hover:border-listening/40 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <span className="font-medium text-listening">Listening</span>
+                  <span className="text-xs text-muted-foreground line-clamp-2">Train with diverse accents</span>
+                </Link>
+              </div>
+            </div>
+            
             {currentUser && (
               <Link 
                 to="/dashboard" 
-                className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
+                className="flex items-center justify-center p-4 mt-2 bg-primary/10 rounded-lg text-primary border border-primary/20"
                 onClick={() => setIsMenuOpen(false)}
               >
-                My Dashboard
+                <User className="h-5 w-5 mr-2" />
+                <span className="font-medium">My Dashboard</span>
               </Link>
             )}
+            
             {isAdmin && currentUser && (
               <Link 
                 to="/admin" 
-                className="px-4 py-2 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded-md transition-colors"
+                className="flex items-center justify-center p-4 bg-amber-50 text-amber-800 rounded-lg border border-amber-200"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Shield className="inline-block h-4 w-4 mr-2 text-amber-600" />
-                Admin Panel
+                <Shield className="h-5 w-5 mr-2 text-amber-600" />
+                <span className="font-medium">Admin Panel</span>
               </Link>
             )}
-            <Link 
-              to="/practice" 
-              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Practice
-            </Link>
-            <Link 
-              to="/community" 
-              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Community
-            </Link>
-            <Link 
-              to="/resources" 
-              className="px-4 py-2 hover:bg-accent rounded-md transition-colors"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Resources
-            </Link>
-            {currentUser ? (
-              <Button variant="outline" className="w-full" onClick={handleLogout}>
-                <LogIn className="h-4 w-4 mr-2" />
-                Logout
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" className="w-full" asChild>
-                  <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Link>
+            
+            <div className="mt-auto grid grid-cols-2 gap-4">
+              {currentUser ? (
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={handleLogout}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Logout
                 </Button>
-                <Button className="w-full" asChild>
-                  <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Sign Up
-                  </Link>
-                </Button>
-              </>
-            )}
+              ) : (
+                <>
+                  <Button variant="outline" className="w-full" asChild>
+                    <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Link>
+                  </Button>
+                  <Button className="w-full" asChild>
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
