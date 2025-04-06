@@ -252,8 +252,8 @@ const Practice = () => {
             </div>
 
             {viewMode === 'columns' ? (
-              <div className="flex flex-col md:flex-row gap-6">
-                <div className="w-full md:w-1/2 space-y-4">
+              <div className={`${isMobile ? "flex flex-col gap-6" : "flex flex-row gap-6"}`}>
+                <div className={`${isMobile ? "w-full" : "w-1/2"} space-y-4`}>
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <Trophy className="h-5 w-5 mr-2 text-amber-500" />
                     Full IELTS Exams
@@ -324,7 +324,7 @@ const Practice = () => {
                   </div>
                 </div>
                 
-                <div className="w-full md:w-1/2 space-y-4">
+                <div className={`${isMobile ? "w-full" : "w-1/2"} space-y-4`}>
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <CheckSquare className="h-5 w-5 mr-2 text-primary" />
                     Practice Tests
