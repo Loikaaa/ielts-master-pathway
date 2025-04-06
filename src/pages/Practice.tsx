@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -6,11 +5,12 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutGrid } from 'lucide-react';
+import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutGrid, Columns } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/contexts/UserContext';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { Question, ReadingQuestion, ListeningQuestion } from '@/types/questions';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Practice = () => {
   const { currentUser } = useUser();
@@ -19,6 +19,7 @@ const Practice = () => {
   const [username, setUsername] = useState('');
   const [userCountry, setUserCountry] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'columns'>('columns'); // Default to columns view
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     // Get user's first name or username
@@ -105,13 +106,11 @@ const Practice = () => {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
 
-  // Group tests by type (Exams and Practice Tests)
   const groupedTests = {
     exams: questions.filter(q => q.isFullExam === true),
     practices: questions.filter(q => q.isFullExam !== true)
   };
   
-  // Helper function to safely get question count for reading and listening questions
   const getQuestionCount = (question: Question): number => {
     if (question.skillType === 'reading' && 'questions' in question) {
       return (question as ReadingQuestion).questions.length;
@@ -162,14 +161,14 @@ const Practice = () => {
                   onClick={() => setViewMode(viewMode === 'grid' ? 'columns' : 'grid')}
                   className="h-10 w-10"
                 >
-                  <LayoutGrid className="h-5 w-5" />
+                  {viewMode === 'grid' ? <Columns className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
                 </Button>
               </div>
             </div>
           </motion.div>
           
           <motion.div 
-            className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12"
             initial="hidden"
             animate="visible"
             variants={{
@@ -223,7 +222,6 @@ const Practice = () => {
             ))}
           </motion.div>
           
-          {/* Two-column layout for Exams and Practice Tests */}
           <motion.div 
             initial="hidden"
             animate="visible"
@@ -238,7 +236,7 @@ const Practice = () => {
                   size="sm"
                   onClick={() => setViewMode('columns')}
                 >
-                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  <Columns className="h-4 w-4 mr-2" />
                   Two Columns
                 </Button>
                 <Button 
@@ -246,30 +244,15 @@ const Practice = () => {
                   size="sm"
                   onClick={() => setViewMode('grid')}
                 >
-                  <svg 
-                    width="15" 
-                    height="15" 
-                    viewBox="0 0 15 15" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4 mr-2"
-                  >
-                    <path 
-                      d="M1.5 1.5H6.5V6.5H1.5V1.5ZM8.5 1.5H13.5V6.5H8.5V1.5ZM1.5 8.5H6.5V13.5H1.5V8.5ZM8.5 8.5H13.5V13.5H8.5V8.5Z" 
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
+                  <LayoutGrid className="h-4 w-4 mr-2" />
                   Grid
                 </Button>
               </div>
             </div>
 
             {viewMode === 'columns' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Full Exams Column */}
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+                <div className="space-y-4">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <Trophy className="h-5 w-5 mr-2 text-amber-500" />
                     Full IELTS Exams
@@ -340,8 +323,7 @@ const Practice = () => {
                   </div>
                 </div>
                 
-                {/* Practice Tests Column */}
-                <div>
+                <div className="space-y-4">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <CheckSquare className="h-5 w-5 mr-2 text-primary" />
                     Practice Tests
@@ -402,7 +384,6 @@ const Practice = () => {
                 </div>
               </div>
             ) : (
-              // Standard grid view (existing tab layout)
               <Tabs defaultValue={selectedSkill} value={selectedSkill} onValueChange={setSelectedSkill} className="mt-8">
                 <TabsList className="w-full justify-start mb-6 overflow-auto">
                   <TabsTrigger value="all" className="text-base">All Tests</TabsTrigger>
