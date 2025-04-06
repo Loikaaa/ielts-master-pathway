@@ -115,12 +115,12 @@ const NavBar = () => {
           
           <Link to="/" className="flex items-center space-x-2">
             <div className="relative flex-shrink-0">
-              <div className="flex items-center justify-center h-10 w-10 rounded-md bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white shadow-md">
-                <span className="font-bold text-xl">N</span>
+              <div className="flex items-center justify-center h-8 w-8 rounded-md bg-gradient-to-br from-purple-600 via-indigo-500 to-blue-500 text-white shadow-md">
+                <span className="font-bold text-lg">N</span>
               </div>
-              <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
+              <div className="absolute -bottom-1 -right-1 h-2.5 w-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></div>
             </div>
-            <span className="font-bold text-xl bg-gradient-to-r from-indigo-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">IELTS</span>
+            <span className="font-bold text-lg bg-gradient-to-r from-indigo-600 via-blue-500 to-emerald-400 text-transparent bg-clip-text">IELTS</span>
           </Link>
         </div>
         
@@ -325,160 +325,147 @@ const NavBar = () => {
         )}
         
         <button 
-          className="md:hidden relative z-20 w-10 h-10 flex items-center justify-center rounded-full bg-primary/5 hover:bg-primary/10 transition-colors"
+          className="md:hidden relative z-20 w-8 h-8 flex items-center justify-center rounded-full bg-primary/5 hover:bg-primary/10 transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}
         >
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </button>
       </div>
       
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/98 backdrop-blur-lg">
-          <ScrollArea className="h-[calc(100vh-61px)]">
-            <div className="px-4 py-6">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <MobileNavCard 
+        <div className="md:hidden fixed inset-0 top-[57px] z-50 bg-background/98 backdrop-blur-sm">
+          <ScrollArea className="h-[calc(100vh-57px)] custom-scrollbar">
+            <div className="px-4 py-4">
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <MobileNavCompactCard 
                   to="/"
-                  icon={<Home className="h-5 w-5 text-blue-500" />}
+                  icon={<Home className="h-4 w-4 text-blue-500" />}
                   label="Home"
-                  color="bg-blue-50"
-                  border="border-blue-100"
                   onClick={() => setIsMenuOpen(false)}
                 />
                 
-                <MobileNavCard 
+                <MobileNavCompactCard 
                   to="/practice"
-                  icon={<BookOpen className="h-5 w-5 text-green-500" />}
+                  icon={<BookOpen className="h-4 w-4 text-green-500" />}
                   label="Practice"
-                  color="bg-green-50"
-                  border="border-green-100"
                   onClick={() => setIsMenuOpen(false)}
                 />
                 
-                <MobileNavCard 
+                <MobileNavCompactCard 
                   to="/community"
-                  icon={<Users className="h-5 w-5 text-purple-500" />}
+                  icon={<Users className="h-4 w-4 text-purple-500" />}
                   label="Community"
-                  color="bg-purple-50"
-                  border="border-purple-100"
                   onClick={() => setIsMenuOpen(false)}
                 />
                 
-                <MobileNavCard 
+                <MobileNavCompactCard 
                   to="/resources"
-                  icon={<Library className="h-5 w-5 text-amber-500" />}
+                  icon={<Library className="h-4 w-4 text-amber-500" />}
                   label="Resources"
-                  color="bg-amber-50"
-                  border="border-amber-100"
                   onClick={() => setIsMenuOpen(false)}
                 />
               </div>
               
-              <div className="mb-6">
-                <h3 className="font-medium text-base mb-3 text-muted-foreground px-2">IELTS Skills</h3>
+              <div className="mb-4">
+                <h3 className="text-xs font-medium uppercase text-muted-foreground mb-2 px-1">IELTS Skills</h3>
                 
-                <div className="space-y-2">
-                  <MobileNavLink 
+                <div className="grid grid-cols-2 gap-2">
+                  <MobileNavSkillCard 
                     to="/practice?skill=reading"
-                    icon={<BookMarked className="h-4 w-4 text-pink-500" />}
+                    icon={<BookMarked className="h-3.5 w-3.5 text-pink-500" />}
                     label="Reading"
-                    description="Improve comprehension skills"
                     onClick={() => setIsMenuOpen(false)}
+                    color="bg-pink-50"
                   />
                   
-                  <MobileNavLink 
+                  <MobileNavSkillCard 
                     to="/practice?skill=writing"
-                    icon={<Pen className="h-4 w-4 text-emerald-500" />}
+                    icon={<Pen className="h-3.5 w-3.5 text-emerald-500" />}
                     label="Writing"
-                    description="Master essay techniques"
                     onClick={() => setIsMenuOpen(false)}
+                    color="bg-emerald-50"
                   />
                   
-                  <MobileNavLink 
+                  <MobileNavSkillCard 
                     to="/practice?skill=speaking"
-                    icon={<Globe className="h-4 w-4 text-indigo-500" />}
+                    icon={<Globe className="h-3.5 w-3.5 text-indigo-500" />}
                     label="Speaking"
-                    description="Practice pronunciation"
                     onClick={() => setIsMenuOpen(false)}
+                    color="bg-indigo-50"
                   />
                   
-                  <MobileNavLink 
+                  <MobileNavSkillCard 
                     to="/practice?skill=listening"
-                    icon={<Headphones className="h-4 w-4 text-amber-500" />}
+                    icon={<Headphones className="h-3.5 w-3.5 text-amber-500" />}
                     label="Listening"
-                    description="Train with diverse accents"
                     onClick={() => setIsMenuOpen(false)}
+                    color="bg-amber-50"
                   />
                 </div>
               </div>
               
               {currentUser && (
-                <div className="mb-6">
-                  <MobileNavLink 
+                <div className="mb-4">
+                  <h3 className="text-xs font-medium uppercase text-muted-foreground mb-2 px-1">Account</h3>
+                  
+                  <MobileNavCompactCard 
                     to="/dashboard"
                     icon={<User className="h-4 w-4 text-primary" />}
-                    label="My Dashboard"
-                    description="Track your progress"
+                    label="Dashboard"
                     onClick={() => setIsMenuOpen(false)}
                   />
-                </div>
-              )}
-              
-              {isAdmin && currentUser && (
-                <div className="mb-6">
-                  <MobileNavLink 
-                    to="/admin"
-                    icon={<Shield className="h-4 w-4 text-amber-600" />}
-                    label="Admin Panel"
-                    description="Manage your site"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="bg-amber-50 text-amber-900 border-amber-100"
-                  />
+                  
+                  {isAdmin && (
+                    <MobileNavCompactCard 
+                      to="/admin"
+                      icon={<Shield className="h-4 w-4 text-amber-600" />}
+                      label="Admin Panel"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="mt-2 bg-amber-50 border-amber-100"
+                    />
+                  )}
                 </div>
               )}
             </div>
             
             <div className="sticky bottom-0 left-0 w-full p-4 bg-background/95 backdrop-blur-md border-t">
-              <div className="flex flex-col space-y-2">
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">
-                  {currentUser ? 'Account' : 'Get Started'}
-                </h3>
-                
-                {currentUser ? (
+              {currentUser ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="w-full justify-center border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100" 
+                  onClick={handleLogout}
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100" 
-                    onClick={handleLogout}
+                    size="sm"
+                    className="justify-center" 
+                    asChild
                   >
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Logout
+                    <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
+                      <LogIn className="h-4 w-4 mr-1.5" />
+                      Sign In
+                    </Link>
                   </Button>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3">
-                    <Button 
-                      variant="outline" 
-                      className="justify-center" 
-                      asChild
-                    >
-                      <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                        <LogIn className="h-4 w-4 mr-2" />
-                        Sign In
-                      </Link>
-                    </Button>
-                    
-                    <Button 
-                      className="justify-center" 
-                      asChild
-                    >
-                      <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
-                        <UserPlus className="h-4 w-4 mr-2" />
-                        Sign Up
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
+                  
+                  <Button 
+                    size="sm"
+                    className="justify-center" 
+                    asChild
+                  >
+                    <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
+                      <UserPlus className="h-4 w-4 mr-1.5" />
+                      Sign Up
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </div>
           </ScrollArea>
         </div>
@@ -487,14 +474,14 @@ const NavBar = () => {
   );
 };
 
-const MobileNavCard = ({ to, icon, label, color, border, onClick }) => {
+const MobileNavCompactCard = ({ to, icon, label, onClick, className = "" }) => {
   return (
     <Link 
       to={to} 
-      className={`flex flex-col items-center justify-center p-4 rounded-lg border ${border} ${color} hover:shadow-md transition-all duration-200`}
+      className={`flex items-center p-3 rounded-lg border border-border/50 hover:bg-accent hover:border-border transition-colors ${className}`}
       onClick={onClick}
     >
-      <div className="mb-2">
+      <div className="mr-2">
         {icon}
       </div>
       <span className="font-medium text-sm">{label}</span>
@@ -502,20 +489,17 @@ const MobileNavCard = ({ to, icon, label, color, border, onClick }) => {
   );
 };
 
-const MobileNavLink = ({ to, icon, label, description, onClick, className = "" }) => {
+const MobileNavSkillCard = ({ to, icon, label, onClick, color = "bg-accent/30" }) => {
   return (
     <Link 
       to={to} 
-      className={`flex items-center p-3 rounded-lg border border-border/50 hover:bg-accent hover:border-accent transition-colors ${className}`}
+      className={`flex flex-col items-center justify-center py-2.5 rounded-lg border border-border/50 ${color} hover:brightness-95 transition-all`}
       onClick={onClick}
     >
-      <div className="flex-shrink-0 mr-3">
+      <div className="mb-1">
         {icon}
       </div>
-      <div>
-        <div className="font-medium text-sm">{label}</div>
-        <p className="text-xs text-muted-foreground">{description}</p>
-      </div>
+      <span className="text-xs font-medium">{label}</span>
     </Link>
   );
 };
