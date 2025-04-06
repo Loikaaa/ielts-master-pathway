@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -157,7 +158,7 @@ const Practice = () => {
           </motion.div>
           
           <motion.div 
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12"
+            className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12"
             initial="hidden"
             animate="visible"
             variants={{
@@ -237,7 +238,7 @@ const Practice = () => {
               </TabsList>
               
               <TabsContent value="all" className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {filterQuestions('all').map((question, idx) => {
                     const skillType = skillTypes.find(s => s.id === question.skillType);
                     const Icon = skillType?.icon || Book;
@@ -300,7 +301,7 @@ const Practice = () => {
                       Full IELTS Exams
                     </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {groupedTests.exams.filter(exam => exam.skillType === skill.id).length > 0 ? (
                         groupedTests.exams
                           .filter(exam => exam.skillType === skill.id)
@@ -372,7 +373,7 @@ const Practice = () => {
                       Practice Tests
                     </h3>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {filterQuestions(skill.id).map((question, idx) => {
                         const displayTitle = getQuestionDisplayTitle(question);
                         
