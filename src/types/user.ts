@@ -7,11 +7,11 @@ export interface User {
   role: 'student' | 'teacher' | 'admin';
   profileImage?: string;
   joinDate: string;
-  lastLogin?: string;
+  lastLogin?: string; // Changed from Date to string for consistency
   country?: string;
   countryCode?: string;
   ipAddress?: string;
-  targetScore?: number;
+  targetScore?: string; // Changed from number to string
   examDate?: string;
   testType?: string;
   skillScores?: {
@@ -22,7 +22,7 @@ export interface User {
   };
   displayName?: string;
   isAdmin?: boolean;
-  created?: Date;
+  created?: string; // Changed from Date to string for consistency
   stories?: Array<{
     id: string;
     title: string;
@@ -33,7 +33,7 @@ export interface User {
   recentActivity?: Array<{
     id: string;
     type: 'practice' | 'blog' | 'resource' | 'login';
-    timestamp: Date;
+    timestamp: string; // Changed from Date to string for consistency
     details?: string;
   }>;
   preferences?: {
@@ -43,6 +43,7 @@ export interface User {
   };
   oauthProvider?: 'google' | 'facebook';
   oauthId?: string;
+  password?: string; // Added for authentication
 }
 
 export interface AdminCredentials {
@@ -52,7 +53,7 @@ export interface AdminCredentials {
 
 export interface LoginStats {
   attempts: number;
-  lastAttempt: Date;
+  lastAttempt: string; // Changed from Date to string for consistency
   ipAddress?: string;
   country?: string;
 }
@@ -60,7 +61,7 @@ export interface LoginStats {
 export interface UserActivity {
   userId: string;
   activity: 'login' | 'practice' | 'resource' | 'blog' | 'logout';
-  timestamp: Date;
+  timestamp: string; // Changed from Date to string for consistency
   details?: string;
   metadata?: Record<string, any>;
 }

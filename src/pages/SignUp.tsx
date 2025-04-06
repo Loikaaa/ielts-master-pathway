@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -49,6 +48,8 @@ const SignUp = () => {
         targetScore: '7.0',
         examDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         country: userCountry,
+        role: 'student' as const,
+        joinDate: new Date().toISOString()
       };
       
       const success = await signup(userData);
@@ -122,7 +123,6 @@ const SignUp = () => {
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <div className="flex-grow flex items-center justify-center w-full pt-16 pb-12 px-4 relative overflow-hidden">
-        {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-[20%] -left-[10%] w-1/2 h-1/2 bg-speaking/20 rounded-full blur-3xl animate-pulse-slow"></div>
           <div className="absolute -bottom-[10%] -right-[10%] w-1/2 h-1/2 bg-reading/20 rounded-full blur-3xl animate-pulse-slow"></div>
@@ -130,7 +130,6 @@ const SignUp = () => {
           <div className="absolute bottom-[30%] -left-[10%] w-1/3 h-1/3 bg-writing/20 rounded-full blur-3xl animate-pulse-slow"></div>
         </div>
         
-        {/* IELTS skill icons background */}
         <div className="absolute inset-0 opacity-5 flex flex-wrap justify-center items-center">
           {Array(20).fill(0).map((_, i) => (
             <div key={i} className={`w-24 h-24 m-8 flex items-center justify-center text-4xl opacity-20 

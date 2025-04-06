@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Facebook, Google } from "lucide-react";
+import { Mail, Chrome } from "lucide-react";
 
 interface OAuthButtonsProps {
   onOAuthLogin: (provider: 'google' | 'facebook') => void;
@@ -23,7 +23,7 @@ const OAuthButtons: React.FC<OAuthButtonsProps> = ({
         onClick={() => onOAuthLogin('google')}
         className="flex items-center justify-center gap-2"
       >
-        <Google className="h-4 w-4 text-red-500" />
+        <Chrome className="h-4 w-4 text-red-500" />
         <span>Google</span>
       </Button>
       
@@ -34,7 +34,7 @@ const OAuthButtons: React.FC<OAuthButtonsProps> = ({
         onClick={() => onOAuthLogin('facebook')}
         className="flex items-center justify-center gap-2"
       >
-        <Facebook className="h-4 w-4 text-blue-600" />
+        <Mail className="h-4 w-4 text-blue-600" />
         <span>Facebook</span>
       </Button>
     </div>

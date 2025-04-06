@@ -22,7 +22,7 @@ const createUserSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   isAdmin: z.boolean().default(false),
   testType: z.string().min(1, 'Please select a test type'),
-  targetScore: z.string().min(1, 'Please select a target score'),
+  targetScore: z.string().min(1, 'Please select a target score'), // Changed from number to string
   examDate: z.string().optional(),
   country: z.string().optional(),
 });
