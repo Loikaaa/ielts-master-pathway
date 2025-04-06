@@ -2,12 +2,15 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Youtube, Book } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Footer = () => {
+  const isMobile = useIsMobile();
+  
   return (
     <footer className="bg-card text-card-foreground py-12 border-t">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4 md:gap-8">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Book className="h-6 w-6 text-primary" />
@@ -33,7 +36,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="font-medium text-lg mb-4">Quick Links</h4>
+            <h4 className="font-medium text-lg mb-3">Quick Links</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
@@ -59,7 +62,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="font-medium text-lg mb-4">Resources</h4>
+            <h4 className="font-medium text-lg mb-3">Resources</h4>
             <ul className="space-y-2">
               <li>
                 <Link to="/resources/blog" className="text-muted-foreground hover:text-primary transition-colors">
@@ -85,7 +88,7 @@ const Footer = () => {
           </div>
           
           <div>
-            <h4 className="font-medium text-lg mb-4">Contact</h4>
+            <h4 className="font-medium text-lg mb-3">Contact</h4>
             <ul className="space-y-2">
               <li className="text-muted-foreground">
                 Email: support@neplia-ielts.com
