@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -6,7 +5,7 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutGrid, Columns } from 'lucide-react';
+import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/contexts/UserContext';
 import { useQuestions } from '@/contexts/QuestionsContext';
@@ -19,16 +18,13 @@ const Practice = () => {
   const [selectedSkill, setSelectedSkill] = useState('all');
   const [username, setUsername] = useState('');
   const [userCountry, setUserCountry] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'columns'>('columns'); // Default to columns view
   const isMobile = useIsMobile();
   
   useEffect(() => {
-    // Get user's first name or username
     if (currentUser && currentUser.firstName) {
       setUsername(currentUser.firstName);
     }
     
-    // Check for stored country or use API
     const getCountry = async () => {
       try {
         const response = await fetch('https://ipapi.co/json/');
@@ -151,19 +147,11 @@ const Practice = () => {
                   Choose a skill to improve your IELTS score.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 mt-3 md:mt-0">
                 <div className="flex items-center gap-2 p-2 bg-background/50 backdrop-blur-sm rounded-lg border border-border/50 shadow-sm">
                   <Clock className="h-5 w-5 text-muted-foreground" />
                   <span className="text-sm">Recent activity: <span className="font-medium">2 days ago</span></span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => setViewMode(viewMode === 'grid' ? 'columns' : 'grid')}
-                  className="h-10 w-10"
-                >
-                  {viewMode === 'grid' ? <Columns className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
-                </Button>
               </div>
             </div>
           </motion.div>
@@ -231,234 +219,160 @@ const Practice = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">IELTS Practice Tests</h2>
-              <div className="flex gap-2">
-                <Button 
-                  variant={viewMode === 'columns' ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode('columns')}
-                >
-                  <Columns className="h-4 w-4 mr-2" />
-                  Two Columns
-                </Button>
-                <Button 
-                  variant={viewMode === 'grid' ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                >
-                  <LayoutGrid className="h-4 w-4 mr-2" />
-                  Grid
-                </Button>
-              </div>
             </div>
 
-            {viewMode === 'columns' ? (
-              <div className={`${isMobile ? "flex flex-col gap-6" : "flex flex-row gap-6"}`}>
-                <div className={`${isMobile ? "w-full" : "w-1/2"} space-y-4`}>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center">
-                    <Trophy className="h-5 w-5 mr-2 text-amber-500" />
-                    Full IELTS Exams
-                  </h3>
-                  <div className="space-y-4">
-                    {groupedTests.exams.length > 0 ? (
-                      groupedTests.exams.map((exam, idx) => {
-                        const skillType = skillTypes.find(s => s.id === exam.skillType);
-                        const Icon = skillType?.icon || Book;
-                        const displayTitle = getQuestionDisplayTitle(exam);
-                        
-                        return (
-                          <Link 
-                            key={idx} 
-                            to={`/practice/session/${exam.skillType}/${exam.id}`}
-                            className="block"
-                          >
-                            <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30 hover:border-${skillType?.color || 'primary'} cursor-pointer`}>
-                              <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
-                              <CardHeader className="pb-2">
-                                <div className="flex justify-between items-start">
-                                  <CardTitle className="text-lg flex items-center">
-                                    <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
-                                    {displayTitle.substring(0, 25)}
-                                    {displayTitle.length > 25 && '...'}
-                                  </CardTitle>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <Bookmark className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <CardDescription className="mt-1">
-                                  Full {exam.skillType.charAt(0).toUpperCase() + exam.skillType.slice(1)} Exam
-                                </CardDescription>
-                              </CardHeader>
-                              <CardContent className="text-sm">
-                                <div className="flex items-center mb-2">
-                                  <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-                                  <span className="text-muted-foreground">
-                                    {exam.timeLimit ? `${Math.floor(exam.timeLimit / 60)} minutes` : 'Full test'}
-                                  </span>
-                                </div>
-                                <div className="flex items-center">
-                                  <Trophy className="h-4 w-4 text-amber-500 mr-1" />
-                                  <span className="text-muted-foreground">
-                                    {getQuestionCount(exam) > 0 
-                                      ? `${getQuestionCount(exam)} questions` 
-                                      : '40 questions'}
-                                  </span>
-                                </div>
-                              </CardContent>
-                              <CardFooter className="pt-0">
-                                <Button 
-                                  className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
-                                >
-                                  Start Exam
-                                </Button>
-                              </CardFooter>
-                            </Card>
-                          </Link>
-                        );
-                      })
-                    ) : (
-                      <Card className="p-6 text-center">
-                        <p className="text-muted-foreground mb-4">No full exams available yet</p>
-                        <Button variant="outline" size="sm">View Practice Tests</Button>
-                      </Card>
-                    )}
-                  </div>
-                </div>
-                
-                <div className={`${isMobile ? "w-full" : "w-1/2"} space-y-4`}>
-                  <h3 className="text-xl font-semibold mb-4 flex items-center">
-                    <CheckSquare className="h-5 w-5 mr-2 text-primary" />
-                    Practice Tests
-                  </h3>
-                  <div className="space-y-4">
-                    {filterQuestions(selectedSkill).map((question, idx) => {
-                      const skillType = skillTypes.find(s => s.id === question.skillType);
-                      const Icon = skillType?.icon || Book;
-                      const displayTitle = getQuestionDisplayTitle(question);
-                      
-                      return (
-                        <Link 
-                          key={idx} 
-                          to={`/practice/session/${question.skillType}/${question.id}`}
-                          className="block"
-                        >
-                          <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30 hover:border-${skillType?.color || 'primary'} cursor-pointer`}>
-                            <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
-                            <CardHeader className="pb-2">
-                              <div className="flex justify-between items-start">
-                                <CardTitle className="text-lg flex items-center">
-                                  <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
-                                  {displayTitle.substring(0, 25)}
-                                  {displayTitle.length > 25 && '...'}
-                                </CardTitle>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Bookmark className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <CardDescription className="mt-1">
-                                {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Practice
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="text-sm">
-                              <div className="flex items-center mb-2">
-                                <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-                                <span className="text-muted-foreground">
-                                  {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <Trophy className="h-4 w-4 text-amber-500 mr-1" />
-                                <span className="text-muted-foreground">Difficulty: {question.difficulty || 'Medium'}</span>
-                              </div>
-                            </CardContent>
-                            <CardFooter className="pt-0">
-                              <Button 
-                                className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
-                              >
-                                Practice Now
-                              </Button>
-                            </CardFooter>
-                          </Card>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Tabs defaultValue={selectedSkill} value={selectedSkill} onValueChange={setSelectedSkill} className="mt-8">
-                <TabsList className="w-full justify-start mb-6 overflow-auto">
-                  <TabsTrigger value="all" className="text-base">All Tests</TabsTrigger>
-                  {skillTypes.map(skill => (
-                    <TabsTrigger 
-                      key={skill.id} 
-                      value={skill.id} 
-                      className={`text-base flex items-center`}
-                    >
-                      <skill.icon className="h-4 w-4 mr-2" />
-                      {skill.name}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-                
-                <TabsContent value="all" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filterQuestions('all').map((question, idx) => {
-                      const skillType = skillTypes.find(s => s.id === question.skillType);
-                      const Icon = skillType?.icon || Book;
-                      const displayTitle = getQuestionDisplayTitle(question);
-                      
-                      return (
-                        <Link 
-                          key={idx} 
-                          to={`/practice/session/${question.skillType}/${question.id}`}
-                          className="block"
-                        >
-                          <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30 hover:border-${skillType?.color || 'primary'} cursor-pointer`}>
-                            <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
-                            <CardHeader className="pb-2">
-                              <div className="flex justify-between items-start">
-                                <CardTitle className="text-lg flex items-center">
-                                  <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
-                                  {displayTitle.substring(0, 25)}
-                                  {displayTitle.length > 25 && '...'}
-                                </CardTitle>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <Bookmark className="h-4 w-4" />
-                                </Button>
-                              </div>
-                              <CardDescription className="mt-1">
-                                {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Test
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="text-sm">
-                              <div className="flex items-center mb-2">
-                                <Clock className="h-4 w-4 text-muted-foreground mr-1" />
-                                <span className="text-muted-foreground">
-                                  {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
-                                </span>
-                              </div>
-                              <div className="flex items-center">
-                                <Trophy className="h-4 w-4 text-amber-500 mr-1" />
-                                <span className="text-muted-foreground">Difficulty: {question.difficulty || 'Medium'}</span>
-                              </div>
-                            </CardContent>
-                            <CardFooter className="pt-0">
-                              <Button 
-                                className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
-                              >
-                                Start Practice
-                              </Button>
-                            </CardFooter>
-                          </Card>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </TabsContent>
-                
+            <Tabs defaultValue={selectedSkill} value={selectedSkill} onValueChange={setSelectedSkill} className="mt-4">
+              <TabsList className={`w-full justify-start mb-6 ${isMobile ? 'overflow-x-auto pb-1 flex-nowrap' : ''}`}>
+                <TabsTrigger value="all" className="text-base">All Tests</TabsTrigger>
                 {skillTypes.map(skill => (
-                  <TabsContent key={skill.id} value={skill.id} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <TabsTrigger 
+                    key={skill.id} 
+                    value={skill.id} 
+                    className={`text-base flex items-center whitespace-nowrap`}
+                  >
+                    <skill.icon className="h-4 w-4 mr-2" />
+                    {skill.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              
+              <TabsContent value="all" className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {filterQuestions('all').map((question, idx) => {
+                    const skillType = skillTypes.find(s => s.id === question.skillType);
+                    const Icon = skillType?.icon || Book;
+                    const displayTitle = getQuestionDisplayTitle(question);
+                    
+                    return (
+                      <Link 
+                        key={idx} 
+                        to={`/practice/session/${question.skillType}/${question.id}`}
+                        className="block"
+                      >
+                        <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skillType?.color || 'primary'}/30 hover:border-${skillType?.color || 'primary'} cursor-pointer`}>
+                          <div className={`h-2 w-full bg-${skillType?.color || 'primary'}`}></div>
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg flex items-center">
+                                <Icon className={`h-5 w-5 mr-2 text-${skillType?.color || 'primary'}`} />
+                                {displayTitle.substring(0, 25)}
+                                {displayTitle.length > 25 && '...'}
+                              </CardTitle>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Bookmark className="h-4 w-4" />
+                              </Button>
+                            </div>
+                            <CardDescription className="mt-1">
+                              {question.skillType.charAt(0).toUpperCase() + question.skillType.slice(1)} Test
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="text-sm">
+                            <div className="flex items-center mb-2">
+                              <Clock className="h-4 w-4 text-muted-foreground mr-1" />
+                              <span className="text-muted-foreground">
+                                {question.timeLimit ? `${Math.floor(question.timeLimit / 60)} minutes` : 'Timed practice'}
+                              </span>
+                            </div>
+                            <div className="flex items-center">
+                              <Trophy className="h-4 w-4 text-amber-500 mr-1" />
+                              <span className="text-muted-foreground">Difficulty: {question.difficulty || 'Medium'}</span>
+                            </div>
+                          </CardContent>
+                          <CardFooter className="pt-0">
+                            <Button 
+                              className={`w-full bg-${skillType?.color || 'primary'}/90 hover:bg-${skillType?.color || 'primary'}`}
+                            >
+                              Start Practice
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+              
+              {skillTypes.map(skill => (
+                <TabsContent key={skill.id} value={skill.id} className="space-y-6">
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 flex items-center">
+                      <Trophy className="h-5 w-5 mr-2 text-amber-500" />
+                      Full IELTS Exams
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {groupedTests.exams.filter(exam => exam.skillType === skill.id).length > 0 ? (
+                        groupedTests.exams
+                          .filter(exam => exam.skillType === skill.id)
+                          .map((exam, idx) => {
+                            const displayTitle = getQuestionDisplayTitle(exam);
+                            
+                            return (
+                              <Link 
+                                key={idx} 
+                                to={`/practice/session/${exam.skillType}/${exam.id}`}
+                                className="block"
+                              >
+                                <Card className={`overflow-hidden hover:shadow-lg transition-all border-${skill.color}/30 hover:border-${skill.color} cursor-pointer`}>
+                                  <div className={`h-2 w-full bg-${skill.color}`}></div>
+                                  <CardHeader className="pb-2">
+                                    <div className="flex justify-between items-start">
+                                      <CardTitle className="text-lg flex items-center">
+                                        <skill.icon className={`h-5 w-5 mr-2 text-${skill.color}`} />
+                                        {displayTitle.substring(0, 25)}
+                                        {displayTitle.length > 25 && '...'}
+                                      </CardTitle>
+                                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <Bookmark className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                    <CardDescription className="mt-1">
+                                      Full {skill.name} Exam
+                                    </CardDescription>
+                                  </CardHeader>
+                                  <CardContent className="text-sm">
+                                    <div className="flex items-center mb-2">
+                                      <Clock className="h-4 w-4 text-muted-foreground mr-1" />
+                                      <span className="text-muted-foreground">
+                                        {exam.timeLimit ? `${Math.floor(exam.timeLimit / 60)} minutes` : 'Full test'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <Trophy className="h-4 w-4 text-amber-500 mr-1" />
+                                      <span className="text-muted-foreground">
+                                        {getQuestionCount(exam) > 0 
+                                          ? `${getQuestionCount(exam)} questions` 
+                                          : '40 questions'}
+                                      </span>
+                                    </div>
+                                  </CardContent>
+                                  <CardFooter className="pt-0">
+                                    <Button 
+                                      className={`w-full bg-${skill.color}/90 hover:bg-${skill.color}`}
+                                    >
+                                      Start Exam
+                                    </Button>
+                                  </CardFooter>
+                                </Card>
+                              </Link>
+                            );
+                          })
+                      ) : (
+                        <Card className="p-6 text-center col-span-full">
+                          <p className="text-muted-foreground mb-4">No full exams available yet</p>
+                          <Button variant="outline" size="sm">View Practice Tests</Button>
+                        </Card>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-xl font-semibold mb-4 flex items-center">
+                      <CheckSquare className="h-5 w-5 mr-2 text-primary" />
+                      Practice Tests
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {filterQuestions(skill.id).map((question, idx) => {
                         const displayTitle = getQuestionDisplayTitle(question);
                         
@@ -482,7 +396,7 @@ const Practice = () => {
                                   </Button>
                                 </div>
                                 <CardDescription className="mt-1">
-                                  {skill.name} Test
+                                  {skill.name} Practice
                                 </CardDescription>
                               </CardHeader>
                               <CardContent className="text-sm">
@@ -501,7 +415,7 @@ const Practice = () => {
                                 <Button 
                                   className={`w-full bg-${skill.color}/90 hover:bg-${skill.color}`}
                                 >
-                                  Start Practice
+                                  Practice Now
                                 </Button>
                               </CardFooter>
                             </Card>
@@ -509,10 +423,10 @@ const Practice = () => {
                         );
                       })}
                     </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            )}
+                  </div>
+                </TabsContent>
+              ))}
+            </Tabs>
           </motion.div>
         </div>
       </main>
