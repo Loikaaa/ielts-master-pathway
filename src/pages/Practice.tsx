@@ -6,7 +6,7 @@ import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutIcon } from 'lucide-react';
+import { Book, Headphones, Mic, Pencil, Clock, Trophy, CheckSquare, Bookmark, ArrowRight, LayoutGrid } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useUser } from '@/contexts/UserContext';
 import { useQuestions } from '@/contexts/QuestionsContext';
@@ -162,7 +162,7 @@ const Practice = () => {
                   onClick={() => setViewMode(viewMode === 'grid' ? 'columns' : 'grid')}
                   className="h-10 w-10"
                 >
-                  <LayoutIcon className="h-5 w-5" />
+                  <LayoutGrid className="h-5 w-5" />
                 </Button>
               </div>
             </div>
@@ -238,7 +238,7 @@ const Practice = () => {
                   size="sm"
                   onClick={() => setViewMode('columns')}
                 >
-                  <LayoutIcon className="h-4 w-4 mr-2" />
+                  <LayoutGrid className="h-4 w-4 mr-2" />
                   Two Columns
                 </Button>
                 <Button 
