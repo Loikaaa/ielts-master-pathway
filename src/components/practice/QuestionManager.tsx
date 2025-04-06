@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import { usePracticeResult } from '@/hooks/use-practice-result';
 
 interface QuestionManagerProps {
   audioPermissionGranted?: boolean;
+  initialTimeRemaining?: number | null;
 }
 
 const isReadingQuestion = (question: Question): question is ReadingQuestion => 
@@ -32,7 +32,7 @@ const isSpeakingQuestion = (question: Question): question is SpeakingQuestion =>
 const isListeningQuestion = (question: Question): question is ListeningQuestion => 
   question.skillType === 'listening';
 
-const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGranted }) => {
+const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGranted, initialTimeRemaining = null }) => {
   const { skillType, practiceId } = useParams<{ skillType: string; practiceId: string }>();
   const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -40,7 +40,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [showResults, setShowResults] = useState(false);
   const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(initialTimeRemaining);
   const [warningShown, setWarningShown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -119,22 +119,22 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     setAnswers({});
     setShowResults(false);
     
-    // Set initial time remaining
-    if (filteredQuestions.length > 0) {
+    // Set initial time remaining if not provided by parent component
+    if (initialTimeRemaining === null && filteredQuestions.length > 0) {
       const firstQuestion = filteredQuestions[0];
-      let initialTime = firstQuestion.timeLimit || null;
+      let questionTime = firstQuestion.timeLimit || null;
       
       // For speaking questions, add preparation time
       if (isSpeakingQuestion(firstQuestion)) {
-        initialTime = (firstQuestion.preparationTime || 0) + (firstQuestion.responseTime || 0);
+        questionTime = (firstQuestion.preparationTime || 0) + (firstQuestion.responseTime || 0);
       }
       
-      setTimeRemaining(initialTime);
-      console.log("Setting initial time remaining:", initialTime);
+      setTimeRemaining(questionTime);
+      console.log("Setting initial time remaining:", questionTime);
     }
     
     setIsLoading(false);
-  }, [skillType, practiceId, contextQuestions, contextLoading]);
+  }, [skillType, practiceId, contextQuestions, contextLoading, initialTimeRemaining]);
   
   // Setting up timer
   useEffect(() => {
@@ -145,7 +145,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
         if (prev === null) return null;
         if (prev <= 0) return 0;
         
-        // Show warning when 5 minutes remaining
+        // Show warnings at different times based on test length
         if (prev === 300 && !warningShown) {
           toast({
             title: "Time Warning",
@@ -153,6 +153,24 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
             variant: "destructive"
           });
           setWarningShown(true);
+        } else if (prev === 60 && !warningShown) {
+          toast({
+            title: "Time Warning",
+            description: "You have 1 minute remaining for this section.",
+            variant: "destructive"
+          });
+          setWarningShown(true);
+        }
+        
+        // Auto-submit when time is up
+        if (prev === 1) {
+          toast({
+            title: "Time's Up",
+            description: "Your test has been automatically submitted.",
+            variant: "destructive"
+          });
+          // Use setTimeout to allow this timer to complete before handling submit
+          setTimeout(() => handleSubmit(), 0);
         }
         
         return prev - 1;
