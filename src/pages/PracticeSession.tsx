@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -20,8 +19,8 @@ const PracticeSession = () => {
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [testStarted, setTestStarted] = useState(false);
+  const [currentTest, setCurrentTest] = useState<any>(null);
 
-  // Test type configuration
   const testTypeConfig = {
     reading: {
       icon: <BookOpen className="h-12 w-12 text-blue-500" />,
@@ -58,7 +57,6 @@ const PracticeSession = () => {
   };
 
   useEffect(() => {
-    // Validate the skill type
     if (skillType && !['reading', 'writing', 'speaking', 'listening'].includes(skillType)) {
       toast({
         title: "Invalid Practice Type",
@@ -68,7 +66,6 @@ const PracticeSession = () => {
       navigate('/practice');
     }
     
-    // Check if there are questions available for this skill type
     if (!loading && skillType && questions.length > 0) {
       const hasQuestions = questions.some(q => q.skillType === skillType);
       if (!hasQuestions) {
@@ -80,14 +77,29 @@ const PracticeSession = () => {
       }
     }
 
-    // Set default time limit based on test type
     if (skillType && testTypeConfig[skillType as keyof typeof testTypeConfig]?.defaultTimeLimit) {
       setTimeRemaining(testTypeConfig[skillType as keyof typeof testTypeConfig].defaultTimeLimit);
     }
-  }, [skillType, navigate, toast, questions, loading]);
+    
+    if (!loading && practiceId && questions.length > 0) {
+      const specificQuestion = questions.find(q => q.id === practiceId);
+      if (specificQuestion) {
+        console.log("Found specific question:", specificQuestion);
+        setCurrentTest({
+          ...getTestDetails(),
+          title: specificQuestion.skillType === 'reading' ? 
+                  (specificQuestion as any).passageTitle : 
+                 specificQuestion.skillType === 'writing' ? 
+                  `Writing Task ${(specificQuestion as any).taskType?.charAt(5) || ''}` :
+                 specificQuestion.skillType === 'speaking' ? 
+                  `Speaking Part ${(specificQuestion as any).partNumber}` :
+                  `Listening Section ${(specificQuestion as any).sectionNumber}`
+        });
+      }
+    }
+  }, [skillType, navigate, toast, questions, loading, practiceId]);
 
   useEffect(() => {
-    // Request microphone permission for speaking section
     if (skillType === 'speaking' && !audioPermissionRequested) {
       setAudioPermissionRequested(true);
       
@@ -102,8 +114,6 @@ const PracticeSession = () => {
             console.log("Microphone permission granted");
             setAudioPermissionGranted(true);
             setPermissionError(null);
-            // Stop all tracks to release the microphone for now
-            // It will be activated again during the actual recording
             stream.getTracks().forEach(track => track.stop());
           })
           .catch(err => {
@@ -125,11 +135,9 @@ const PracticeSession = () => {
       }
     }
 
-    // Handle permission for listening test
     if (skillType === 'listening' && !audioPermissionRequested) {
       setAudioPermissionRequested(true);
       
-      // Just check if audio can be played
       const audio = new Audio();
       if (audio.canPlayType('audio/mpeg') === '') {
         setPermissionError("Your browser doesn't support audio playback. Please try a different browser.");
@@ -148,20 +156,20 @@ const PracticeSession = () => {
     setTestStarted(true);
   };
 
-  // Format time as MM:SS
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // Get current test details
   const getTestDetails = () => {
     if (!skillType) return null;
     return testTypeConfig[skillType as keyof typeof testTypeConfig];
   };
 
-  const currentTest = getTestDetails();
+  if (!currentTest && skillType) {
+    setCurrentTest(getTestDetails());
+  }
 
   if (loading) {
     return (
@@ -239,7 +247,6 @@ const PracticeSession = () => {
     );
   }
 
-  // Show the test overview before starting
   if (!testStarted && currentTest) {
     return (
       <div className="min-h-screen flex flex-col">
