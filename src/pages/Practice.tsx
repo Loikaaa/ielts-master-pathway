@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -229,7 +230,7 @@ const Practice = () => {
             className="mb-12"
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Full IELTS Exams & Practice Tests</h2>
+              <h2 className="text-2xl font-bold">IELTS Practice Tests</h2>
               <div className="flex gap-2">
                 <Button 
                   variant={viewMode === 'columns' ? "default" : "outline"} 
@@ -251,8 +252,8 @@ const Practice = () => {
             </div>
 
             {viewMode === 'columns' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="w-full md:w-1/2 space-y-4">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <Trophy className="h-5 w-5 mr-2 text-amber-500" />
                     Full IELTS Exams
@@ -323,7 +324,7 @@ const Practice = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-4">
+                <div className="w-full md:w-1/2 space-y-4">
                   <h3 className="text-xl font-semibold mb-4 flex items-center">
                     <CheckSquare className="h-5 w-5 mr-2 text-primary" />
                     Practice Tests
