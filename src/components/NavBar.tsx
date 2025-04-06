@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -16,9 +15,10 @@ import {
   BookOpen,
   Users,
   Library,
-  Sparkles,
   Globe,
-  BookMarked
+  BookMarked,
+  Headphones,
+  Pen
 } from "lucide-react";
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -31,6 +31,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -332,264 +333,190 @@ const NavBar = () => {
         </button>
       </div>
       
-      {/* Mobile Navigation Menu with Improved Design */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/98 backdrop-blur-lg animate-in fade-in duration-200">
-          <div className="h-[calc(100vh-61px)] flex flex-col overflow-y-auto custom-scrollbar">
-            {/* Main navigation sections */}
-            <div className="grid grid-cols-2 gap-4 p-4">
-              <Link 
-                to="/" 
-                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-                style={{
-                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
-                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
-                }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 mb-3">
-                  <Home className="h-6 w-6 text-primary" />
-                </div>
-                <span className="font-medium">Home</span>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-primary/5 rounded-full blur-xl"></div>
-              </Link>
+        <div className="md:hidden fixed inset-0 top-[61px] z-50 bg-background/98 backdrop-blur-lg">
+          <ScrollArea className="h-[calc(100vh-61px)]">
+            <div className="px-4 py-6">
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <MobileNavCard 
+                  to="/"
+                  icon={<Home className="h-5 w-5 text-blue-500" />}
+                  label="Home"
+                  color="bg-blue-50"
+                  border="border-blue-100"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                
+                <MobileNavCard 
+                  to="/practice"
+                  icon={<BookOpen className="h-5 w-5 text-green-500" />}
+                  label="Practice"
+                  color="bg-green-50"
+                  border="border-green-100"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                
+                <MobileNavCard 
+                  to="/community"
+                  icon={<Users className="h-5 w-5 text-purple-500" />}
+                  label="Community"
+                  color="bg-purple-50"
+                  border="border-purple-100"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+                
+                <MobileNavCard 
+                  to="/resources"
+                  icon={<Library className="h-5 w-5 text-amber-500" />}
+                  label="Resources"
+                  color="bg-amber-50"
+                  border="border-amber-100"
+                  onClick={() => setIsMenuOpen(false)}
+                />
+              </div>
               
-              <Link 
-                to="/practice" 
-                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-                style={{
-                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
-                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
-                }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-secondary/10 to-secondary/5 mb-3">
-                  <BookOpen className="h-6 w-6 text-secondary" />
+              <div className="mb-6">
+                <h3 className="font-medium text-base mb-3 text-muted-foreground px-2">IELTS Skills</h3>
+                
+                <div className="space-y-2">
+                  <MobileNavLink 
+                    to="/practice?skill=reading"
+                    icon={<BookMarked className="h-4 w-4 text-pink-500" />}
+                    label="Reading"
+                    description="Improve comprehension skills"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+                  
+                  <MobileNavLink 
+                    to="/practice?skill=writing"
+                    icon={<Pen className="h-4 w-4 text-emerald-500" />}
+                    label="Writing"
+                    description="Master essay techniques"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+                  
+                  <MobileNavLink 
+                    to="/practice?skill=speaking"
+                    icon={<Globe className="h-4 w-4 text-indigo-500" />}
+                    label="Speaking"
+                    description="Practice pronunciation"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
+                  
+                  <MobileNavLink 
+                    to="/practice?skill=listening"
+                    icon={<Headphones className="h-4 w-4 text-amber-500" />}
+                    label="Listening"
+                    description="Train with diverse accents"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
                 </div>
-                <span className="font-medium">Practice</span>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-secondary/5 rounded-full blur-xl"></div>
-              </Link>
+              </div>
               
-              <Link 
-                to="/community" 
-                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-                style={{
-                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
-                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
-                }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-400/10 to-blue-500/5 mb-3">
-                  <Users className="h-6 w-6 text-blue-500" />
+              {currentUser && (
+                <div className="mb-6">
+                  <MobileNavLink 
+                    to="/dashboard"
+                    icon={<User className="h-4 w-4 text-primary" />}
+                    label="My Dashboard"
+                    description="Track your progress"
+                    onClick={() => setIsMenuOpen(false)}
+                  />
                 </div>
-                <span className="font-medium">Community</span>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-blue-500/5 rounded-full blur-xl"></div>
-              </Link>
+              )}
               
-              <Link 
-                to="/resources" 
-                className="relative overflow-hidden flex flex-col items-center justify-center p-5 rounded-xl shadow transition-all duration-300"
-                onClick={() => setIsMenuOpen(false)}
-                style={{
-                  background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
-                  boxShadow: "5px 5px 10px #d9d9d9, -5px -5px 10px #ffffff"
-                }}
-              >
-                <div className="w-12 h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-purple-400/10 to-purple-500/5 mb-3">
-                  <Library className="h-6 w-6 text-purple-500" />
+              {isAdmin && currentUser && (
+                <div className="mb-6">
+                  <MobileNavLink 
+                    to="/admin"
+                    icon={<Shield className="h-4 w-4 text-amber-600" />}
+                    label="Admin Panel"
+                    description="Manage your site"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="bg-amber-50 text-amber-900 border-amber-100"
+                  />
                 </div>
-                <span className="font-medium">Resources</span>
-                <div className="absolute -bottom-2 -right-2 w-12 h-12 bg-purple-500/5 rounded-full blur-xl"></div>
-              </Link>
+              )}
             </div>
             
-            {/* IELTS Skills section */}
-            <div className="px-4 mt-4">
-              <div className="relative py-4 mb-3 flex items-center justify-center">
-                <div className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
-                <h3 className="font-semibold text-lg relative bg-background px-4 z-10">IELTS Skills</h3>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <Link 
-                  to="/practice?skill=reading" 
-                  className="group p-4 rounded-xl shadow-sm flex flex-col"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(236,72,153,0.05) 0%, rgba(236,72,153,0.1) 100%)",
-                    border: "1px solid rgba(236,72,153,0.1)"
-                  }}
-                >
-                  <div className="flex items-center mb-2">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-pink-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
-                      <BookMarked className="h-5 w-5 text-pink-500" />
-                    </div>
-                    <span className="font-medium text-pink-500">Reading</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-12">
-                    Improve comprehension skills
-                  </p>
-                </Link>
-                
-                <Link 
-                  to="/practice?skill=writing" 
-                  className="group p-4 rounded-xl shadow-sm flex flex-col"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(16,185,129,0.05) 0%, rgba(16,185,129,0.1) 100%)",
-                    border: "1px solid rgba(16,185,129,0.1)"
-                  }}
-                >
-                  <div className="flex items-center mb-2">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-emerald-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
-                      <BookOpen className="h-5 w-5 text-emerald-500" />
-                    </div>
-                    <span className="font-medium text-emerald-500">Writing</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-12">
-                    Master essay techniques
-                  </p>
-                </Link>
-                
-                <Link 
-                  to="/practice?skill=speaking" 
-                  className="group p-4 rounded-xl shadow-sm flex flex-col"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(99,102,241,0.1) 100%)",
-                    border: "1px solid rgba(99,102,241,0.1)"
-                  }}
-                >
-                  <div className="flex items-center mb-2">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-indigo-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
-                      <Globe className="h-5 w-5 text-indigo-500" />
-                    </div>
-                    <span className="font-medium text-indigo-500">Speaking</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-12">
-                    Practice pronunciation
-                  </p>
-                </Link>
-                
-                <Link 
-                  to="/practice?skill=listening" 
-                  className="group p-4 rounded-xl shadow-sm flex flex-col"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(135deg, rgba(245,158,11,0.05) 0%, rgba(245,158,11,0.1) 100%)",
-                    border: "1px solid rgba(245,158,11,0.1)"
-                  }}
-                >
-                  <div className="flex items-center mb-2">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-amber-500/10 mr-3 transition-all duration-300 group-hover:scale-110">
-                      <Sparkles className="h-5 w-5 text-amber-500" />
-                    </div>
-                    <span className="font-medium text-amber-500">Listening</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground pl-12">
-                    Train with diverse accents
-                  </p>
-                </Link>
-              </div>
-            </div>
-            
-            {/* User Dashboard section */}
-            {currentUser && (
-              <div className="px-4 mt-6">
-                <Link 
-                  to="/dashboard" 
-                  className="relative overflow-hidden p-4 rounded-xl shadow-sm flex items-center gap-3 transition-all duration-300"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(145deg, #f0f0f0, #ffffff)",
-                    boxShadow: "3px 3px 6px #d9d9d9, -3px -3px 6px #ffffff"
-                  }}
-                >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="flex-grow">
-                    <span className="font-medium text-sm">My Dashboard</span>
-                    <p className="text-xs text-muted-foreground">Track your progress</p>
-                  </div>
-                  <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-primary/5 rounded-full blur-xl"></div>
-                </Link>
-              </div>
-            )}
-            
-            {/* Admin panel link */}
-            {isAdmin && currentUser && (
-              <div className="px-4 mt-4">
-                <Link 
-                  to="/admin" 
-                  className="relative overflow-hidden p-4 rounded-xl shadow-sm flex items-center gap-3 transition-all duration-300"
-                  onClick={() => setIsMenuOpen(false)}
-                  style={{
-                    background: "linear-gradient(145deg, #fff8e6, #fffdf0)",
-                    boxShadow: "3px 3px 6px #e6e0cf, -3px -3px 6px #fffff7"
-                  }}
-                >
-                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div className="flex-grow">
-                    <span className="font-medium text-amber-800 text-sm">Admin Panel</span>
-                    <p className="text-xs text-amber-700/70">Manage your site</p>
-                  </div>
-                  <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-amber-500/5 rounded-full blur-xl"></div>
-                </Link>
-              </div>
-            )}
-            
-            {/* Auth buttons */}
-            <div className="px-4 mt-auto sticky bottom-0 pt-4 pb-6 bg-background/90 backdrop-blur-sm">
-              <div className="relative py-4 mb-2 flex items-center justify-center">
-                <div className="absolute left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-border to-transparent"></div>
-                <div className="font-medium text-sm relative bg-background px-4 z-10 text-muted-foreground">
+            <div className="sticky bottom-0 left-0 w-full p-4 bg-background/95 backdrop-blur-md border-t">
+              <div className="flex flex-col space-y-2">
+                <h3 className="font-medium text-sm text-muted-foreground mb-2">
                   {currentUser ? 'Account' : 'Get Started'}
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
+                </h3>
+                
                 {currentUser ? (
                   <Button 
                     variant="outline" 
-                    className="h-12 rounded-xl flex items-center justify-center border-rose-200 bg-rose-50/50 text-rose-600 hover:bg-rose-100 hover:text-rose-700" 
+                    className="w-full justify-start border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100" 
                     onClick={handleLogout}
                   >
                     <LogIn className="h-4 w-4 mr-2" />
                     Logout
                   </Button>
                 ) : (
-                  <>
+                  <div className="grid grid-cols-2 gap-3">
                     <Button 
                       variant="outline" 
-                      className="h-12 rounded-xl flex items-center justify-center gap-2" 
+                      className="justify-center" 
                       asChild
                     >
                       <Link to="/signin" onClick={() => setIsMenuOpen(false)}>
-                        <LogIn className="h-4 w-4" />
-                        <span>Sign In</span>
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign In
                       </Link>
                     </Button>
                     
                     <Button 
-                      className="h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600 transition-all duration-300 shadow-md" 
+                      className="justify-center" 
                       asChild
                     >
                       <Link to="/signup" onClick={() => setIsMenuOpen(false)}>
                         <UserPlus className="h-4 w-4 mr-2" />
-                        <span>Sign Up</span>
+                        Sign Up
                       </Link>
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
+          </ScrollArea>
         </div>
       )}
     </nav>
+  );
+};
+
+const MobileNavCard = ({ to, icon, label, color, border, onClick }) => {
+  return (
+    <Link 
+      to={to} 
+      className={`flex flex-col items-center justify-center p-4 rounded-lg border ${border} ${color} hover:shadow-md transition-all duration-200`}
+      onClick={onClick}
+    >
+      <div className="mb-2">
+        {icon}
+      </div>
+      <span className="font-medium text-sm">{label}</span>
+    </Link>
+  );
+};
+
+const MobileNavLink = ({ to, icon, label, description, onClick, className = "" }) => {
+  return (
+    <Link 
+      to={to} 
+      className={`flex items-center p-3 rounded-lg border border-border/50 hover:bg-accent hover:border-accent transition-colors ${className}`}
+      onClick={onClick}
+    >
+      <div className="flex-shrink-0 mr-3">
+        {icon}
+      </div>
+      <div>
+        <div className="font-medium text-sm">{label}</div>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+    </Link>
   );
 };
 
