@@ -14,6 +14,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Clock, AlertTriangle, AlertCircle, Loader2, ChevronLeft, ChevronRight, Star, Award, Info, Book, BookOpen, Pencil, Mic, Headphones } from 'lucide-react';
 import { useQuestions } from '@/contexts/QuestionsContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { usePracticeResult } from '@/hooks/use-practice-result';
 
 interface QuestionManagerProps {
   audioPermissionGranted?: boolean;
@@ -45,6 +46,7 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
   const [loadError, setLoadError] = useState<string | null>(null);
   const { toast } = useToast();
   const { questions: contextQuestions, loading: contextLoading } = useQuestions();
+  const { submitResult } = usePracticeResult();
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -133,6 +135,32 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
     
     setIsLoading(false);
   }, [skillType, practiceId, contextQuestions, contextLoading]);
+  
+  // Setting up timer
+  useEffect(() => {
+    if (timeRemaining === null) return;
+    
+    const timer = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev === null) return null;
+        if (prev <= 0) return 0;
+        
+        // Show warning when 5 minutes remaining
+        if (prev === 300 && !warningShown) {
+          toast({
+            title: "Time Warning",
+            description: "You have 5 minutes remaining for this section.",
+            variant: "destructive"
+          });
+          setWarningShown(true);
+        }
+        
+        return prev - 1;
+      });
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [timeRemaining, warningShown, toast]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -190,6 +218,19 @@ const QuestionManager: React.FC<QuestionManagerProps> = ({ audioPermissionGrante
 
   const handleSubmit = () => {
     setShowResults(true);
+    
+    // Submit the result to update user progress
+    if (skillType) {
+      const score = calculateScore();
+      const totalPossible = calculateTotalPossible();
+      
+      submitResult({
+        skillType: skillType as 'reading' | 'writing' | 'listening' | 'speaking',
+        score,
+        totalPossible,
+        title: `${skillType.charAt(0).toUpperCase() + skillType.slice(1)} Practice Test`,
+      });
+    }
   };
 
   const handleShowCorrectAnswers = () => {

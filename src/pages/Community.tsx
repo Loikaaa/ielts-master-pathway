@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import NavBar from '@/components/NavBar';
@@ -12,6 +13,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/components/ui/use-toast';
 import { motion } from 'framer-motion';
 import EventRegistration from '@/components/community/EventRegistration';
+import DiscussionBoard from '@/components/community/DiscussionBoard';
 import { 
   MessageSquare, 
   Users, 
@@ -60,53 +62,6 @@ const Community = () => {
     }
   }, []);
 
-  const discussions = [
-    {
-      id: 1,
-      title: "How to improve speaking fluency in 30 days?",
-      author: "Emily Chen",
-      authorAvatar: "https://randomuser.me/api/portraits/women/12.jpg",
-      date: "April 3, 2025",
-      content: "I've been stuck at band 6.5 in speaking for my last two IELTS attempts. My main issue is fluency - I often pause too much looking for the right words. Has anyone successfully improved their speaking fluency in a short time frame? What techniques worked for you?",
-      replies: 18,
-      likes: 32,
-      tags: ["Speaking", "Fluency", "Practice"]
-    },
-    {
-      id: 2,
-      title: "Reading section: Time management strategies",
-      author: "Michael Nguyen",
-      authorAvatar: "https://randomuser.me/api/portraits/men/67.jpg",
-      date: "April 2, 2025",
-      content: "I'm consistently running out of time on the reading section. I can understand the passages well but can't seem to get through all the questions. What strategies do you use to manage time effectively in the reading section? Do you read everything or use a skimming approach?",
-      replies: 24,
-      likes: 41,
-      tags: ["Reading", "Time Management", "Strategy"]
-    },
-    {
-      id: 3,
-      title: "Writing Task 2: My journey from band 6 to 7.5",
-      author: "Sarah Johnson",
-      authorAvatar: "https://randomuser.me/api/portraits/women/45.jpg",
-      date: "March 30, 2025",
-      content: "I wanted to share my experience improving my Writing Task 2 score from band 6 to 7.5 in just two months. I'll outline the key changes I made to my approach, including how I structured my essays differently and expanded my vocabulary. Hope this helps others in the same situation!",
-      replies: 56,
-      likes: 89,
-      tags: ["Writing", "Success Story", "Essay Structure"]
-    },
-    {
-      id: 4,
-      title: "Listening section: Dealing with different accents",
-      author: "Raj Patel",
-      authorAvatar: "https://randomuser.me/api/portraits/men/22.jpg",
-      date: "March 28, 2025",
-      content: "I'm finding the variety of accents in the listening test challenging. I'm comfortable with standard British and American accents, but struggle with Australian, Scottish, etc. What resources do you recommend for practicing with different English accents?",
-      replies: 13,
-      likes: 27,
-      tags: ["Listening", "Accents", "Resources"]
-    }
-  ];
-  
   const studyGroups = [
     {
       id: 1,
@@ -194,13 +149,6 @@ const Community = () => {
   const item = {
     hidden: { y: 20, opacity: 0 },
     show: { y: 0, opacity: 1 }
-  };
-  
-  const handleCreatePost = () => {
-    toast({
-      title: "Coming Soon!",
-      description: "The ability to create new posts will be available in our next update.",
-    });
   };
   
   const handleJoinGroup = () => {
@@ -335,7 +283,7 @@ const Community = () => {
             </motion.div>
           </div>
           
-          <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="mb-8">
+          <Tabs defaultValue={activeTab} onValueChange={setActiveTab as any} className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <TabsList className="bg-muted/50">
                 <TabsTrigger value="discussions" className="flex items-center gap-2">
@@ -351,90 +299,10 @@ const Community = () => {
                   Events
                 </TabsTrigger>
               </TabsList>
-              
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  Filter
-                </Button>
-                <div className="relative hidden md:block">
-                  <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-                  <Input placeholder="Search..." className="pl-10 w-[200px]" />
-                </div>
-              </div>
             </div>
             
             <TabsContent value="discussions">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-2xl font-bold">Recent Discussions</h2>
-                <Button className="bg-primary" onClick={handleCreatePost}>
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  New Post
-                </Button>
-              </div>
-              
-              <motion.div 
-                variants={container}
-                initial="hidden"
-                animate="show"
-                className="space-y-4"
-              >
-                {discussions.map((discussion) => (
-                  <motion.div key={discussion.id} variants={item}>
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between">
-                          <CardTitle className="text-xl hover:text-primary transition-colors">
-                            {discussion.title}
-                          </CardTitle>
-                          <div className="flex items-center text-muted-foreground text-sm">
-                            <Clock className="h-4 w-4 mr-1" />
-                            {discussion.date}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={discussion.authorAvatar} alt={discussion.author} />
-                            <AvatarFallback>{discussion.author.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm text-muted-foreground">{discussion.author}</span>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-muted-foreground line-clamp-2 mb-4">{discussion.content}</p>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          {discussion.tags.map((tag, i) => (
-                            <Badge key={i} variant="outline" className="bg-primary/5 hover:bg-primary/10">
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-4">
-                        <div className="flex gap-4">
-                          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                            <ThumbsUp className="h-4 w-4 mr-1" />
-                            {discussion.likes}
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                            <MessageCircle className="h-4 w-4 mr-1" />
-                            {discussion.replies}
-                          </Button>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          View Discussion
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                ))}
-              </motion.div>
-              
-              <div className="mt-6 text-center">
-                <Button variant="outline" className="mr-2">
-                  Load More
-                </Button>
-              </div>
+              <DiscussionBoard />
             </TabsContent>
             
             <TabsContent value="studyGroups">
