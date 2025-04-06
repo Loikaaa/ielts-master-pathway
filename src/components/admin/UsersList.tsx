@@ -12,7 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, ShieldCheck, Shield, Mail, Calendar, Target, Wifi, Clock } from 'lucide-react';
-import { useUser, User } from '@/contexts/UserContext';
+import { useUser } from '@/contexts/UserContext';
+import { User } from '@/types/user';
 import { format } from 'date-fns';
 import { useToast } from '@/components/ui/use-toast';
 import { 
@@ -133,6 +134,16 @@ const UsersList = () => {
     });
   };
 
+  const formatDate = (dateValue: string | Date | undefined) => {
+    if (!dateValue) return 'Unknown';
+    
+    if (typeof dateValue === 'string') {
+      return format(new Date(dateValue), 'PPP');
+    }
+    
+    return format(dateValue, 'PPP');
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -204,9 +215,7 @@ const UsersList = () => {
                   <TableCell>{user.targetScore}</TableCell>
                   <TableCell>{user.examDate}</TableCell>
                   <TableCell>
-                    {user.created instanceof Date 
-                      ? format(user.created, 'PPP') 
-                      : format(new Date(user.created), 'PPP')}
+                    {formatDate(user.created)}
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">

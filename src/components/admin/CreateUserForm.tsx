@@ -109,6 +109,9 @@ const CreateUserForm = () => {
         country: selectedCountry?.name || '',
         countryCode: values.country || '',
         isAdmin: values.isAdmin,
+        // Add the missing required properties
+        role: 'student',
+        joinDate: new Date().toISOString(),
       });
 
       if (success) {

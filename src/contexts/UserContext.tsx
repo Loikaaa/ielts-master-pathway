@@ -100,12 +100,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         testType: 'General',
         targetScore: '8.0',
         examDate: '2023-12-31',
-        created: new Date(),
+        created: new Date().toISOString(), // Convert Date to string
         isAdmin: true,
         ipAddress: 'localhost',
         country: 'System',
         countryCode: 'SYS',
-        lastLogin: new Date()
+        lastLogin: new Date().toISOString(), // Convert Date to string
+        role: 'admin', // Add required role
+        joinDate: new Date().toISOString(), // Add required joinDate
       },
       {
         id: `user-${Date.now()+1}-${Math.random().toString(36).substr(2, 9)}`,
@@ -116,12 +118,14 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         testType: 'General',
         targetScore: '8.0',
         examDate: '2025-12-31',
-        created: new Date(),
+        created: new Date().toISOString(), // Convert Date to string
         isAdmin: true,
         ipAddress: 'Default',
         country: 'Nepal',
         countryCode: 'NP',
-        lastLogin: new Date()
+        lastLogin: new Date().toISOString(), // Convert Date to string
+        role: 'admin', // Add required role
+        joinDate: new Date().toISOString(), // Add required joinDate
       }
     ];
     
@@ -151,13 +155,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           ipAddress: ipInfo.ip,
           country: ipInfo.country,
           countryCode: ipInfo.countryCode,
-          lastLogin: new Date()
+          lastLogin: new Date().toISOString() // Convert Date to string
         };
         
         // Update user data in users array
         const updatedUsers = users.map(u => 
           u.id === updatedUser.id 
-            ? { ...u, ipAddress: ipInfo.ip, country: ipInfo.country, countryCode: ipInfo.countryCode, lastLogin: new Date() } 
+            ? { ...u, ipAddress: ipInfo.ip, country: ipInfo.country, countryCode: ipInfo.countryCode, lastLogin: new Date().toISOString() } 
             : u
         );
         setUsers(updatedUsers);
@@ -197,8 +201,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        created: new Date(),
-        lastLogin: new Date(),
+        created: new Date().toISOString(), // Convert Date to string
+        lastLogin: new Date().toISOString(), // Convert Date to string
         ipAddress: ipInfo.ip,
         country: ipInfo.country || userData.country,
         countryCode: ipInfo.countryCode || userData.countryCode,
@@ -301,8 +305,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       const newUser: User & { password: string } = {
         ...userData,
         id: `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        created: new Date(),
-        lastLogin: new Date(),
+        created: new Date().toISOString(), // Convert Date to string
+        lastLogin: new Date().toISOString(), // Convert Date to string
         ipAddress: ipInfo.ip,
         country: ipInfo.country,
         countryCode: ipInfo.countryCode,
@@ -411,7 +415,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
           ipAddress: ipInfo.ip,
           country: ipInfo.country,
           countryCode: ipInfo.countryCode,
-          lastLogin: new Date(),
+          lastLogin: new Date().toISOString(), // Convert Date to string
           // If user was found by email but not OAuth (merged account)
           oauthProvider: user.oauthProvider || provider,
           oauthId: user.oauthId || oauthResponse.id
@@ -472,8 +476,8 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
         role: 'student',
         profileImage: oauthResponse.profileImage,
         joinDate: new Date().toISOString(),
-        created: new Date(),
-        lastLogin: new Date(),
+        created: new Date().toISOString(), // Convert Date to string
+        lastLogin: new Date().toISOString(), // Convert Date to string
         oauthProvider: provider,
         oauthId: oauthResponse.id,
         ipAddress: ipInfo.ip,
