@@ -64,6 +64,16 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/5cba962f-88dc-47fe-9f0b-e63a37496231) and click on Share -> Publish.
 
+### Deploying on a regular web host
+
+If you prefer a traditional hosting workflow (for example uploading a zip file via cPanel), you can generate a ready-to-upload package:
+
+```sh
+npm run package
+```
+
+This command runs `deploy.sh` which builds the project and creates `cms.zip` along with `deploy-htaccess.txt`. Upload `cms.zip` and `.htaccess` (or rename `deploy-htaccess.txt` to `.htaccess`) to your `public_html` directory and extract the zip to complete the installation.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes it is!
