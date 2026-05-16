@@ -1,83 +1,92 @@
-# Welcome to your Lovable project
+# SwarmMind - Web Companion
 
-## Project info
+## The On-Device Agent Swarm for Total Life Autonomy
 
-**URL**: https://lovable.dev/projects/5cba962f-88dc-47fe-9f0b-e63a37496231
+This is the web companion demo for SwarmMind, showcasing the UI/UX design and agent swarm visualization. The actual mobile application runs entirely on-device with no server component.
 
-## How can I edit this code?
+## Features Demonstrated
 
-There are several ways of editing your application.
+### Free Tier
+- **Email Digester Agent** - Single active agent that can parse bills and subscriptions
+- **Basic Inbox** - View agent discoveries and alerts
+- **Settings** - Configure integrations (email, calendar, finance)
 
-**Use Lovable**
+### Premium Tier (One-time $49.99 unlock)
+- **Full 7-Agent Swarm**:
+  - Coordinator - Orchestrates all agents
+  - Email Digester - Parses emails for important info
+  - Calendar Guardian - Manages scheduling
+  - Finance Analyst - Tracks spending & predicts cash flow
+  - Negotiator - Drafts negotiation communications
+  - Deal Hunter - Finds better deals on services
+  - Memory & Reflection - Maintains knowledge vault
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5cba962f-88dc-47fe-9f0b-e63a37496231) and start prompting.
+## Project Structure
 
-Changes made via Lovable will be committed automatically to this repo.
+```
+src/
+├── components/
+│   ├── ui/              # Reusable UI components
+│   │   └── Button.tsx
+│   ├── swarm/           # Swarm visualization components
+│   │   ├── AgentNode.tsx
+│   │   └── PremiumUnlockModal.tsx
+│   └── inbox/           # Inbox display components
+│       └── InboxCard.tsx
+├── contexts/
+│   └── SwarmContext.tsx # State management for swarm
+├── pages/
+│   └── Dashboard.tsx    # Main application screen
+├── types/
+│   └── swarm.ts         # TypeScript type definitions
+└── lib/
+    └── utils.ts         # Utility functions
+```
 
-**Use your preferred IDE**
+## Running Locally
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Building for Production
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/5cba962f-88dc-47fe-9f0b-e63a37496231) and click on Share -> Publish.
-
-### Deploying on a regular web host
-
-If you prefer a traditional hosting workflow (for example uploading a zip file via cPanel), you can generate a ready-to-upload package:
-
-```sh
-npm run package
+```bash
+npm run build
 ```
 
-This command runs `deploy.sh` which builds the project and creates `cms.zip` along with `deploy-htaccess.txt`. Upload `cms.zip` and `.htaccess` (or rename `deploy-htaccess.txt` to `.htaccess`) to your `public_html` directory and extract the zip to complete the installation.
+The built files will be in the `dist/` directory.
 
-## Can I connect a custom domain to my Lovable project?
+## Mobile App Implementation
 
-Yes it is!
+For the actual mobile application (iOS/Android), see the Flutter implementation which includes:
+- On-device LLM inference via llama.cpp
+- SQLite local database
+- LanceDB vector store for semantic memory
+- IMAP/CalDAV clients for email/calendar access
+- Local receipt validation for premium unlock
+- Background task scheduling
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Privacy Guarantee
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+This web demo is for UI/UX preview only. The actual SwarmMind app:
+- ✅ Runs 100% on-device
+- ✅ Zero data sent to servers
+- ✅ No user accounts required
+- ✅ All AI processing happens locally
+- ✅ Credentials encrypted with device biometrics
+
+## Technology Stack
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Framer Motion
+- Radix UI primitives
+- date-fns
+
+## License
+
+Proprietary - All rights reserved
